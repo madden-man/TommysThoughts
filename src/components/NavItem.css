@@ -1,0 +1,49 @@
+.nav-item {
+    color: #ffffff;
+    font-size: 35px;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 70px;
+    overflow: hidden;
+}
+
+.nav-item span {
+    display: block;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    max-width: 0;
+    width: 0;
+    transition: max-width 1s ease-in-out;
+}
+
+.nav-item--active span {
+    max-width: 1000px;
+    width: 100%;
+    padding: 0 12px 0 0;
+}
+
+.active-item {
+    background-color: darkslategrey;
+    transition: 0.2s all;
+}
+
+.nav-logo {
+    width: 60px;
+    height: 60px;
+    margin: 4px 8px 4px 8px;
+    background-color: #ffffff;
+}
+
+.nav-logo__menu {
+    align-self: flex-end;
+}
+
+.bordered {
+    width: 58px;
+    height: 58px;
+    border: 2px ridge darkgreen;
+    border-radius: 50%;
+}

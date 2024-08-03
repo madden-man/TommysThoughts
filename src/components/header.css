@@ -1,0 +1,29 @@
+.header-spacer {
+    position: relative;
+    height: 4.375rem;
+}
+
+.header-holder {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    transition: 0.4s all;
+    -webkit-transition: 0.4s all;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: row wrap;
+}
+
+.header {
+    width: 64rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.dark {
+    background-color: #000000;
+}

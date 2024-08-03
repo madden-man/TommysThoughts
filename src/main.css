@@ -1,0 +1,29 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Ubuntu', sans-serif; 
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  background: #060805 url('./assets/canyon.jpg') no-repeat center center fixed;
+}
+
+.main--fire {
+  background: #060805 url('./assets/beach-bonfire.jpg') no-repeat center center fixed;
+}
+
+.main .page {
+  width: 100%;
+  max-width: 64rem;
+  font-family: var(--ubuntu);
+  overflow-y: scroll;
+}

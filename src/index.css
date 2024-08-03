@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css?family=Bevan|Cairo|Press+Start+2P|Roboto+Slab|Ubuntu&display=swap');
+@import 'assets/gravity-webfont/style.css';
+
+:root {
+
+  /* Colors */
+  --blue-0: white;
+  --blue-5: rgb(233, 244, 255);
+  --blue-10: rgb(210, 233, 255);
+  --blue-15: rgb(188, 222, 255);
+  --blue-20: rgb(165, 211, 255);
+  --blue-25: rgb(143, 200, 255);
+  --blue-30: rgb(121, 188, 255);
+  --blue-35: rgb(98, 177, 255);
+  --blue-40: rgb(76, 166, 255);
+  --blue-45: rgb(53, 155, 255);
+  --blue-50: #1F90FF;
+  --blue-60: rgb(25, 115, 204);
+  --blue-70: rgb(19, 86, 153);
+  --blue-80: rgb(12, 58, 102);
+  --blue-90: rgb(6, 29, 51);
+  --purple-10: rgb(233, 226, 248);
+  --purple-20: rgb(212, 198, 240);
+  --purple-30: rgb(190, 169, 233);
+  --purple-40: rgb(169, 141, 225);
+  --purple-50: #9370DA;
+  --purple-60: rgb(118, 90, 174);
+  --purple-70: rgb(88, 67, 131);
+  --purple-80: rgb(59, 45, 87);
+  --purple-90: rgb(29, 22, 44);
+  --orange-10: rgb(255, 229, 204);
+  --orange-20: rgb(255, 204, 153);
+  --orange-30: rgb(255, 178, 102);
+  --orange-40: rgb(255, 153, 51);
+  --orange-50: #FF7F00;
+  --orange-60: rgb(204, 102, 0);
+  --orange-70: rgb(153, 76, 0);
+  --orange-80: rgb(102, 51, 0);
+  --orange-90: rgb(51, 25, 0);
+  --yellow-10: rgb(255, 255, 204);
+  --yellow-20: rgb(255, 255, 153);
+  --yellow-30: rgb(255, 255, 102);
+  --yellow-40: rgb(255, 255, 51);
+  /* --yellow-50: #FFFF99; */
+  --yellow-50: yellow;
+  --yellow-60: rgb(204, 204, 0);
+  --yellow-70: rgb(153, 153, 0);
+  --yellow-80: rgb(102, 102, 0);
+  --yellow-90: rgb(51, 51, 0);
+  --white: #FFFFFF;
+  --gray-10: rgb(230, 230, 230);
+  --gray-20: rgb(204, 204, 204);
+  --gray-30: rgb(179, 179, 179);
+  --gray-40: rgb(153, 153, 153);
+  /* --gray-50: #D3D3D3; */
+  --gray-50: gray;
+  --gray-60: rgb(102, 102, 102);
+  --gray-70: rgb(77, 77, 77);
+  --gray-80: rgb(51, 51, 51);
+  --gray-90: rgb(26, 26, 26);
+  --green-10: rgb(206, 248, 220);
+  --green-20: rgb(157, 240, 185);
+  --green-30: rgb(108, 233, 150);
+  --green-40: rgb(59, 225, 115);
+  --green-50: #0ADA50;
+  --green-60: rgb(8, 174, 64);
+  --green-70: rgb(6, 131, 48);
+  --green-80: rgb(4, 87, 32);
+  --green-90: rgb(2, 44, 16);
+
+  /* Font Families */
+  --ubuntu: 'Ubuntu', sans-serif;
+  --roboto-slab: 'Roboto Slab', serif;
+  --bevan: 'Bevan', cursive;
+  --cairo: 'Cairo', sans-serif;
+  --press-start-2p: 'Press Start 2P', cursive;
+
+  /* Spacing Units */
+  --half-spacing-unit: 4px;
+  --spacing-unit: 8px;
+  --spacing-unit-x2: 16px;
+  --spacing-unit-x3: 24px;
+  --spacing-unit-x4: 32px;
+  --spacing-unit-x5: 40px;
+  --spacing-unit-x6: 48px;
+}
+
+body {
+  font-family: var(--ubuntu);
+}

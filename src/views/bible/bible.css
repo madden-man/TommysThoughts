@@ -1,0 +1,100 @@
+.bible-container {
+  width: 100%;
+  background: white;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  height: 100vh;
+}
+
+.bible-modal__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.bible-modal {
+  width: 25rem;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.bible-modal h2 {
+  margin-bottom: 16px;
+}
+
+.bible-modal span {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.bible-modal input {
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.bible-sidebar {
+  min-width: 20rem;
+  background: linear-gradient(to top left, #f2f2f2 0%, #a3a3a3 100%);
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.bible-sidebar p,
+.bible-sidebar h2,
+.bible-sidebar input {
+  margin: 0 8px;
+}
+
+.bible-sidebar h2 {
+  margin: 8px 8px 12px;
+}
+
+.bible-sidebar p {
+  margin-top: 8px;
+}
+
+.bible-accordion {
+  border-bottom: 1px solid black;
+}
+
+.bible-accordion:nth-of-type(1) {
+  border-top: 1px solid black;
+}
+
+.bible-accordion__btn {
+  padding: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.bible-accordion__btn:hover {
+  cursor: pointer;
+}
+
+.bible-content {
+  flex-grow: 1;
+}
+
+.book-span {
+  margin-bottom: 8px;
+}
+
+.bible-content {
+  overflow-y: scroll;
+  white-space: pre-wrap;
+  padding: 1rem;
+}

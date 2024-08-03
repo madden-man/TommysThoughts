@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css?family=Bevan|Cairo|Press+Start+2P|Roboto+Slab|Ubuntu&display=swap');
+@import 'assets/gravity-webfont/style.css';
+
+:root {
+
+  /* Colors */
+  --blue-0: white;
+  --blue-5: color-mod(var(--blue-50) tint(90%));
+  --blue-10: color-mod(var(--blue-50) tint(80%));
+  --blue-15: color-mod(var(--blue-50) tint(70%));
+  --blue-20: color-mod(var(--blue-50) tint(60%));
+  --blue-25: color-mod(var(--blue-50) tint(50%));
+  --blue-30: color-mod(var(--blue-50) tint(40%));
+  --blue-35: color-mod(var(--blue-50) tint(30%));
+  --blue-40: color-mod(var(--blue-50) tint(20%));
+  --blue-45: color-mod(var(--blue-50) tint(10%));
+  --blue-50: #1F90FF;
+  --blue-60: color-mod(var(--blue-50) shade(20%));
+  --blue-70: color-mod(var(--blue-50) shade(40%));
+  --blue-80: color-mod(var(--blue-50) shade(60%));
+  --blue-90: color-mod(var(--blue-50) shade(80%));
+  --purple-10: color-mod(var(--purple-50) tint(80%));
+  --purple-20: color-mod(var(--purple-50) tint(60%));
+  --purple-30: color-mod(var(--purple-50) tint(40%));
+  --purple-40: color-mod(var(--purple-50) tint(20%));
+  --purple-50: #9370DA;
+  --purple-60: color-mod(var(--purple-50) shade(20%));
+  --purple-70: color-mod(var(--purple-50) shade(40%));
+  --purple-80: color-mod(var(--purple-50) shade(60%));
+  --purple-90: color-mod(var(--purple-50) shade(80%));
+  --orange-10: color-mod(var(--orange-50) tint(80%));
+  --orange-20: color-mod(var(--orange-50) tint(60%));
+  --orange-30: color-mod(var(--orange-50) tint(40%));
+  --orange-40: color-mod(var(--orange-50) tint(20%));
+  --orange-50: #FF7F00;
+  --orange-60: color-mod(var(--orange-50) shade(20%));
+  --orange-70: color-mod(var(--orange-50) shade(40%));
+  --orange-80: color-mod(var(--orange-50) shade(60%));
+  --orange-90: color-mod(var(--orange-50) shade(80%));
+  --yellow-10: color-mod(var(--yellow-50) tint(80%));
+  --yellow-20: color-mod(var(--yellow-50) tint(60%));
+  --yellow-30: color-mod(var(--yellow-50) tint(40%));
+  --yellow-40: color-mod(var(--yellow-50) tint(20%));
+  /* --yellow-50: #FFFF99; */
+  --yellow-50: yellow;
+  --yellow-60: color-mod(var(--yellow-50) shade(20%));
+  --yellow-70: color-mod(var(--yellow-50) shade(40%));
+  --yellow-80: color-mod(var(--yellow-50) shade(60%));
+  --yellow-90: color-mod(var(--yellow-50) shade(80%));
+  --white: #FFFFFF;
+  --gray-10: color-mod(var(--gray-50) tint(80%));
+  --gray-20: color-mod(var(--gray-50) tint(60%));
+  --gray-30: color-mod(var(--gray-50) tint(40%));
+  --gray-40: color-mod(var(--gray-50) tint(20%));
+  /* --gray-50: #D3D3D3; */
+  --gray-50: gray;
+  --gray-60: color-mod(var(--gray-50) shade(20%));
+  --gray-70: color-mod(var(--gray-50) shade(40%));
+  --gray-80: color-mod(var(--gray-50) shade(60%));
+  --gray-90: color-mod(var(--gray-50) shade(80%));
+  --green-10: color-mod(var(--green-50) tint(80%));
+  --green-20: color-mod(var(--green-50) tint(60%));
+  --green-30: color-mod(var(--green-50) tint(40%));
+  --green-40: color-mod(var(--green-50) tint(20%));
+  --green-50: #0ADA50;
+  --green-60: color-mod(var(--green-50) shade(20%));
+  --green-70: color-mod(var(--green-50) shade(40%));
+  --green-80: color-mod(var(--green-50) shade(60%));
+  --green-90: color-mod(var(--green-50) shade(80%));
+
+  /* Font Families */
+  --ubuntu: 'Ubuntu', sans-serif;
+  --roboto-slab: 'Roboto Slab', serif;
+  --bevan: 'Bevan', cursive;
+  --cairo: 'Cairo', sans-serif;
+  --press-start-2p: 'Press Start 2P', cursive;
+
+  /* Spacing Units */
+  --half-spacing-unit: 4px;
+  --spacing-unit: 8px;
+  --spacing-unit-x2: 16px;
+  --spacing-unit-x3: 24px;
+  --spacing-unit-x4: 32px;
+  --spacing-unit-x5: 40px;
+  --spacing-unit-x6: 48px;
+}
+
+body {
+  font-family: var(--ubuntu);
+}

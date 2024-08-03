@@ -1,0 +1,54 @@
+.home {
+  max-width: 40rem;
+  background-color: white;
+  margin: auto;
+  text-align: center;
+  border: 2px ridge var(--blue-70);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.home h2 {
+  margin-bottom: 0;
+  font-family: 'Gravity Light', 'Times New Roman', serif;
+  margin-bottom: 2px;
+  font-size: 2rem;
+}
+
+.home h1 {
+  font-family: 'Arvo', 'Times New Roman', serif;
+  font-size: 1.75rem;
+}
+
+.home__profile-pic {
+  border-radius: 50%;
+  border: 3px ridge #893E2E;
+  max-width: 400px;
+  max-height: 400px;
+  margin: auto;
+  margin-top: 20px;
+  background-size: cover;
+  width: 100%;
+}
+
+.home__headline {
+  font-size: 18px;
+  margin: 8px;
+}
+
+.home hr {
+  width: 100%;
+  background-color: black;
+}
+
+@media (min-width: 768px) {
+  .home h2 {
+    font-size: 50px;
+  }
+
+  .home h1 {
+    font-size: 2.5rem;
+  }
+}
