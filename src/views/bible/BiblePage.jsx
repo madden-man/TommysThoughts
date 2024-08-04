@@ -60,7 +60,7 @@ export const BiblePage = () => {
 
   useEffect(() => {
     dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: 'gen 1' }));
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="page">
