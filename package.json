@@ -27,7 +27,7 @@
     "watch-css": "postcss src/util/index.css -o src/index.css -w",
     "start-app": "react-scripts start",
     "start": "concurrently --names 'POSTCSS, APP' --prefix-colors 'yellow,green' --kill-others npm:watch-css npm:start-app",
-    "build": "react-scripts build",
+    "build": "postcss src/util/index.css -o src/index.css && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
