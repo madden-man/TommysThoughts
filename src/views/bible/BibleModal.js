@@ -22,25 +22,25 @@ export const BibleModal = ({ isOpen, closeModal }) => {
     _setChapter(data);
   }
 
-  const onKeyPressed = (e) => {
-    const bookInput = document.getElementById('book-input');
-
-    if (e.keyCode === 32 && bookInput === document.activeElement) {
-      document.getElementById('chapter-input')?.focus();
-    } if (e.keyCode === 13) {
-      dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: `${bookNameRef.current} ${chapterRef.current}`}));
-      closeModal();
-    }
-  }
-
   useEffect(() => {
+    const onKeyPressed = (e) => {
+      const bookInput = document.getElementById('book-input');
+  
+      if (e.keyCode === 32 && bookInput === document.activeElement) {
+        document.getElementById('chapter-input')?.focus();
+      } if (e.keyCode === 13) {
+        dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: `${bookNameRef.current} ${chapterRef.current}`}));
+        closeModal();
+      }
+    }
+
     document.getElementById('book-input')?.focus();
     window.addEventListener('keydown', (e) => onKeyPressed(e));
 
     return () => {
       window.removeEventListener('keydown', (e) => onKeyPressed(e));
     }
-  }, [dispatch]);
+  }, [dispatch, closeModal]);
   
   if (!isOpen) return null;
 
