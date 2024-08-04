@@ -40,7 +40,7 @@ export const BibleModal = ({ isOpen, closeModal }) => {
     return () => {
       window.removeEventListener('keydown', (e) => onKeyPressed(e));
     }
-  }, []);
+  }, [dispatch]);
   
   if (!isOpen) return null;
 
