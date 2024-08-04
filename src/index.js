@@ -24,7 +24,7 @@ root.render(
     'main--air': window.location.pathname.includes('/air'),
     'main--water': window.location.pathname.includes('/water'),
     'main--earth': window.location.pathname.includes('/earth'),
-    'main--fire': window.location.pathname.includes('/fire'),
+    'main--fire': window.location.pathname.includes('/poetry'),
   })}>
     <Provider store={store}>
       <RouterProvider router={router} />

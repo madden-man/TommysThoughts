@@ -6,6 +6,7 @@ import { TwoColumn } from '../components/TwoColumn';
 import { PoetryArea } from './PoetryArea';
 import { POETRY_LINKS, POEMS } from './poetryConstants';
 import './poetry.css';
+import { Header } from '../components/Header';
 
 export const PoetryPage = () => {
   const { id } = useParams();
@@ -14,18 +15,21 @@ export const PoetryPage = () => {
   const poems = [{ text: 'Poems', url: '/poetry', color: 'white' }, ...POETRY_LINKS];
 
   return (
-    <section style={{whiteSpace: 'pre-wrap', textAlign: 'center'}} className="page">
-      <TwoColumn links={poems.map((link, index) => {
-        return {
-          text: link.text,
-          url: `/poetry/${link.id}`,
-          color: `var(--blue-${Math.round(index * 50 / POETRY_LINKS.length / 5) * 5})`,
-        };
-      })}>
-        {poem ? <div className="poetry-area">{poem}</div>
-          : <PoetryArea />}
+    <div>
+      <Header />
+      <section style={{whiteSpace: 'pre-wrap', textAlign: 'center'}} className="page">
+        <TwoColumn links={poems.map((link, index) => {
+          return {
+            text: link.text,
+            url: `/poetry/${link.id}`,
+            color: `var(--blue-${Math.round(index * 50 / POETRY_LINKS.length / 5) * 5})`,
+          };
+        })}>
+          {poem ? <div className="poetry-area">{poem}</div>
+            : <PoetryArea />}
 
-      </TwoColumn>
-    </section>
+        </TwoColumn>
+      </section>
+    </div>
   );
 };

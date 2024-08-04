@@ -16,7 +16,7 @@ export const Header = () => {
                 <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
                 <NavItem text="Theology" img="air-symbol.jpg" color="#286977" path="/air" onClick={onClick} />
                 <NavItem text="Stories" img="water-symbol.jpg" color="#24435c" path="/water" onClick={onClick}/>
-                <NavItem text="Poetry" img="fire-symbol.jpg" color="#671414" path="/fire" onClick={onClick}/>
+                <NavItem text="Poetry" img="fire-symbol.jpg" color="#671414" path="/poetry" onClick={onClick}/>
                 <NavItem text="Projects" img="earth-symbol.jpg" color="#00380a" path="/earth" onClick={onClick}/>
                 <NavItem text="Memories" img="stories.png" path="/stories" color="darkgreen" border={true} onClick={onClick} />
                 <NavItem text="Options" img="settings-24px.svg" path="/options" color="darkgreen" border={true} onClick={onClick} />
@@ -29,7 +29,7 @@ export const Header = () => {
             {isExpanded && <div>
             <NavItem text="Theology" img="air-symbol.jpg" color="#286977" path="/air" showText onClick={onClick} />
             <NavItem text="Stories" img="water-symbol.jpg" color="#24435c" path="/water" showText onClick={onClick} />
-            <NavItem text="Poetry" img="fire-symbol.jpg" color="#671414" path="/fire" showText onClick={onClick} />
+            <NavItem text="Poetry" img="fire-symbol.jpg" color="#671414" path="/poetry" showText onClick={onClick} />
             <NavItem text="Projects" img="earth-symbol.jpg" color="#00380a" path="/earth" showText onClick={onClick} />
             <NavItem text="Memories" img="stories.png" path="/stories" color="darkgreen" border={true} showText onClick={onClick}  />
             <NavItem text="Options" img="settings-24px.svg" path="/options" color="darkgreen" border={true} showText onClick={onClick} />
