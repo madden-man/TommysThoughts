@@ -1,0 +1,36 @@
+.poetry-area {
+    background-image: linear-gradient(180deg, #FDEE53 0%, #ec9f05 74%);
+    padding: 16px;
+    border: 2px ridge black;
+    border-radius: 8px;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+  }
+  
+  .poetry-area textarea {
+    margin-bottom: 16px;
+    border: solid 1px #dcdcdc;
+    transition: box-shadow 0.3s, border 0.3s;
+    padding: 8px;
+    border: solid 1px #707070;
+  }
+  
+  .poetry-area textarea:hover {
+    box-shadow: 0 0 5px 1px #969696;
+  }
+  
+  .poetry-area button {
+    border-radius: 8px;
+  }
+  
+  .poetry-area button:hover {
+    background-color: var(--gray-20);
+    cursor: pointer;
+  }
+  
+  .poetry-area textarea, .poetry-area button {
+    width: 75%;
+  }  
