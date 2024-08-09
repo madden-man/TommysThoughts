@@ -1,7 +1,7 @@
 html, body {
   height: 100%;
   width: 100%;
-  font-family: 'Ubuntu', sans-serif; 
+  font-family: var(--ubuntu), sans-serif; 
   margin: 0;
   padding: 0;
 }
@@ -14,16 +14,24 @@ a {
   display: flex;
   justify-content: center;
   height: 100vh;
-  background: #060805 url('./assets/canyon.jpg') no-repeat center center fixed;
+  position: relative;
 }
 
-.main--fire {
+.bg {
+  position: fixed;
+  background: #060805 url('./assets/canyon.jpg') no-repeat center center fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.bg.bg--fire {
   background: #060805 url('./assets/beach-bonfire.jpg') no-repeat center center fixed;
 }
 
 .main .page {
   width: 100%;
   max-width: 64rem;
-  font-family: var(--ubuntu);
-  overflow-y: scroll;
 }

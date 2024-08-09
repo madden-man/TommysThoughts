@@ -20,15 +20,16 @@ const store = setUpStore();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <main className={classNames('main', {
-    'main--air': window.location.pathname.includes('/air'),
-    'main--water': window.location.pathname.includes('/water'),
-    'main--earth': window.location.pathname.includes('/earth'),
-    'main--fire': window.location.pathname.includes('/poetry'),
-  })}>
+  <main className='main'>
     <Provider store={store}>
       <RouterProvider router={router} />
     </Provider>
+    <div className={classNames('bg', {
+    'bg--air': window.location.pathname.includes('/air'),
+    'bg--water': window.location.pathname.includes('/water'),
+    'bg--earth': window.location.pathname.includes('/earth'),
+    'bg--fire': window.location.pathname.includes('/poetry'),
+  })}></div>
   </main>
 );
 

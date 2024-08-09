@@ -9,7 +9,7 @@ export const Home = () =>
         <Header />
         <div className="home">
             <h2>Welcome to</h2>
-            <h1>TommyTheMadden.com!</h1>
+            <h1>TommysThoughts.com!</h1>
             <a href="/personal/Resume_Thomas_Madden.pdf" className="home__profile-cont" style={{borderRadius: '50%'}}>
                 <img src={headshot} alt="" className="home__profile-pic" />
             </a>

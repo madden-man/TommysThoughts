@@ -1,0 +1,22 @@
+.projects {
+    max-width: 64rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+}
+
+.projects__item {
+    max-width: 30rem;
+    margin: 0.75rem;
+    background: var(--green-50);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    border-radius: 2rem;
+    border: 0.125rem ridge darkblue;
+    flex-direction: column;
+    text-decoration: none;
+    color: black;
+}

@@ -97,4 +97,5 @@
   overflow-y: scroll;
   white-space: pre-wrap;
   padding: 1rem;
+  width: 100%;
 }

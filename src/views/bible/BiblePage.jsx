@@ -63,7 +63,7 @@ export const BiblePage = () => {
   }, [dispatch]);
 
   return (
-    <div className="page">
+    <div>
         <Header />
         <div className="bible-container">
             <BibleSidebar />
