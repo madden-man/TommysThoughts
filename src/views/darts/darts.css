@@ -1,0 +1,123 @@
+.darts {
+    background: url('../../assets/corkboard.jpg') center center;
+    width: 100%;
+    max-width: 40rem;
+    max-height: 40rem;
+    display: flex;
+    flex-direction: column;
+    border: 2px ridge black;
+}
+
+.darts__menu {
+    background: white;
+    border: 2px ridge black;
+    border-bottom: none;
+    margin: 1rem 0 0 0;
+    padding: 0.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    width: 100%;
+    max-width: 39rem;
+    display: flex;
+    align-items: center;
+    flex-flow: row;
+}
+
+.darts__menu h1 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.darts__menu button {
+    background: linear-gradient(180deg, rgba(220,255,254,1) 0%, rgba(0,212,255,1) 100%);
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.darts__modal-holder {
+    position: fixed;
+    top: 4.375rem;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.3), 
+        rgba(0, 0, 0, 0.3)
+    );
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+}
+
+.darts__modal {
+    max-width: 48rem;
+    max-height: 48rem;
+    background: white;
+    -webkit-filter: brightness(100%);
+    padding: 4rem;
+    border-radius: 2rem;
+    border: 4px ridge darkblue;
+    display: flex;
+    flex-direction: column;
+}
+
+.darts__modal--field {
+    padding: 0.5rem 0;
+
+    & input {
+        margin-left: 0.5rem;
+    }
+}
+
+.darts__row {
+    display: flex;
+    flex-direction: row;
+}
+
+.darts__item {
+    background: white;
+    width: 78px;
+    height: 78px;
+    border: 1px solid black;
+    border-left: none;
+    font-size: 0.75rem;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.darts__item:hover {
+    -webkit-filter: brightness(70%);
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    -ms-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    cursor: pointer;
+}
+
+.darts__item--2 {
+    background: #00FFFF;
+}
+
+.darts__item--3 {
+    background: #FFAC1C;
+}
+
+.darts__item--6 {
+    background: #50C878;
+}
+
+.darts__item--8 {
+    background: #880808;
+    color: white;
+}
+
+.darts__item--9 {
+    background: #DCDCDC;
+}

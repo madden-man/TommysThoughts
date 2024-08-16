@@ -4,6 +4,7 @@ import { BiblePage } from '../views/bible/BiblePage';
 import { PoetryPage } from '../views/PoetryPage';
 import { NotFoundPage } from '../views/NotFoundPage';
 import { ProjectsPage } from '../views/ProjectsPage';
+import { DartWallPage } from '../views/darts/DartWallPage';
 
 export const router = createBrowserRouter([
     {
@@ -13,6 +14,10 @@ export const router = createBrowserRouter([
     {
         path: '/bible',
         element: <BiblePage />
+    },
+    {
+      path: '/darts',
+      element: <DartWallPage />
     },
     {
         path: '/poetry',
