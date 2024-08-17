@@ -3,14 +3,16 @@ import { Header } from '../../components/Header';
 import { mockDarts } from './mockDarts';
 
 import './darts.css';
-import { getDarts } from './server';
+import { getDarts, addDart, updateDart } from './server';
 import { DartModal } from './DartModal';
 
 export const DartWallPage = () => {
 
+    const initialFields = { name: '', description: '', rating: '', enneagram: '', metrics: ''};
     const [sortMetric, setSortMetric] = useState('lighthearted');
     const [modalOpen, setModalOpen] = useState(false);
     const [dartItems, setDartItems] = useState([]);
+    const [activeDart, setActiveDart] = useState(initialFields);
 
     useEffect(() => {
         (async() => {
@@ -23,6 +25,10 @@ export const DartWallPage = () => {
         }
     }, []);
 
+    useEffect(() => {
+        setModalOpen(!!activeDart?._id);
+    }, [activeDart])
+
     if (!mockDarts) { return null; }
 
     let darts = mockDarts.sort((a, b) => {
@@ -34,8 +40,8 @@ export const DartWallPage = () => {
         return 0;
     })
 
-    const DartItem = ({ name, enneagram }) =>
-        <div className={`darts__item darts__item--${enneagram.toString(10)}`}>
+    const DartItem = ({ name, enneagram, onClick }) =>
+        <div className={`darts__item darts__item--${enneagram.toString(10)}`} onClick={onClick}>
             {name}
         </div>
 
@@ -43,7 +49,18 @@ export const DartWallPage = () => {
         <div className="page">
             <Header />
             {dartItems && ''}
-            {modalOpen && <DartModal onClose={() => setModalOpen(false)} />}
+            {modalOpen && <DartModal
+                initialFields={activeDart}
+                onClose={() => { setModalOpen(false); setActiveDart(initialFields)}}
+                onSubmit={(fields) => {
+                    if (!!activeDart['_id']) {
+                        updateDart(fields);
+                        setActiveDart(initialFields);
+                    } else {
+                        addDart(fields);
+                    }
+                }}
+            />}
             <div className="darts__menu">
                 <h1 className='darts__title'>Darts</h1>
                 <button className='darts__btn' onClick={() => setModalOpen(true)}>+</button>
@@ -51,35 +68,35 @@ export const DartWallPage = () => {
             <div className="darts">
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 8)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 7)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 6)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 5)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 4)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 3)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 2)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
                 <div className="darts__row">
                     {darts.filter(({ metrics }) => metrics[sortMetric] === 1)
-                        .map((props) => <DartItem {...props} key={props['_id']} />)}
+                        .map((props) => <DartItem {...props} key={props['_id']} onClick={() => setActiveDart(props)} />)}
                 </div>
             </div>
         </div>

@@ -12,3 +12,11 @@ export const addDart = async (dartItem) => {
     console.log(insertResults);
     return insertResults;
 }
+
+export const updateDart = async (dartItem) => {
+    let updateResults = await fetch(".netlify/functions/update_dart", 
+        { method: 'POST', body: JSON.stringify({ ...dartItem })})
+        .then(response => response.json());
+    console.log(updateResults);
+    return updateResults;
+}
