@@ -1,8 +1,9 @@
 .darts {
     background: url('../../assets/corkboard.jpg') center center;
     width: 100%;
-    max-width: 40rem;
-    max-height: 40rem;
+    max-width: 50rem;
+    max-height: 50rem;
+    height: 100%;
     min-width: 16rem;
     min-height: 16rem;
     display: flex;
@@ -18,7 +19,7 @@
     padding: 0.5rem;
     border-radius: 0.5rem 0.5rem 0 0;
     width: 100%;
-    max-width: 39rem;
+    max-width: 49rem;
     min-width: 15rem;
     display: flex;
     align-items: center;
@@ -125,6 +126,11 @@
     cursor: pointer;
 }
 
+.darts__item--1 {
+    background: #000000;
+    color: white;
+}
+
 .darts__item--2 {
     background: #00FFFF;
 }
@@ -133,8 +139,21 @@
     background: #FFAC1C;
 }
 
+.darts__item--4 {
+    background: #0C5395;
+    color: white;
+}
+
+.darts__item--5 {
+    background: #FFFF04;
+}
+
 .darts__item--6 {
     background: #50C878;
+}
+
+.darts__item--7 {
+    background: #F891F8;
 }
 
 .darts__item--8 {

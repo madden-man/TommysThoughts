@@ -38,6 +38,12 @@ export const DartWallPage = () => {
             return 1;
         }
         return 0;
+    });
+
+    darts.forEach((item) => {
+        if (item.metrics?.lighthearted === 0) {
+            item.metrics.lighthearted = Math.floor(Math.random() * 8) + 1;
+        }
     })
 
     const DartItem = ({ name, enneagram, onClick }) =>
@@ -59,7 +65,7 @@ export const DartWallPage = () => {
                     } else {
                         addDart(fields);
                     }
-                    fetchDarts();
+                    setTimeout(() => fetchDarts(), 300);
                 }}
             />}
             <div className="darts__menu">

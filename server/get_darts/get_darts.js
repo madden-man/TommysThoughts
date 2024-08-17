@@ -10,7 +10,7 @@ const handler = async (event) => {
         const collection = database.collection(process.env.MONGODB_COLLECTION);
         // Function logic here ...
 
-        const results = await collection.find({}).limit(10).toArray();
+        const results = await collection.find({}).toArray();
         return {
           statusCode: 200,
           body: JSON.stringify(results),
