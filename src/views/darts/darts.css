@@ -39,8 +39,8 @@
 }
 
 .darts__modal-holder {
-    position: fixed;
-    top: 4.375rem;
+    position: absolute;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
@@ -51,21 +51,22 @@
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
     border-radius: 0;
 }
 
 .darts__modal {
     max-width: 48rem;
-    max-height: 48rem;
+    min-width: 16rem;
     background: white;
     -webkit-filter: brightness(100%);
-    padding: 4rem;
+    padding: 2rem;
     border-radius: 2rem;
     border: 4px ridge darkblue;
     display: flex;
     flex-direction: column;
+    width: 50%;
+    overflow-y: scroll;
 }
 
 .darts__modal--x {
@@ -86,9 +87,13 @@
 
 .darts__modal--field {
     padding: 0.5rem 0;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 
-    & input {
-        margin-left: 0.5rem;
+    & span.darts__span {
+        margin-bottom: 0.5rem;
+        margin-left: 0.25rem;
     }
 }
 

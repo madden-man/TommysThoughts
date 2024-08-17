@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '../../components/Header';
-import { mockDarts } from './mockDarts';
 
 import './darts.css';
 import { getDarts, addDart, updateDart } from './server';
@@ -8,16 +7,19 @@ import { DartModal } from './DartModal';
 
 export const DartWallPage = () => {
 
-    const initialFields = { name: '', description: '', rating: '', enneagram: '', metrics: ''};
+    const initialFields = { name: '', description: '', rating: 0, enneagram: '', metrics: { lighthearted: 0 }};
     const [sortMetric, setSortMetric] = useState('lighthearted');
     const [modalOpen, setModalOpen] = useState(false);
     const [dartItems, setDartItems] = useState([]);
     const [activeDart, setActiveDart] = useState(initialFields);
 
+    const fetchDarts = async() => {
+        setDartItems(await getDarts());
+    }
+
     useEffect(() => {
-        (async() => {
-            setDartItems(await getDarts());
-        })();
+        fetchDarts();
+
         return () => {
             setDartItems([]);
             setModalOpen(false);
@@ -29,9 +31,7 @@ export const DartWallPage = () => {
         setModalOpen(!!activeDart?._id);
     }, [activeDart])
 
-    if (!mockDarts) { return null; }
-
-    let darts = mockDarts.sort((a, b) => {
+    let darts = dartItems.sort((a, b) => {
         if (a.rating > b.rating) {
             return -1;
         } else if (b.rating > a.rating) {
@@ -59,6 +59,7 @@ export const DartWallPage = () => {
                     } else {
                         addDart(fields);
                     }
+                    fetchDarts();
                 }}
             />}
             <div className="darts__menu">
