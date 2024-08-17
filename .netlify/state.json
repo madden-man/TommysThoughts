@@ -1,0 +1,20 @@
+{
+	"siteId": "b7a05fea-8ff2-4544-85ac-3473e58af73b",
+	"geolocation": {
+		"data": {
+			"city": "Denver",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "CO",
+				"name": "Colorado"
+			},
+			"timezone": "America/Denver",
+			"latitude": 39.6796,
+			"longitude": -104.9626
+		},
+		"timestamp": 1723833375778
+	}
+}
