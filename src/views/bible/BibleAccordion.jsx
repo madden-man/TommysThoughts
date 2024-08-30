@@ -5,12 +5,12 @@ export const BibleAccordion = ({ title, books }) => {
   const [isAccordionOpen, setAccordionOpen] = useState(false);
 
   return (
-    <div className="bible-accordion">
-      <button onClick={() => setAccordionOpen(!isAccordionOpen)} className="bible-accordion__btn">
+    <div className="bible__accordion">
+      <button onClick={() => setAccordionOpen(!isAccordionOpen)} className="bible__accordion__btn">
         {title}
       </button>
       {isAccordionOpen && books.map(({ name, code }) =>
-        <div>{name} - {code}</div>
+        <a href={`/bible?sig=${code}+1`}>{name} - {code}</a>
       )}
     </div>
   );

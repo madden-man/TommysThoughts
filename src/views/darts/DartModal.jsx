@@ -83,7 +83,13 @@ export const DartModal = ({ initialFields, onSubmit, onClose }) => {
                 </div>
                 <div className="darts__modal--field">
                     {Object.keys(fields.metrics).map((key) => (
-                        <div>
+                        <div className='darts__modal--field-tag'>
+                            {key !== 'heartlighted' && <div className="darts__modal--field-x" onClick={() => {
+                                let newFields = fields;
+                                delete newFields?.metrics[key];
+                                console.log(newFields);
+                                setFields(fields);
+                            }}>x</div>}
                             <TextField
                                 id="standard-basic"
                                 label="Tag"

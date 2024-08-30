@@ -6,7 +6,7 @@ export const BibleSidebar = () => {
   const [searchText, setSearchText] = useState('');
   
   return (
-    <div className="bible-sidebar">
+    <div className="bible__sidebar">
       <h2>Bible Explorer</h2>
       <BibleAccordion title="Old Testament" books={OLD_TESTAMENT_BOOKS} />
       <BibleAccordion title="New Testament" books={NEW_TESTAMENT_BOOKS} />

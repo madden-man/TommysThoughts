@@ -6,11 +6,11 @@ const clientPromise = mongoClient.connect();
 
 const handler = async (event) => {
     try {
-        const database = (await clientPromise).db(process.env.MONGODB_DB);
-        const collection = database.collection(process.env.MONGODB_COLLECTION);
+        const database = (await clientPromise).db('bible');
+        const collection = database.collection('notes');
         // Function logic here ...
 
-        const results = await collection.find({ board: JSON.parse(event.body)?.board }).toArray();
+        const results = await collection.find({}).toArray();
         return {
           statusCode: 200,
           body: JSON.stringify(results),

@@ -9,20 +9,29 @@ import { BOOKS } from './constants';
 
 import './bible.css';
 import { Header } from '../../components/Header';
+import { useSearchParams } from 'react-router-dom';
 
 export const BiblePage = () => {
   const { currentSignature } = useSelector(state => state['bible']);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
 
   useEffect(() => {
 
     const onKeyPressed = (e) => {
       if (e.keyCode === 74 || e.keyCode === 220) {
+        e.preventDefault();
+        e.stopPropagation();
         setModalOpen(true);
       } else if (e.keyCode === 27) {
+        e.preventDefault();
+        e.stopPropagation();
         setModalOpen(false);
       } else if (e.keyCode === 39) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const currChapter = parseInt(currentSignature.substring(currentSignature.indexOf(' ') + 1), 10);
         const currBook = currentSignature.substring(0, currentSignature.indexOf(' '));
   
@@ -59,18 +68,25 @@ export const BiblePage = () => {
   }, [currentSignature, dispatch]);
 
   useEffect(() => {
-    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: 'gen 1' }));
+    const sig = searchParams?.get('sig').replaceAll('+', ' ');
+    if (sig !== currentSignature) {
+      dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: sig }));
+    } else {
+      dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: 'gen 1' }));
+    }
   }, [dispatch]);
+
+  const closeBibleModal = () => setModalOpen(false);
 
   return (
     <div>
         <Header />
-        <div className="bible-container">
+        <div className="bible">
             <BibleSidebar />
             <BibleContent />
             <BibleModal
                 isOpen={isModalOpen}
-                closeModal={() => setModalOpen(false)}
+                closeModal={closeBibleModal}
                 passageRequested={bibleSlice.actions.PASSAGE_REQUESTED}
             />
         </div>

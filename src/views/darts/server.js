@@ -1,5 +1,6 @@
-export const getDarts = async () => {
-    let dartResults = await fetch(".netlify/functions/get_darts")
+export const getDarts = async (board) => {
+    let dartResults = await fetch(".netlify/functions/get_darts",
+        { method: 'POST', body: JSON.stringify({ board })})
         .then(response => response.json());
     console.log(dartResults);
     return dartResults;

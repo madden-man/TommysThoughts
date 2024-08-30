@@ -98,6 +98,20 @@
     }
 }
 
+.darts__modal--field-tag {
+    position: relative;
+}
+
+.darts__modal--field-x {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+    border: solid black 1px;
+    padding: 0 0.25rem;
+    border-radius: 50%;
+}
+
 .darts__row {
     display: flex;
     flex-direction: row;

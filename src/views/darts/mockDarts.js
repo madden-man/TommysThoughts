@@ -7,7 +7,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 2,
     metrics: {
-        lighthearted: 4
+        heartlighted: 4
     }
 }, {
     _id: '2',
@@ -16,7 +16,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 3,
     metrics: {
-        lighthearted: 3
+        heartlighted: 3
     }
 }, {
     _id: '3',
@@ -25,7 +25,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 9,
     metrics: {
-        lighthearted: 6
+        heartlighted: 6
     }
 }, {
     _id: '4',
@@ -34,7 +34,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 6,
     metrics: {
-        lighthearted: 5
+        heartlighted: 5
     }
 }, {
     _id: '5',
@@ -43,7 +43,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 3,
     metrics: {
-        lighthearted: 1
+        heartlighted: 1
     }
 }, {
     _id: '6',
@@ -52,7 +52,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 8,
     metrics: {
-        lighthearted: 2
+        heartlighted: 2
     }
 }, {
     _id: '7',
@@ -61,7 +61,7 @@ export const mockDarts = [{
     rating: 5,
     enneagram: 6,
     metrics: {
-        lighthearted: 7
+        heartlighted: 7
     }
 }, {
     _id: '8',
@@ -70,7 +70,7 @@ export const mockDarts = [{
     rating: 4.5,
     enneagram: 3,
     metrics: {
-        lighthearted: 5
+        heartlighted: 5
     }
 }, {
     name: 'My Hero Academia',
@@ -78,7 +78,7 @@ export const mockDarts = [{
     rating: 4.5,
     enneagram: 3,
     metrics: {
-        lighthearted: 5
+        heartlighted: 5
     }
 }, {
     name: 'Rick and Morty',
@@ -86,6 +86,6 @@ export const mockDarts = [{
     rating: 4.5,
     enneagram: 8,
     metrics: {
-        lighthearted: 1
+        heartlighted: 1
     }
 }]

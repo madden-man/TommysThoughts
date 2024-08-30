@@ -5,7 +5,7 @@ import headshot from '../assets/photos_of_me/headshot.jpeg';
 import './home.css';
 
 export const Home = () =>
-    <div style={{position: 'relative'}}>
+    <div>
         <Header />
         <div className="home">
             <h2>Welcome to</h2>

@@ -8,8 +8,11 @@ const headers = {
 
 const BibleApi = {
   fetch: (signature) => {
+    const bookAndChapter = signature.indexOf(':') !== -1
+      ? signature.substring(0, signature.indexOf(':')) : signature;
+
     const passage = axios.get(`https://api.esv.org/v3/passage/text/`,
-      { headers, params: { 'q': signature }})
+      { headers, params: { 'q': bookAndChapter }})
       .catch(error => {  console.log(error); return Promise.reject(error); });
 
     return passage;
