@@ -68,6 +68,7 @@
     flex-direction: column;
     width: 50%;
     overflow-y: scroll;
+    z-index: 300;
 }
 
 .darts__modal--x {
@@ -140,6 +141,12 @@
     cursor: pointer;
 }
 
+.darts__item--shuffled {
+    border: 4px solid yellow;
+    width: 70px;
+    height: 70px;
+}
+
 .darts__item--1 {
     background: #000000;
     color: white;
@@ -160,6 +167,10 @@
 
 .darts__item--5 {
     background: #FFFF04;
+}
+
+.darts__item--5.darts__item--shuffled {
+    border: 4px solid black;
 }
 
 .darts__item--6 {
