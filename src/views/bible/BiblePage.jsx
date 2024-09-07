@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { bibleSlice } from './state/reducer';
@@ -16,6 +16,10 @@ export const BiblePage = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
+
+  const dispatchVerse = useCallback((verse) => {
+    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: verse }))
+  }, [dispatch]);
 
   useEffect(() => {
 
@@ -42,7 +46,7 @@ export const BiblePage = () => {
         } else {
           newPassage = currBook + ' ' + (currChapter + 1);
         }
-        dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: newPassage }));
+        dispatchVerse(newPassage);
       } else if (e.keyCode === 37) {
         /* left arrow */
         const currChapter = parseInt(currentSignature.substring(currentSignature.indexOf(' ') + 1), 10);
@@ -56,25 +60,24 @@ export const BiblePage = () => {
           newPassage = currBook + ' ' + (currChapter - 1);
         }
   
-        dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: newPassage }));
+        dispatchVerse(newPassage);
       }
     };
 
     window.addEventListener('keydown', onKeyPressed);
 
+    const sig = searchParams?.get('sig').replaceAll('+', ' ');
+    if (sig !== currentSignature) {
+      dispatchVerse(sig);
+    } else {
+      dispatchVerse('gen 1');
+    }
+    setSearchParams('');
+
     return () => {
       window.removeEventListener('keydown', onKeyPressed);
     }
-  }, [currentSignature, dispatch]);
-
-  useEffect(() => {
-    const sig = searchParams?.get('sig').replaceAll('+', ' ');
-    if (sig !== currentSignature) {
-      dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: sig }));
-    } else {
-      dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: 'gen 1' }));
-    }
-  }, [dispatch]);
+  }, [currentSignature, dispatchVerse, searchParams, setSearchParams]);
 
   const closeBibleModal = () => setModalOpen(false);
 

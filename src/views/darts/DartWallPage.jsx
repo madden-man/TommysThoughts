@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -22,7 +22,7 @@ export const DartWallPage = () => {
     const [shuffleDart, setShuffleDart] = useState([]);
     const [activeDart, setActiveDart] = useState(initialFields);
 
-    const fetchDarts = async(board) => {
+    const fetchDarts = useCallback(async () => {
         let newDartItems = await getDarts(board);
 
         newDartItems = newDartItems.sort((a, b) => {
@@ -41,17 +41,17 @@ export const DartWallPage = () => {
         });
 
         setDartItems(newDartItems);
-    }
+    }, [board, sortMetric]);
 
     useEffect(() => {
-        fetchDarts(board);
+        fetchDarts();
 
         return () => {
             setDartItems([]);
             setModalOpen(false);
             setSortMetric('heartlighted');
         }
-    }, [board]);
+    }, [fetchDarts]);
 
     useEffect(() => {
         setModalOpen(!!activeDart?._id);
@@ -79,7 +79,7 @@ export const DartWallPage = () => {
                     } else {
                         addDart(allFields);
                     }
-                    setTimeout(() => fetchDarts(board), 300);
+                    setTimeout(() => fetchDarts(), 300);
                 }}
             />}
             <div className="darts__menu">
