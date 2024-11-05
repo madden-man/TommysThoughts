@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { bibleSlice } from './state/reducer';
 import { useDispatch } from 'react-redux';
 
-export const BibleModal = ({ isOpen, closeModal }) => {
+export const BibleModal = ({ isOpen, closeModal, setSearchParams }) => {
 
   const [bookName, _setBookName] = useState('');
   const [chapter, _setChapter] = useState('');
@@ -43,8 +43,9 @@ export const BibleModal = ({ isOpen, closeModal }) => {
       } else if (e.keyCode === 13 && (bookNameRef.current !== '' && chapterRef.current !== '')) {
         e.preventDefault();
         e.stopPropagation();
-        dispatch(bibleSlice.actions.PASSAGE_REQUESTED(
-          { newSignature: `${bookNameRef.current} ${chapterRef.current}${verseRef && `: ${verseRef.current}`}`}));
+        const newPassage = `${bookNameRef.current} ${chapterRef.current}${verseRef && `: ${verseRef.current}`}`;
+        dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: newPassage }));
+        setSearchParams(newPassage);
         setBookName('');
         setChapter('');
         setVerse('');
@@ -61,7 +62,7 @@ export const BibleModal = ({ isOpen, closeModal }) => {
     return () => {
       window.removeEventListener('keypress', (e) => onKeyPressed(e));
     }
-  }, [closeModal, dispatch]);
+  }, [closeModal, setSearchParams, dispatch]);
   
   if (!isOpen) return null;
 

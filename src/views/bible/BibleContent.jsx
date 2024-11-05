@@ -4,12 +4,11 @@ import { useSelector } from 'react-redux';
 export const BibleContent = () => {
   const { currentText, currentSignature } = useSelector(state => state.bible) || '';
 
-  const bibleContentArray = currentText.split('\n');
+  const bibleContentArray = currentText?.split('\n');
 
   useEffect(() => {
     if (currentSignature?.indexOf(':') && bibleContentArray.length > 0) {
       const verse = currentSignature.substring(currentSignature.indexOf(':') + 1) || 0;
-      debugger;
       const verseIndex = bibleContentArray.findIndex((p) => p.indexOf(`[${verse.trim()}]`) !== -1);
       console.log('verseIndex', verseIndex);
       if (verseIndex > 0) {

@@ -13,16 +13,17 @@ import { useSearchParams } from 'react-router-dom';
 
 export const BiblePage = () => {
   const { currentSignature } = useSelector(state => state['bible']);
+  const [newPassage, setNewPassage] = useState('');
   const [isModalOpen, setModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
 
   const dispatchVerse = useCallback((verse) => {
-    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: verse }))
-  }, [dispatch]);
+    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: verse }));
+    setSearchParams({ sig: verse?.replaceAll(' ', '+') });
+  }, [dispatch, setSearchParams]);
 
   useEffect(() => {
-
     const onKeyPressed = (e) => {
       if (e.keyCode === 74 || e.keyCode === 220) {
         e.preventDefault();
@@ -40,44 +41,40 @@ export const BiblePage = () => {
         const currBook = currentSignature.substring(0, currentSignature.indexOf(' '));
   
         const currBookInfo = BOOKS.map((book, index) => book.name === currBook && ({ ...book, index }))[0];
-        let newPassage;
         if (currChapter === currBookInfo.numChapters) {
-          newPassage = BOOKS[currBookInfo.index + 1].name + ' 1';
+          setNewPassage(BOOKS[currBookInfo.index + 1].name + ' 1');
         } else {
-          newPassage = currBook + ' ' + (currChapter + 1);
+          setNewPassage(currBook + ' ' + (currChapter + 1));
         }
-        dispatchVerse(newPassage);
       } else if (e.keyCode === 37) {
         /* left arrow */
         const currChapter = parseInt(currentSignature.substring(currentSignature.indexOf(' ') + 1), 10);
         const currBook = currentSignature.substring(0, currentSignature.indexOf(' '));
   
         const currBookInfo = BOOKS.map((book, index) => book.name === currBook && ({ ...book, index }))[0];
-        let newPassage;
         if (currChapter === 1) {
-          newPassage = BOOKS[currBookInfo.index - 1].name + ' ' + BOOKS[currBookInfo.index - 1].numChapters;
+          setNewPassage(BOOKS[currBookInfo.index - 1].name + ' '
+            + BOOKS[currBookInfo.index - 1].numChapters);
         } else {
-          newPassage = currBook + ' ' + (currChapter - 1);
+          setNewPassage(currBook + ' ' + (currChapter - 1));
         }
-  
-        dispatchVerse(newPassage);
       }
     };
 
     window.addEventListener('keydown', onKeyPressed);
 
-    const sig = searchParams?.get('sig').replaceAll('+', ' ');
-    if (sig !== currentSignature) {
-      dispatchVerse(sig);
-    } else {
+    console.log('currentSignature: ', currentSignature);
+    console.log('newPassage: ', newPassage);
+    if (searchParams?.has('sig') && searchParams?.get('sig') !== newPassage && newPassage !== '') {
+      dispatchVerse(newPassage);
+    } else if (!searchParams?.has('sig') || currentSignature === '') {
       dispatchVerse('gen 1');
     }
-    setSearchParams('');
 
     return () => {
       window.removeEventListener('keydown', onKeyPressed);
     }
-  }, [currentSignature, dispatchVerse, searchParams, setSearchParams]);
+  }, [currentSignature, searchParams, newPassage, dispatchVerse]);
 
   const closeBibleModal = () => setModalOpen(false);
 
@@ -91,6 +88,7 @@ export const BiblePage = () => {
                 isOpen={isModalOpen}
                 closeModal={closeBibleModal}
                 passageRequested={bibleSlice.actions.PASSAGE_REQUESTED}
+                setSearchParams={(sig) => { setSearchParams(sig); setNewPassage(sig); }}
             />
         </div>
     </div>

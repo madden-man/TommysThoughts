@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  currentSignature: 'gen 1',
+  currentSignature: '',
   currentText: '',
 };
 
