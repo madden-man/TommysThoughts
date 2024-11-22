@@ -1,0 +1,21 @@
+.bingo {
+    margin-top: 0.5rem;
+}
+
+.bingo-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.bingo-col1, .bingo-col2, .bingo-col3, .bingo-col4, .bingo-col5 {
+    background: white;
+    border: 2px solid black;
+    width: 6rem;
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}

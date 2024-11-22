@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { Home } from '../views/Home';
 import { BiblePage } from '../views/bible/BiblePage';
+import { BingoPage } from '../views/bingo/BingoPage';
 import { PoetryPage } from '../views/PoetryPage';
 import { NotFoundPage } from '../views/NotFoundPage';
 import { ProjectsPage } from '../views/ProjectsPage';
@@ -14,6 +15,10 @@ export const router = createBrowserRouter([
     {
         path: '/bible',
         element: <BiblePage />
+    },
+    {
+        path: '/bingo',
+        element: <BingoPage />
     },
     {
       path: '/darts',
