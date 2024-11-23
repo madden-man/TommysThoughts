@@ -7,8 +7,8 @@ export const getBingo = async () => {
 }
 
 export const upsertBoard = async (boardInfo) => {
-    let upsertResults = await fetch(".netlify/functions/upsert_bingo", 
-        { method: 'POST', body: JSON.stringify(boardInfo)})
+    let upsertResults = await fetch(".netlify/functions/update_bingo", 
+        { method: 'POST', body: JSON.stringify({ ...boardInfo })})
         .then(response => response.json());
     console.log(upsertResults);
     return upsertResults;

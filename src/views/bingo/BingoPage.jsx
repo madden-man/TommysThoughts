@@ -14,8 +14,8 @@ export const BingoPage = () => {
         let newBoard = activeBoard;
         console.log(newBoard);
         newBoard.rows[row][col] = text;
-        setActiveBoard(newBoard);
         upsertBoard(newBoard);
+        setActiveBoard(newBoard);
     }
 
     const BingoRow = ({ row }) => !activeBoard?.rows?.[row] ? null :
