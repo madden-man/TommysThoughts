@@ -9,11 +9,14 @@ const handler = async (event) => {
         const database = (await clientPromise).db(process.env.MONGODB_DB);
         const collection = database.collection('bingo');
         // Function logic here ...
-        const { rows } = JSON.parse(event.body);
-        console.log({ rows });
+
+        const item = JSON.parse(event.body);
+        if (item._id) { delete item._id; }
+
+        const results = await collection.replaceOne({ title: item.title }, item);
 
         // const results = {};
-        const results = await collection.updateOne({ id: boardInfo._id }, { rows });
+        // const results = await collection.updateOne({ id: boardInfo._id }, { rows });
         // const results = await collection.findOneAndUpdate({ id: boardInfo['_id'] }, { rows });
         // const results = await collection.replaceOne({ id: boardInfo._id }, bingoBoard);
 
