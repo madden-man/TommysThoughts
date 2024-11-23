@@ -13,3 +13,10 @@ export const upsertBoard = async (boardInfo) => {
     console.log(upsertResults);
     return upsertResults;
 }
+
+export const addBingo = async (cardName) => {
+    let addResults = await fetch(".netlify/functions/add_bingo",
+        { method: 'POST', body: JSON.stringify({title: cardName }) })
+        .then(response => response.json());
+    return addResults;
+}

@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
+
 import { Header } from '../../components/Header';
+import { BingoModal } from './BingoModal';
 import { BingoMenu } from './BingoMenu';
 import './bingo.css';
-import { getBingo, upsertBoard } from './server';
+import { addBingo, getBingo, upsertBoard } from './server';
 
 export const BingoPage = () => {
 
     const [boards, setBoards] = useState([]);
     const [activeBoard, setActiveBoard] = useState({});
+    const [modalOpen, setModalOpen] = useState(false);
 
     const updateRow = (row, col, text) => {
         console.log(text);
@@ -54,8 +58,22 @@ export const BingoPage = () => {
     return (
         <div className="page">
             <Header />
+            {!modalOpen ? null : <BingoModal
+                onClose={() => setModalOpen(false)}
+                onSubmit={(cardName) => {
+                    addBingo(cardName);
+                    setTimeout(async () => {
+                        const results = await getBingo();
+                        setActiveBoard(results.find(({ title }) => title === cardName ));
+                    }, 500);
+                }}
+            />}
             <div className="bingo">
-                <BingoMenu board={activeBoard?.title || 'Long Term Bets'} options={boards} />
+                <BingoMenu
+                    setActiveBoard={(board) => setActiveBoard(board)}
+                    options={boards}
+                    openModal={() => setModalOpen(true)}
+                />
                 <div>
                     <BingoRow row={0} />
                     <BingoRow row={1} />
