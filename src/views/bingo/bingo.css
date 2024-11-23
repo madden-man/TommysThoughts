@@ -19,3 +19,21 @@
     justify-content: center;
     text-align: center;
 }
+
+.bingo__menu {
+    background: white;
+    display: flex;
+    flex-direction: row;
+    border-radius: 1rem 1rem 0 0;
+    border: 2px ridge darkblue;
+    border-bottom: 2px solid black;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+
+.bingo__menu div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}

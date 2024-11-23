@@ -7,6 +7,7 @@ import { Button } from '@mui/material';
 
 export const BingoMenu = ({
     board,
+    options,
 }) =>
     <div className="bingo__menu">
         <h1 className='bingo__title'>Bingo</h1>
@@ -19,10 +20,10 @@ export const BingoMenu = ({
                     onChange={(e) => console.log(e)}
                     label="Type"
                 >
-                    <MenuItem value="Babies">Long Term Bets</MenuItem>
+                    {options?.map(({ title }) => <MenuItem value={title}>{title}</MenuItem>)}
                 </Select>
             </FormControl>
+            <Button className='bingo__btn' onClick={() => console.log('ooh nice one babies')}>Save</Button>
         </div>
-        <Button className='bingo__btn' onClick={() => console.log('ooh nice one babies')}>Save</Button>
 </div>;
     

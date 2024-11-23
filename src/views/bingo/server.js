@@ -7,7 +7,7 @@ export const getBingo = async () => {
 }
 
 export const upsertBoard = async (boardInfo) => {
-    let upsertResults = await fetch(".netlify/functions/add_dart", 
+    let upsertResults = await fetch(".netlify/functions/upsert_bingo", 
         { method: 'POST', body: JSON.stringify(boardInfo)})
         .then(response => response.json());
     console.log(upsertResults);
