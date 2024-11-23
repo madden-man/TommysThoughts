@@ -9,10 +9,13 @@ const handler = async (event) => {
         const database = (await clientPromise).db(process.env.MONGODB_DB);
         const collection = database.collection('bingo');
         // Function logic here ...
-        console.log(event.body);
-        const { rows } = JSON.parse(event.body);
-        const results = await collection.updateOne({ id: boardInfo._id }, { rows });
-        // const results = await collection.findOneAndUpdate({ id: boardInfo['_id'] }, { rows: rows });
+        const bingoBoard = JSON.parse(event.body);
+        console.log({ rows });
+        // const results = await collection.updateOne({ id: boardInfo._id }, { rows });
+        // const results = await collection.findOneAndUpdate({ id: boardInfo['_id'] }, { rows });
+        // const results = await collection.replaceOne({ id: boardInfo._id }, bingoBoard);
+
+        const results = await collection.find({});
         return {
           statusCode: 200,
           body: JSON.stringify(results),
