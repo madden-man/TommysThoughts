@@ -10,8 +10,9 @@ const handler = async (event) => {
         const collection = database.collection('bingo');
         // Function logic here ...
         console.log(event.body);
-        const boardInfo = JSON.parse(event.body);
-        const results = await collection.updateOne({ id: boardInfo.id }, boardInfo, { upsert: true });
+        const { rows } = JSON.parse(event.body);
+        const results = await collection.updateOne({ id: boardInfo._id }, { rows });
+        // const results = await collection.findOneAndUpdate({ id: boardInfo['_id'] }, { rows: rows });
         return {
           statusCode: 200,
           body: JSON.stringify(results),
