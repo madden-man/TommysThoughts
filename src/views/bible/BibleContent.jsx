@@ -4,7 +4,12 @@ import { useSelector } from 'react-redux';
 export const BibleContent = () => {
   const { currentText, currentSignature } = useSelector(state => state.bible) || '';
 
-  const bibleContentArray = currentText?.split('\n');
+  let bibleContentArray;
+
+  if (currentText?.trim() === '')
+      bibleContentArray = [];
+  else
+      bibleContentArray = currentText?.split('\n');
 
   useEffect(() => {
     if (currentSignature?.indexOf(':') && bibleContentArray.length > 0) {

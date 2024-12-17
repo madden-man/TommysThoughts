@@ -12,19 +12,23 @@ import { Header } from '../../components/Header';
 import { useSearchParams } from 'react-router-dom';
 
 export const BiblePage = () => {
-  const { currentSignature } = useSelector(state => state['bible']);
-  const [newPassage, setNewPassage] = useState('');
+  const { currentText, currentSignature, status: bibleStatus } = useSelector(state => state['bible']);
   const [isModalOpen, setModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [newPassage, setNewPassage] = useState(searchParams?.get('sig') || 'gen 1');
   const dispatch = useDispatch();
 
   const dispatchVerse = useCallback((verse) => {
-    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: verse }));
-    setSearchParams({ sig: verse?.replaceAll(' ', '+') });
+    const sig = verse?.replaceAll(' ', '+');
+    dispatch(bibleSlice.actions.PASSAGE_REQUESTED({ newSignature: sig }));
+    setSearchParams({ sig });
   }, [dispatch, setSearchParams]);
 
   useEffect(() => {
     const onKeyPressed = (e) => {
+      console.log(bibleStatus);
+      if (bibleStatus === 'inprogress') return;
+
       if (e.keyCode === 74 || e.keyCode === 220) {
         e.preventDefault();
         e.stopPropagation();
@@ -65,16 +69,19 @@ export const BiblePage = () => {
 
     console.log('currentSignature: ', currentSignature);
     console.log('newPassage: ', newPassage);
-    if (searchParams?.has('sig') && searchParams?.get('sig') !== newPassage && newPassage !== '') {
+    console.log('currentText: ', currentText);
+    if (searchParams?.has('sig') && bibleStatus !== 'inprogress' &&
+      (newPassage?.trim() !== '' && currentSignature !== newPassage)) {
       dispatchVerse(newPassage);
-    } else if (!searchParams?.has('sig') || currentSignature === '') {
+    } else if (currentText?.trim() === '' &&
+      (!searchParams?.has('sig') || currentSignature?.trim() === '')) {
       dispatchVerse('gen 1');
     }
 
     return () => {
       window.removeEventListener('keydown', onKeyPressed);
     }
-  }, [currentSignature, searchParams, newPassage, dispatchVerse]);
+  }, [currentSignature, searchParams, newPassage, bibleStatus, dispatchVerse]);
 
   const closeBibleModal = () => setModalOpen(false);
 
