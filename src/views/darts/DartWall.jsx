@@ -13,6 +13,9 @@ export const DartWall = ({ dartItems, setActiveDart, shuffleDart, sortMetric }) 
     let longestRow = 0;
 
     dartItems?.forEach((item) => {
+        if (!item?.metrics[sortMetric]) {
+            return;
+        }
         const row = 7 - item?.metrics[sortMetric];
         const rowLength = dartWall[row].length;
         if (rowLength > longestRow) { longestRow = rowLength; }

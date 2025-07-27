@@ -20,6 +20,8 @@ export const DartWallPage = () => {
     const [shuffleDart, setShuffleDart] = useState([]);
     const [activeDart, setActiveDart] = useState(initialFields);
 
+    const [allSortMetrics, setAllSortMetrics] = useState([]);
+
     const fetchDarts = useCallback(async () => {
         let newDartItems = await getDarts(board);
 
@@ -31,12 +33,26 @@ export const DartWallPage = () => {
             }
             return 0;
         });
+
+        console.log('tryin - ', sortMetric);
+
+        let theSortMetrics = [];
     
         newDartItems.forEach((item) => {
             if (item.metrics[sortMetric] === 0) {
                 item.metrics[sortMetric] = Math.floor(Math.random() * 8) + 1;
             }
+            Object.keys(item.metrics).forEach((metric) => {
+                if (!theSortMetrics.includes(metric) && typeof metric === 'string') {
+                    theSortMetrics.push(metric);
+                }
+            });
         });
+        setAllSortMetrics(theSortMetrics);
+        console.log('allSortMetrics', allSortMetrics);
+
+        newDartItems = newDartItems.filter((item) => item.metrics[sortMetric])
+        console.log('newDartItems', newDartItems);
 
         setDartItems(newDartItems);
     }, [board, sortMetric]);
@@ -47,7 +63,6 @@ export const DartWallPage = () => {
         return () => {
             setDartItems([]);
             setModalOpen(false);
-            setSortMetric('heartlighted');
         }
     }, [fetchDarts]);
 
@@ -81,6 +96,8 @@ export const DartWallPage = () => {
                 board={board}
                 setBoard={setBoard}
                 sortMetric={sortMetric}
+                setSortMetric={setSortMetric}
+                allSortMetrics={allSortMetrics}
             />
             <DartWall
                 dartItems={dartItems}

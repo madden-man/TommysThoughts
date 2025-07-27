@@ -6,6 +6,7 @@ import { PoetryPage } from '../views/PoetryPage';
 import { NotFoundPage } from '../views/NotFoundPage';
 import { ProjectsPage } from '../views/ProjectsPage';
 import { DartWallPage } from '../views/darts/DartWallPage';
+import { NeighborhoodPage } from '../views/neighborhoods/NeighborhoodPage';
 
 export const router = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
     {
       path: '/earth',
       element: <ProjectsPage />
+    },
+    {
+      path: '/neighborhoods',
+      element: <NeighborhoodPage />
     },
     {
       path: '*',
