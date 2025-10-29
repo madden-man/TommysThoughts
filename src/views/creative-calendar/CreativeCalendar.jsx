@@ -11,16 +11,27 @@ export const CreativeCalendar = () => {
   const [value, onChange] = useState(new Date());
   const [creativeCounts, setCreativeCounts] = useState({});
 
+    const fetchCreativeCounts = async () => {
+        let newCreativeCounts = await getCreativeCount();
+        setCreativeCounts(newCreativeCounts);
+    };
+
     useEffect(() => {
-        const creativeCountsFromServer = getCreativeCount();
-        setCreativeCounts(creativeCountsFromServer);
+        fetchCreativeCounts();
     }, []);
 
     const formattedDate = formatDate(value);
 
-    useEffect(() => {
-        insertCreativeCount({ [formattedDate]: creativeCounts[formattedDate] });
-    }, [creativeCounts]);
+    const updateCreativeCount = (points) => {
+        const newCount = {
+            [formattedDate]: points + (creativeCounts[formattedDate] || 0)
+        };
+        setCreativeCounts({
+            ...creativeCounts,
+            ...newCount
+        });
+        insertCreativeCount(newCount);
+    };
 
     return (
         <div>
@@ -29,10 +40,7 @@ export const CreativeCalendar = () => {
                 <div style={{fontSize: '10px'}}>{`{${creativeCounts[date] || 0}}`}</div>} />
             {formattedDate}
             {JSON.stringify(creativeCounts)}
-            <CreativeTimer assignPoints={(points) => setCreativeCounts({
-                ...creativeCounts,
-                [formattedDate]: points + (creativeCounts[formattedDate] || 0)
-            })}/>
+            <CreativeTimer assignPoints={(points) => updateCreativeCount(points)}/>
         </div>
     )
 }

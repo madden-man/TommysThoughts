@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { Header } from '../../components/Header';
 
@@ -49,13 +49,12 @@ export const DartWallPage = () => {
             });
         });
         setAllSortMetrics(theSortMetrics);
-        console.log('allSortMetrics', allSortMetrics);
 
         newDartItems = newDartItems.filter((item) => item.metrics[sortMetric])
         console.log('newDartItems', newDartItems);
 
         setDartItems(newDartItems);
-    }, [board, sortMetric, allSortMetrics]);
+    }, [board, sortMetric]);
 
     useEffect(() => {
         fetchDarts();

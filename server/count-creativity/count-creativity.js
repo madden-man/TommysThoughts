@@ -14,7 +14,7 @@ const handler = async (event) => {
         let results;
         if (event.body['_id']) {
           results = await collection.updateOne(event.body['_id'], JSON.parse(event.body), { upsert: true });
-        } else {
+        } else if (event.body) {
           results = await collection.insertOne(JSON.parse(event.body));
         }
 

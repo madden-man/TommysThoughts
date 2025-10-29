@@ -1,5 +1,5 @@
 export const insertCreativeCount = async (pointBody) => {
-    let creativeResults = await fetch(".netlify/functions/",
+    let creativeResults = await fetch(".netlify/functions/count-creativity",
         { method: 'POST', body: JSON.stringify(pointBody)})
         .then(response => response.json());
     console.log(creativeResults);
@@ -7,8 +7,8 @@ export const insertCreativeCount = async (pointBody) => {
 }
 
 export const getCreativeCount = async () => {
-    let creativeResults = await fetch(".netlify/functions/",
-        { method: 'POST', body: {}})
+    let creativeResults = await fetch(".netlify/functions/get-creative-count",
+        { method: 'GET'})
         .then(response => response.json());
     console.log(creativeResults);
     return creativeResults;
