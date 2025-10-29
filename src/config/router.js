@@ -7,6 +7,7 @@ import { NotFoundPage } from '../views/NotFoundPage';
 import { ProjectsPage } from '../views/ProjectsPage';
 import { DartWallPage } from '../views/darts/DartWallPage';
 import { NeighborhoodPage } from '../views/neighborhoods/NeighborhoodPage';
+import { CreativeCalendar } from '../views/creative-calendar/CreativeCalendar';
 
 export const router = createBrowserRouter([
     {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
     {
       path: '/neighborhoods',
       element: <NeighborhoodPage />
+    },
+    {
+      path: '/creative-calendar',
+      element: <CreativeCalendar />
     },
     {
       path: '*',

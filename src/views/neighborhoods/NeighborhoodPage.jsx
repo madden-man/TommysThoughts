@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { HIGH_SCHOOLS } from './constants';
+//import { HIGH_SCHOOLS } from './constants';
+import { NeighborhoodMap } from './NeighborhoodMap';
 
 export const NeighborhoodPage = () => {
     const KEY = process.env.REACT_APP_MAPS_KEY;
@@ -11,13 +11,7 @@ export const NeighborhoodPage = () => {
                 <script async src={`https://maps.googleapis.com/maps/api/js?key=${KEY}&loading=async&callback=console.debug&libraries=maps,marker&v=beta`} />
             </Helmet>
             Neighborhood time!
-            <div id="map"></div>
-            <gmp-map center="39.687828,-105.086441" zoom="15" map-id="DEMO_MAP_ID">
-                <gmp-advanced-marker position="39.687828,-105.086441" title="Home!"></gmp-advanced-marker>
-                {HIGH_SCHOOLS.map(({ lat, long, title, rating}) =>
-                    <gmp-advanced-marker position={{ lat, long }} title={`${title} - ${rating}`}></gmp-advanced-marker>
-            )}
-            </gmp-map>
+            <NeighborhoodMap />
         </div>
     )
 }

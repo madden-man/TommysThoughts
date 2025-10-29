@@ -81,7 +81,7 @@ export const BiblePage = () => {
     return () => {
       window.removeEventListener('keydown', onKeyPressed);
     }
-  }, [currentSignature, searchParams, newPassage, bibleStatus, dispatchVerse]);
+  }, [currentSignature, searchParams, newPassage, bibleStatus, currentText, dispatchVerse]);
 
   const closeBibleModal = () => setModalOpen(false);
 
