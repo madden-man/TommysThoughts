@@ -9,7 +9,7 @@ import { formatDate } from './utils';
 
 export const CreativeCalendar = () => {
   const [value, onChange] = useState(new Date());
-  const [creativeCounts, setCreativeCounts] = useState({});
+  const [creativeCounts, setCreativeCounts] = useState([]);
 
     const fetchCreativeCounts = async () => {
         let newCreativeCounts = await getCreativeCount();
@@ -22,8 +22,13 @@ export const CreativeCalendar = () => {
 
     const formattedDate = formatDate(value);
 
+    const findCreativeCount = (creativeCounts, dateToFind) => {
+        let countItem = creativeCounts.find((item) => Object.keys(item).includes(dateToFind));
+        return countItem;
+    }
+
     const updateCreativeCount = (points) => {
-        const existingCountItem = creativeCounts.find((item) => Object.keys(item).includes(formattedDate));
+        const existingCountItem = findCreativeCount(creativeCounts, formattedDate);
         const newCount = {
             ...existingCountItem,
             [formattedDate]: points + (existingCountItem?.[formattedDate] || 0)
@@ -41,7 +46,7 @@ export const CreativeCalendar = () => {
         <div>
             <Header />
             <Calendar onChange={onChange} value={value} tileContent={({ date }) =>
-                <div style={{fontSize: '10px'}}>{`{${Math.round(creativeCounts[formatDate(date)] || 0)}}`}</div>} />
+                <div style={{fontSize: '10px'}}>{`{${findCreativeCount(creativeCounts, formatDate(date))?.[formatDate(date)] || 0}}`}</div>} />
             <CreativeTimer assignPoints={(points) => updateCreativeCount(points)}/>
         </div>
     )
