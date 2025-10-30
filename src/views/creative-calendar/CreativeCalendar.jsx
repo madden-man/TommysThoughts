@@ -45,8 +45,10 @@ export const CreativeCalendar = () => {
     return (
         <div>
             <Header />
-            <Calendar onChange={onChange} value={value} tileContent={({ date }) =>
-                <div style={{fontSize: '10px'}}>{`{${findCreativeCount(creativeCounts, formatDate(date))?.[formatDate(date)] || 0}}`}</div>} />
+            <Calendar onChange={onChange} value={value} tileContent={({ date }) => {
+                const thisCount = findCreativeCount(creativeCounts, formatDate(date))?.[formatDate(date)] || 0;
+                return <div style={{fontSize: '10px'}}>{thisCount > 0 && `{${Number(thisCount).toFixed(1)}}`}</div>
+                }} />
             <CreativeTimer assignPoints={(points) => updateCreativeCount(points)}/>
         </div>
     )
