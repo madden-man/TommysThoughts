@@ -9,7 +9,6 @@ export const CreativeTimer = ({ assignPoints }) => {
     seconds,
     minutes,
     hours,
-    isRunning,
     start,
     pause,
     reset,
