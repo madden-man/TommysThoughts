@@ -23,7 +23,7 @@ export const CreativeCalendar = () => {
     const formattedDate = formatDate(value);
 
     const findCreativeCount = (creativeCounts, dateToFind) => {
-        let countItem = creativeCounts.find((item) => Object.keys(item).includes(dateToFind));
+        let countItem = creativeCounts?.find((item) => Object.keys(item).includes(dateToFind));
         return countItem;
     }
 
@@ -31,7 +31,7 @@ export const CreativeCalendar = () => {
         const existingCountItem = findCreativeCount(creativeCounts, formattedDate);
         const newCount = {
             ...existingCountItem,
-            [formattedDate]: points + (existingCountItem?.[formattedDate] || 0)
+            [formattedDate]: Number(points) + (existingCountItem?.[formattedDate] || 0)
         };
 
         console.log(newCount);
