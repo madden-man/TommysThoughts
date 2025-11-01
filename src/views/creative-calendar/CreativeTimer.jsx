@@ -5,14 +5,16 @@ export const CreativeTimer = ({ assignPoints }) => {
     const [totalHours, setTotalHours] = useState(0);
 
     const updateHours = () => setTotalHours(hours + (minutes / 60) + (seconds / 3600));
+
   const {
     seconds,
     minutes,
     hours,
     start,
     pause,
-    reset,
   } = useStopwatch({ autoStart: false }); // Set autoStart to true if you want it to start immediately
+
+  const reset = () => { pause(); window.location.reload(); };
 
   return (
     <div style={{ textAlign: 'center', background: 'white', borderRadius: '1rem', marginTop: '1rem', padding: '2rem', border: '2px ridge darkblue' }}>
@@ -22,7 +24,7 @@ export const CreativeTimer = ({ assignPoints }) => {
       </div>
       <button onClick={start}>Start</button>
       <button onClick={() => { pause(); updateHours(); }}>Pause</button>
-      <button onClick={() => { pause(); setTotalHours(0); window.location.reload(); }}>Reset</button>
+      <button onClick={() => { setTotalHours(0); reset(); }}>Reset</button>
       <br />
       <input type="text" style={{margin: '0.5rem 0', width: '100%', textAlign: 'center'}}value={totalHours} onChange={(e) => setTotalHours(e.target.value)} />
       <br />
