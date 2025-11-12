@@ -2,10 +2,9 @@
     background: url('../../assets/corkboard.jpg') center center;
     width: 100%;
     max-width: 50rem;
-    max-height: 50rem;
     height: 100%;
     min-width: 16rem;
-    min-height: 16rem;
+    min-height: 35rem;
     display: flex;
     flex-direction: column;
     border: 2px ridge black;

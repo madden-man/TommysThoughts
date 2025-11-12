@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
 
@@ -10,10 +10,14 @@ const handler = async (event) => {
         const database = (await clientPromise).db(process.env.MONGODB_DB);
         const collection = database.collection('creativity-counter');
         // Function logic here ...
-        console.log(event.body);
         let results;
-        if (event.body['_id']) {
-          results = await collection.updateOne(event.body['_id'], JSON.parse(event.body), { upsert: true });
+        if (event.body.includes('_id')) {
+          let thisId = new ObjectId(event.body._id);
+          const intendedBody = JSON.parse(event.body);
+          delete intendedBody._id;
+          console.log(intendedBody, thisId);
+          results = await collection.updateOne({ _id: thisId },
+            { $set: intendedBody }, { upsert: true });
         } else if (event.body) {
           results = await collection.insertOne(JSON.parse(event.body));
         }
