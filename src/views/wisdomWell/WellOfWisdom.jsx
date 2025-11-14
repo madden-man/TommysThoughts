@@ -6,7 +6,7 @@ import { getWisdom } from './server';
 export const WellOfWisdom = () => {
     const [allWisdom, setAllWisdom] = useState([]);
     const [currentNugget, setNugget] = useState('');
-    const [isModalOpen, setModalOpen] = useState(false);
+    const [modalStatus, setModalStatus] = useState('closed');
 
     const fetchWisdom = useCallback(async() => {
         const fetchedWisdom = await getWisdom();
@@ -26,11 +26,15 @@ export const WellOfWisdom = () => {
 
     return (
         <div className="well-of-wisdom">
-            {isModalOpen && <WellOfWisdomModal onClose={() => setModalOpen(false)} />}
+            {modalStatus === 'closed' ? null :
+                <WellOfWisdomModal
+                    nugget={modalStatus === 'edit' ? currentNugget : {}}
+                    onClose={() => setModalStatus('closed')}
+                />}
             <h2 style={{textAlign: 'center'}}>Well O' Wisdom!</h2>
             <p>{currentNugget?.quote}</p>
             <div>
-                - Immanuel Kant,<br />
+                - {currentNugget?.author},<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {currentNugget?.book} ({currentNugget?.page}),<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -46,11 +50,12 @@ export const WellOfWisdom = () => {
                             setNugget({ ...allWisdom[currentIndex  - 1], index: currentIndex - 1 })
                         }
                     }}>&lt;</button>
-                    <button onClick={() => setModalOpen(true)}>+</button>
+                    <button onClick={() => setModalStatus('add')}>+</button>
                     <button onClick={() => {
                         let newIndex = Math.floor(Math.random() * allWisdom?.length);
                         setNugget({ ...allWisdom[newIndex], index: newIndex });
                     }}>Shuffle!</button>
+                    <button onClick={() => setModalStatus('edit')}>e</button>
                     <button onClick={() => {
                         let currentIndex = currentNugget?.index;
                         if (currentIndex === allWisdom?.length - 1) {
