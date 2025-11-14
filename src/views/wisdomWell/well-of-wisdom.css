@@ -1,0 +1,84 @@
+.well-of-wisdom {
+    background: white;
+    border: 2px ridge darkblue;
+    border-radius: 2rem;
+    padding: 1.5rem;
+    max-width: 30rem;
+}
+
+.well-of-wisdom__toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 0 4rem;
+    margin-top: 0.5rem;
+}
+
+.well-of-wisdom__toolbar button {
+    margin: 0 0 0 0.5rem;
+}
+
+.well-of-wisdom__toolbar button:last-child {
+    margin-right: 0.5rem;
+}
+
+.well-of-wisdom p {
+    text-indent: 2rem;
+    font-family: monospace;
+    line-height: 1.5;
+    background-color: lightyellow;
+}
+
+.well-of-wisdom__modal-holder {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.3), 
+        rgba(0, 0, 0, 0.3)
+    );
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    border-radius: 0;
+}
+
+.well-of-wisdom__modal {
+    max-width: 48rem;
+    min-width: 16rem;
+    background: white;
+    -webkit-filter: brightness(100%);
+    padding: 2rem;
+    border-radius: 2rem;
+    border: 4px ridge darkblue;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    overflow-y: scroll;
+    z-index: 300;
+}
+
+.well-of-wisdom__modal h3 {
+    margin-bottom: 0.25rem;
+}
+
+.well-of-wisdom__modal input[type="submit"] {
+    width: 4rem;
+    margin-top: 1rem;
+}
+
+.well-of-wisdom__modal--x {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    text-decoration: none;
+    background: none;
+    border-radius: 50%;
+    border: 1px solid black;
+    padding: 0 0.25rem;
+    cursor: pointer;
+}

@@ -8,6 +8,7 @@ import { ProjectsPage } from '../views/ProjectsPage';
 import { DartWallPage } from '../views/darts/DartWallPage';
 import { NeighborhoodPage } from '../views/neighborhoods/NeighborhoodPage';
 import { CreativeCalendar } from '../views/creative-calendar/CreativeCalendar';
+import { WellOfWisdomPage } from '../views/wisdomWell/WellOfWisdomPage';
 
 export const router = createBrowserRouter([
     {
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
     {
       path: '/creative-calendar',
       element: <CreativeCalendar />
+    },
+    {
+      path: '/well-o-wisdom',
+      element: <WellOfWisdomPage />
     },
     {
       path: '*',
