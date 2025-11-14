@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStopwatch } from 'react-timer-hook';
 
 export const CreativeTimer = ({ assignPoints }) => {
-    const [totalHours, setTotalHours] = useState(0);
+    const [totalHours, setTotalHours] = useState('');
 
     const updateHours = () => setTotalHours(hours + (minutes / 60) + (seconds / 3600));
 
