@@ -36,7 +36,7 @@ export const WellOfWisdom = () => {
             <div>
                 - {currentNugget?.author},<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                {currentNugget?.book} ({currentNugget?.page}),<br />
+                {currentNugget?.book} ({currentNugget?.page || '?'}),<br />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &lt;-- (sequence) --&gt;
             </div>

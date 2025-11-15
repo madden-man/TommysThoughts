@@ -24,7 +24,7 @@ export const CreativeTimer = ({ assignPoints }) => {
       </div>
       <button onClick={start}>Start</button>
       <button onClick={() => { pause(); updateHours(); }}>Pause</button>
-      <button onClick={() => { setTotalHours(0); reset(); }}>Reset</button>
+      <button onClick={() => { setTimeout(() => { setTotalHours('');  reset(); }, 500)}}>Reset</button>
       <br />
       <input type="text" style={{margin: '0.5rem 0', width: '100%', textAlign: 'center'}}value={totalHours} onChange={(e) => setTotalHours(e.target.value)} />
       <br />
