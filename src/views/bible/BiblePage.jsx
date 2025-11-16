@@ -86,7 +86,7 @@ export const BiblePage = () => {
   const closeBibleModal = () => setModalOpen(false);
 
   return (
-    <div>
+    <div className="page">
         <Header />
         <div className="bible">
             <BibleSidebar />

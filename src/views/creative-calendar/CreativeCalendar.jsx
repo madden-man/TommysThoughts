@@ -54,7 +54,7 @@ export const CreativeCalendar = () => {
     };
 
     return (
-        <div>
+        <div className="page">
             <Header />
             <Calendar onChange={onChange} value={value} tileContent={({ date }) => {
                 const thisCount = creativeCounts?.[formatDate(date)] || 0;

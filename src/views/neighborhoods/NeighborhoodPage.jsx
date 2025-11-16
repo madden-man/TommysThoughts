@@ -6,7 +6,7 @@ export const NeighborhoodPage = () => {
     const KEY = process.env.REACT_APP_MAPS_KEY;
 
     return (
-        <div style={{width: '100%'}}>
+        <div style={{width: '100%'}} className="page">
             <Helmet>
                 <script async src={`https://maps.googleapis.com/maps/api/js?key=${KEY}&loading=async&callback=console.debug&libraries=maps,marker&v=beta`} />
             </Helmet>

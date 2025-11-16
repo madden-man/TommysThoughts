@@ -5,7 +5,7 @@ import headshot from '../assets/photos_of_me/headshot.jpeg';
 import './home.css';
 
 export const Home = () =>
-    <div>
+    <div className="page">
         <Header />
         <div className="home">
             <h2>Welcome to</h2>

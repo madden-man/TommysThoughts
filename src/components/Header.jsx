@@ -8,7 +8,7 @@ export const Header = () => {
   const onClick = () => setIsExpanded(false);
 
   return (
-    <div className="header-spacer">
+    <div>
         <div className={isExpanded ? "header-holder expanded dark" : "header-holder not-expanded dark"}>
             <div className="header">
             <NavItem text="Home" img="tommy_real.jpg" path="/" color="darkgreen" border={true} />

@@ -1,6 +1,4 @@
-import React from 'react';
-
 export const NotFoundPage = () =>
-    <div>
-        WHAATT
+    <div className="page">
+        Sorry you're lost! Sucks for you!
     </div>;

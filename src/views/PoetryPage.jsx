@@ -15,7 +15,7 @@ export const PoetryPage = () => {
   const poems = [{ text: 'Poems', url: '/poetry', color: 'white' }, ...POETRY_LINKS];
 
   return (
-    <div>
+    <div className="page">
       <Header />
       <section style={{whiteSpace: 'pre-wrap', textAlign: 'center'}} className="page">
         <TwoColumn links={poems.map((link, index) => {

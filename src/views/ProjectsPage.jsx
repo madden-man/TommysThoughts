@@ -5,7 +5,7 @@ import { projects } from './projectConstants';
 import './projects.css';
 
 export const ProjectsPage = () =>
-    <div>
+    <div className="page">
         <Header />
         <div className="projects">
             {projects.map(({ title, description, link }) =>
