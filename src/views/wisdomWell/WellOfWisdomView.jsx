@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const WellOfWisdomView = ({ allWisdom, currentNugget }) => {
-    const [wisdomView, setWisdomView] = useState('');
+    const [wisdomView, setWisdomView] = useState('c');
+
+    useEffect(() => {
+        setWisdomView('c'); // as in current nugget lol
+    }, [currentNugget])
 
     let nuggets = [];
-    if (wisdomView === '') {
+    if (wisdomView === 'c') {
         nuggets.push(currentNugget);
     } else if (wisdomView.charAt(0) === 'a') {
         allWisdom.forEach((nugget) => {
@@ -21,12 +25,12 @@ export const WellOfWisdomView = ({ allWisdom, currentNugget }) => {
             {nuggets.map((iterateNugget) =>
                 <div>
                     <p>{iterateNugget?.quote}</p>
-                    <span onClick={() => setWisdomView(`a|${iterateNugget?.author}`)}>
+                    {iterateNugget?.author && <span onClick={() => setWisdomView(`a|${iterateNugget?.author}`)}>
                         - {iterateNugget?.author},
-                    </span>
-                    <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </span>}
+                    {iterateNugget?.author && <br />}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span onClick={() => setWisdomView(`b|${iterateNugget?.book}`)}>
-                        {iterateNugget?.book} ({iterateNugget?.page || '?'}),
+                        {!iterateNugget?.author && '- '}{iterateNugget?.book} ({iterateNugget?.page || '?'}),
                     </span>
                     <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     &lt;-- (sequence) --&gt;
