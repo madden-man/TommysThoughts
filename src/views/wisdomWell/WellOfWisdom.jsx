@@ -14,12 +14,12 @@ export const WellOfWisdom = () => {
 
     const searchFromParam = urlParam.get('search');
 
-
     const fetchWisdom = useCallback(async() => {
         const fetchedWisdom = await getWisdom();
         setAllWisdom(fetchedWisdom);
         if (fetchedWisdom.length > 0) {
-            setNugget({ ...fetchedWisdom[0], index: 0 });
+            const whichNugget = Math.floor(Math.random() * fetchedWisdom.length);
+            setNugget({ ...fetchedWisdom[whichNugget], index: whichNugget });
         }
     }, []);
     
@@ -39,7 +39,12 @@ export const WellOfWisdom = () => {
                     onClose={() => setModalStatus('closed')}
                 />}
             <h2 style={{textAlign: 'center'}}>Well O' Wisdom!</h2>
-            <WellOfWisdomView allWisdom={allWisdom} currentNugget={currentNugget} initialView={searchFromParam} />
+            <WellOfWisdomView
+                allWisdom={allWisdom}
+                currentNugget={currentNugget}
+                initialView={searchFromParam}
+                editThisOne={(nugget) => { setNugget(nugget); setModalStatus('edit')}}
+            />
             <div className="well-of-wisdom__toolbar">
                 <div className="well-of-wisdom__toolbar--buttons">
                     <button onClick={() => {

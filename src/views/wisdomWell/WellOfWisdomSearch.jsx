@@ -28,7 +28,7 @@ export const WellOfWisdomSearch = ({ allWisdom }) => {
             <button onClick={() => sendToSearch(`/well-o-wisdom?search=q|${searchTerm}`)}>Quote Search!</button>
             <div className="well-of-wisdom__typeahead">
                 {searchTerm.length > 2 && uniqTypeaheads.map((term) =>
-                    <div className="well-of-wisdom__typeahead-item" onClick={() => sendToSearch(`/well-o-wisdom?search=${term}`)}>
+                    <div key={term} className="well-of-wisdom__typeahead-item" onClick={() => sendToSearch(`/well-o-wisdom?search=${term}`)}>
                         {term.substring(2)}
                     </div>)}
             </div>

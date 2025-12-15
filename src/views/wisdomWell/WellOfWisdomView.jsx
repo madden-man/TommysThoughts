@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const WellOfWisdomView = ({ allWisdom, currentNugget, initialView }) => {
+export const WellOfWisdomView = ({ allWisdom, currentNugget, initialView, editThisOne }) => {
     const [wisdomView, setWisdomView] = useState(initialView || 'c');
 
     useEffect(() => {
@@ -26,7 +26,7 @@ export const WellOfWisdomView = ({ allWisdom, currentNugget, initialView }) => {
         <div>
             {nuggets?.map((iterateNugget, index) =>
                 <div key={index}>
-                    <p>{iterateNugget?.quote}</p>
+                    <p onClick={() => editThisOne({ ...iterateNugget, index })}>{iterateNugget?.quote}</p>
                     {iterateNugget?.author && <span onClick={() => setWisdomView(`a|${iterateNugget?.author}`)}>
                         - {iterateNugget?.author},
                     </span>}
