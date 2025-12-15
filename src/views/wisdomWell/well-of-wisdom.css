@@ -91,6 +91,8 @@
 
 .well-of-wisdom__search {
     margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .well-of-wisdom__search input {
