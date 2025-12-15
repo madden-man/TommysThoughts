@@ -14,7 +14,7 @@ export const Home = () =>
                 <img src={headshot} alt="" className="home__profile-pic" />
             </a>
             <span className="home__headline">
-                Senior Engineering Manager at Aetna Digital, Inc.
+                Lead Engineering Director at Aetna Digital, Inc.
             </span>
             <hr />
         </div>

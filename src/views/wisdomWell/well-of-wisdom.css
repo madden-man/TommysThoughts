@@ -8,15 +8,21 @@
 
 .well-of-wisdom__toolbar {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
     padding: 0 4rem;
     margin-top: 0.5rem;
 }
 
+.well-of-wisdom__toolbar--buttons {
+    flex-direction: row;
+}
+
 .well-of-wisdom__toolbar button {
     margin: 0 0 0 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid black;
 }
 
 .well-of-wisdom__toolbar button:last-child {
@@ -82,3 +88,78 @@
     padding: 0 0.25rem;
     cursor: pointer;
 }
+
+.well-of-wisdom__search {
+    margin-top: 1rem;
+}
+
+.well-of-wisdom__search input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    outline: none;
+    transition: border 0.15s, box-shadow 0.15s;
+}
+
+  .well-of-wisdom__typeahead {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+  }
+  
+  .well-of-wisdom__search input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+  
+  .well-of-wisdom__dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  
+  .well-of-wisdom__typeahead-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  
+  .well-of-wisdom__typeahead-item:hover {
+    background: #f4f5ff;
+  }
+  
+  .well-of-wisdom__typeahead-item.active {
+    background: #eef2ff;
+    color: #4338ca;
+  }
+  
+  .well-of-wisdom__typeahead-item.disabled {
+    color: #9ca3af;
+    cursor: default;
+    background: transparent;
+  }
+  
+  .well-of-wisdom__typeahead-item .label {
+    font-weight: 500;
+  }
+  
+  .well-of-wisdom__typeahead-item .meta {
+    font-size: 12px;
+    color: #6b7280;
+  }

@@ -14,6 +14,9 @@ export const addWisdom = async (wisdomNugget) => {
     return insertResults;
 }
 
+// TODO: Semantic Search?
+// https://www.mongodb.com/docs/atlas/atlas-vector-search/tutorials/vector-search-tutorial/
+
 // export const updateDart = async (dartItem) => {
 //     let updateResults = await fetch(".netlify/functions/update_dart", 
 //         { method: 'POST', body: JSON.stringify({ ...dartItem })})

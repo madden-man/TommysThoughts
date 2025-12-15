@@ -7,6 +7,8 @@ export const WellOfWisdomModal = ({ nugget, onClose }) => {
     const [book, setBook] = useState(nugget?.book || '');
     const [page, setPage] = useState(nugget?.page || '');
 
+    // TODO: OCR?
+
     return (
         <div className="well-of-wisdom__modal-holder">
             <div className="well-of-wisdom__modal">

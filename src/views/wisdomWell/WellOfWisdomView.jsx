@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 
-export const WellOfWisdomView = ({ allWisdom, currentNugget }) => {
-    const [wisdomView, setWisdomView] = useState('c');
+export const WellOfWisdomView = ({ allWisdom, currentNugget, initialView }) => {
+    const [wisdomView, setWisdomView] = useState(initialView || 'c');
 
     useEffect(() => {
-        setWisdomView('c'); // as in current nugget lol
-    }, [currentNugget])
+        if (!initialView) {
+            setWisdomView('c'); // as in current nugget lol
+        }
+    }, [initialView, currentNugget]);
 
     let nuggets = [];
     if (wisdomView === 'c') {
@@ -22,8 +24,8 @@ export const WellOfWisdomView = ({ allWisdom, currentNugget }) => {
 
     return (
         <div>
-            {nuggets.map((iterateNugget) =>
-                <div>
+            {nuggets?.map((iterateNugget, index) =>
+                <div key={index}>
                     <p>{iterateNugget?.quote}</p>
                     {iterateNugget?.author && <span onClick={() => setWisdomView(`a|${iterateNugget?.author}`)}>
                         - {iterateNugget?.author},
