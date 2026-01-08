@@ -75,7 +75,7 @@ export const DartWall = ({ dartItems, setActiveDart, shuffleDart, sortMetric }) 
                 if (document.body.scrollWidth <= 768) {
                     row = row.slice((scrollX * 5), (scrollX * 5) + 5) || [];
                 } else {
-                    row = row.slice((scrollX * 10), (scrollX * 10) + 10) || [];
+                    row = row.slice((scrollX * 20), (scrollX * 20) + 20) || [];
                 }
 
                 return (
