@@ -10,9 +10,10 @@ const handler = async (event) => {
         const collection = database.collection(process.env.MONGODB_COLLECTION);
         // Function logic here ...
         const item = JSON.parse(event.body);
+        let theId = item?._id;
         if (item._id) { delete item._id; }
 
-        const results = await collection.replaceOne({ name: item.name }, item);
+        const results = await collection.replaceOne({ _id: theId }, item, { upsert: true });
         return {
           statusCode: 200,
           body: JSON.stringify(results),
