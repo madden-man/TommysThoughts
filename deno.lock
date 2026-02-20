@@ -1,0 +1,48 @@
+{
+  "version": "5",
+  "remote": {
+    "https://edge.netlify.com/": "fd941d61d88673d5f28aab283fb86fcc50f08a3bc80ee5470498fcfa88c65cfb",
+    "https://edge.netlify.com/bootstrap/config.ts": "6a2ce0e544e15e8f8883a5c18da5948e37fd0f2619f68cb31f3af53c51817025",
+    "https://edge.netlify.com/bootstrap/context.ts": "e97240232121e2f369f6546ce961490f34d961ea1ea54be3ff09633e3f08373f",
+    "https://edge.netlify.com/bootstrap/cookie.ts": "8b0baae708989ca183c6f3b4ab3d029e6abcbc2e43f93edeb0ff447b3bbc3a05",
+    "https://edge.netlify.com/bootstrap/edge_function.ts": "b8253e86aa83c67341f5cfedeba5049d77fbf84dcab7eceff7566b7728ae9b39",
+    "https://edge.netlify.com/bootstrap/globals/types.ts": "eaa6148ded3121d8dee62dd91c86e7fe76601df0f3ca8d7962243a30f4c8935f"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@babel/plugin-proposal-private-property-in-object@^7.21.11",
+        "npm:@emotion/react@^11.13.0",
+        "npm:@emotion/styled@^11.13.0",
+        "npm:@mui/material@^5.16.7",
+        "npm:@mui/styled-engine-sc@^6.0.0-alpha.18",
+        "npm:@reduxjs/toolkit@^2.2.7",
+        "npm:@testing-library/jest-dom@^5.17.0",
+        "npm:@testing-library/react@^13.4.0",
+        "npm:@testing-library/user-event@^13.5.0",
+        "npm:@vis.gl/react-google-maps@^1.5.4",
+        "npm:axios@^1.7.3",
+        "npm:classnames@^2.5.1",
+        "npm:concurrently@^8.2.2",
+        "npm:material-components-web@14",
+        "npm:mongodb@^6.8.0",
+        "npm:postcss-cli@11",
+        "npm:postcss-color-mod-function@^3.0.3",
+        "npm:postcss@^8.4.40",
+        "npm:react-calendar@6",
+        "npm:react-dom@^18.3.1",
+        "npm:react-helmet@^6.1.0",
+        "npm:react-redux@^9.1.2",
+        "npm:react-router-dom@^6.26.0",
+        "npm:react-scripts@5.0.1",
+        "npm:react-timer-hook@^4.0.5",
+        "npm:react@^18.3.1",
+        "npm:redux-saga@^1.3.0",
+        "npm:styled-components@^6.1.12",
+        "npm:tesseract.js@^6.0.1",
+        "npm:web-vitals@^2.1.4",
+        "npm:webfontloader@^1.6.28"
+      ]
+    }
+  }
+}

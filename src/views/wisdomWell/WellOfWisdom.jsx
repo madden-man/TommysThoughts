@@ -14,14 +14,50 @@ export const WellOfWisdom = () => {
 
     const searchFromParam = urlParam.get('search');
 
+    const upTheNugget = useCallback(() => {
+        setNugget(prev => {
+            if (!allWisdom.length) return prev;
+
+            const nextIndex =
+                prev.index === allWisdom.length - 1
+                    ? 0
+                    : prev.index + 1;
+
+            return { ...allWisdom[nextIndex], index: nextIndex };
+        });
+    }, [allWisdom]);
+
+    const downTheNugget = useCallback(() => {
+        setNugget(prev => {
+            if (!allWisdom.length) return prev;
+
+            const nextIndex =
+                prev.index === 0
+                    ? allWisdom.length - 1
+                    : prev.index - 1;
+
+            return { ...allWisdom[nextIndex], index: nextIndex };
+        });
+    }, [allWisdom]);
+
     const fetchWisdom = useCallback(async() => {
         const fetchedWisdom = await getWisdom();
         setAllWisdom(fetchedWisdom);
         if (fetchedWisdom.length > 0) {
-            const whichNugget = Math.floor(Math.random() * fetchedWisdom.length);
+            const whichNugget = fetchedWisdom.length - 1; // last one to start
             setNugget({ ...fetchedWisdom[whichNugget], index: whichNugget });
         }
     }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === "ArrowRight") upTheNugget();
+            if (event.key === "ArrowLeft") downTheNugget();
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [upTheNugget, downTheNugget]);
     
     useEffect(() => {
         fetchWisdom();
@@ -47,28 +83,14 @@ export const WellOfWisdom = () => {
             />
             <div className="well-of-wisdom__toolbar">
                 <div className="well-of-wisdom__toolbar--buttons">
-                    <button onClick={() => {
-                        let currentIndex = currentNugget?.index;
-                        if (currentIndex === 0) {
-                            setNugget({ ...allWisdom[allWisdom?.length - 1], index: allWisdom?.length - 1 });
-                        } else {
-                            setNugget({ ...allWisdom[currentIndex  - 1], index: currentIndex - 1 })
-                        }
-                    }}>&lt;</button>
+                    <button onClick={downTheNugget}>&lt;</button>
                     <button onClick={() => setModalStatus('add')}>+</button>
                     <button onClick={() => {
                         let newIndex = Math.floor(Math.random() * allWisdom?.length);
                         setNugget({ ...allWisdom[newIndex], index: newIndex });
                     }}>Shuffle!</button>
                     <button onClick={() => setModalStatus('edit')}>e</button>
-                    <button onClick={() => {
-                        let currentIndex = currentNugget?.index;
-                        if (currentIndex === allWisdom?.length - 1) {
-                            setNugget({ ...allWisdom[0], index: 0 });
-                        } else {
-                            setNugget({ ...allWisdom[currentIndex + 1], index: currentIndex + 1 })
-                        }
-                    }}>&gt;</button>
+                    <button onClick={upTheNugget}>&gt;</button>
                 </div>
             </div>
             <WellOfWisdomSearch allWisdom={allWisdom} />
