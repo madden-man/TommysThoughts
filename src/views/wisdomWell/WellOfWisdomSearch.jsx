@@ -23,10 +23,15 @@ export const WellOfWisdomSearch = ({ allWisdom }) => {
     return (
         <div className="well-of-wisdom__search">
             <input type="text" name="wisdom-search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            <div>
+            <div className="well-of-wisdom__search--sendit">
                 <button onClick={() => sendToSearch(`/well-o-wisdom?search=a|${searchTerm}`)}>Author Search!</button>
                 <button onClick={() => sendToSearch(`/well-o-wisdom?search=b|${searchTerm}`)}>Book Search!</button>
                 <button onClick={() => sendToSearch(`/well-o-wisdom?search=q|${searchTerm}`)}>Quote Search!</button>
+            </div>
+            <div className="well-of-wisdom__search--catalog">
+                <button onClick={() => sendToSearch(`/well-o-wisdom?catalog=authors`)}>Authors</button>
+                <button onClick={() => sendToSearch(`/well-o-wisdom?catalog=books`)}>Books</button>
+                <button onClick={() => sendToSearch(`/well-o-wisdom?search=q`)}>Quotes</button>
             </div>
             <div className="well-of-wisdom__typeahead">
                 {searchTerm.length > 2 && uniqTypeaheads.map((term) =>

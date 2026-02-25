@@ -20,6 +20,12 @@ export const WellOfWisdomView = ({ allWisdom, currentNugget, initialView, editTh
         allWisdom.forEach((nugget) => {
             if (nugget?.book === wisdomView.substring(2)) nuggets.push(nugget);
         });
+    } else if (wisdomView.charAt(0) === 'q') {
+        allWisdom.forEach((nugget) => {
+            if (!wisdomView.includes('short') || nugget?.quote?.split(' ')?.length < 40) {
+                nuggets.push(nugget);
+            }
+        });
     }
 
     return (

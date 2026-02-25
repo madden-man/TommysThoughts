@@ -5,6 +5,7 @@ import { WellOfWisdomModal } from './WellOfWisdomModal';
 import { getWisdom } from './server';
 import { WellOfWisdomView } from './WellOfWisdomView';
 import { WellOfWisdomSearch } from './WellOfWisdomSearch';
+import { WellOfWisdomCatalog } from './WellOfWisdomCatalog';
 
 export const WellOfWisdom = () => {
     const [allWisdom, setAllWisdom] = useState([]);
@@ -13,6 +14,7 @@ export const WellOfWisdom = () => {
     const [urlParam] = useSearchParams();
 
     const searchFromParam = urlParam.get('search');
+    const catalogParam = urlParam.get('catalog');
 
     const upTheNugget = useCallback(() => {
         setNugget(prev => {
@@ -75,12 +77,12 @@ export const WellOfWisdom = () => {
                     onClose={() => setModalStatus('closed')}
                 />}
             <h2 style={{textAlign: 'center'}}>Well O' Wisdom!</h2>
-            <WellOfWisdomView
+            {!catalogParam ? <WellOfWisdomView
                 allWisdom={allWisdom}
                 currentNugget={currentNugget}
                 initialView={searchFromParam}
                 editThisOne={(nugget) => { setNugget(nugget); setModalStatus('edit')}}
-            />
+            /> : <WellOfWisdomCatalog allWisdom={allWisdom} catalogParam={catalogParam} />}
             <div className="well-of-wisdom__toolbar">
                 <div className="well-of-wisdom__toolbar--buttons">
                     <button onClick={downTheNugget}>&lt;</button>
