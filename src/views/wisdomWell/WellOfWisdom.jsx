@@ -76,7 +76,7 @@ export const WellOfWisdom = () => {
                     nugget={modalStatus === 'edit' ? currentNugget : {}}
                     onClose={() => setModalStatus('closed')}
                 />}
-            <h2 style={{textAlign: 'center'}}>Well O' Wisdom!</h2>
+            <a href={`/well-o-wisdom`}><h2 style={{textAlign: 'center', color: 'black'}}>Well O' Wisdom!</h2></a>
             {!catalogParam ? <WellOfWisdomView
                 allWisdom={allWisdom}
                 currentNugget={currentNugget}
