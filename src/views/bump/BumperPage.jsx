@@ -11,7 +11,7 @@ export const BumperPage = () => {
     return (
         <div className="page">
             <Header />
-            <h1 className="bumper__title">Bump Bump</h1>
+            <h1 className="bumper__title">Bump Buddies!</h1>
             <div className="bumper">
                 {BUMP_BUTTONS.map(({ key, symbol, header }) =>
                     <div key={key} className="bumper__item">

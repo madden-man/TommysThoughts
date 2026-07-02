@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { getBumpHeader } from './constants';
 import { sendBumpNotification } from './server';
+import { BumpActivities } from './BumpActivities';
 
 import './bump.css';
 
@@ -21,9 +22,8 @@ export const BumpPage = () => {
         <div className="page">
             <Header />
             <div className="bump">
-                {header
-                    ? <p>You're up for a <strong>{header}</strong>.</p>
-                    : <p>No button was clicked.</p>}
+                {header && <p>You're up for a <strong>{header}</strong>.</p>}
+                <BumpActivities />
             </div>
         </div>
     );
