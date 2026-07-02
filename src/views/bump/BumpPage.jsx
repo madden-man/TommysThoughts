@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/Header';
-import { getBumpHeader } from './constants';
+import { getBumpHeader, getBumpSymbol } from './constants';
 import { sendBumpNotification } from './server';
 import { BumpActivities } from './BumpActivities';
 
@@ -11,6 +11,7 @@ export const BumpPage = () => {
     const [searchParams] = useSearchParams();
     const button = searchParams.get('button');
     const header = getBumpHeader(button);
+    const initialFilter = getBumpSymbol(button);
 
     useEffect(() => {
         if (header) {
@@ -23,7 +24,7 @@ export const BumpPage = () => {
             <Header />
             <div className="bump">
                 {header && <p>You're up for a <strong>{header}</strong>.</p>}
-                <BumpActivities />
+                <BumpActivities initialFilter={initialFilter} />
             </div>
         </div>
     );

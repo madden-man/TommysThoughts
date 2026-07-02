@@ -84,6 +84,21 @@
     text-align: center;
 }
 
+.bump-activities__filters {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.bump-filter {
+    min-width: 3rem;
+    font-size: 1.25rem;
+}
+
 .bump-activities__list {
     list-style: none;
     margin: 0;

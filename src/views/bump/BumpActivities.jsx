@@ -26,12 +26,13 @@ const IconSelect = ({ value, onChange, labelId }) => (
 
 const emptyDraft = { symbol: '', header: '' };
 
-export const BumpActivities = () => {
+export const BumpActivities = ({ initialFilter = null }) => {
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState(null);
     const [draft, setDraft] = useState(emptyDraft);
     const [newActivity, setNewActivity] = useState(emptyDraft);
+    const [filter, setFilter] = useState(initialFilter);
 
     const fetchActivities = useCallback(async () => {
         setLoading(true);
@@ -96,18 +97,46 @@ export const BumpActivities = () => {
         }
     };
 
+    const visibleActivities = filter
+        ? activities.filter((a) => a.symbol === filter)
+        : activities;
+
     return (
         <div className="bump-activities">
             <h2 className="bump-activities__title">Activities</h2>
+
+            <div className="bump-activities__filters">
+                <Button
+                    className="bump-filter"
+                    variant={filter === null ? 'contained' : 'outlined'}
+                    onClick={() => setFilter(null)}
+                >
+                    All
+                </Button>
+                {ICON_OPTIONS.map((icon) => (
+                    <Button
+                        key={icon}
+                        className="bump-filter"
+                        variant={filter === icon ? 'contained' : 'outlined'}
+                        onClick={() => setFilter(icon)}
+                    >
+                        {icon}
+                    </Button>
+                ))}
+            </div>
 
             {loading ? (
                 <p className="bump-activities__empty">Loading…</p>
             ) : (
                 <ul className="bump-activities__list">
-                    {activities.length === 0 && (
-                        <li className="bump-activities__empty">No activities yet — add one below.</li>
+                    {visibleActivities.length === 0 && (
+                        <li className="bump-activities__empty">
+                            {activities.length === 0
+                                ? 'No activities yet — add one below.'
+                                : 'No activities match this filter.'}
+                        </li>
                     )}
-                    {activities.map((activity) => (
+                    {visibleActivities.map((activity) => (
                         <li key={activity._id} className="bump-activity">
                             {editingId === activity._id ? (
                                 <>

@@ -7,5 +7,8 @@ export const BUMP_BUTTONS = [
 export const getBumpHeader = (key) =>
     BUMP_BUTTONS.find((b) => b.key === key)?.header;
 
+export const getBumpSymbol = (key) =>
+    BUMP_BUTTONS.find((b) => b.key === key)?.symbol;
+
 // The only icons an activity may use — the three bump-button symbols.
 export const ICON_OPTIONS = BUMP_BUTTONS.map(({ symbol }) => symbol);
