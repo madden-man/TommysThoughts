@@ -170,3 +170,64 @@
 .bump-activity__header-input {
     flex: 1;
 }
+
+@media (max-width: 600px) {
+    /* --- /bumper --- */
+    .bumper {
+        gap: 1.25rem;
+        min-height: auto;
+        padding: 1.5rem 0.5rem;
+    }
+
+    .bumper__button {
+        width: 96px;
+        height: 96px;
+        font-size: 2.25rem;
+    }
+
+    .bumper__title {
+        margin: 1rem 0.5rem 0;
+    }
+
+    /* --- /bump --- */
+    .bump {
+        padding: 0.5rem;
+    }
+
+    .bump > p {
+        font-size: 1.25rem;
+        padding: 8px 16px;
+    }
+
+    .bump-activities {
+        padding: 8px 10px 12px;
+    }
+
+    /* Let each activity row wrap instead of crushing its contents. */
+    .bump-activity {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .bump-activity__header,
+    .bump-activity__header--button {
+        flex: 1 1 45%;
+        min-width: 0;
+        word-break: break-word;
+    }
+
+    /* Trim MUI button padding so Edit/Delete fit alongside the title. */
+    .bump-activity .MuiButton-root {
+        min-width: 0;
+        padding: 4px 8px;
+    }
+
+    /* Edit / new rows: give the text field its own full-width line. */
+    .bump-activity__header-input {
+        flex: 1 1 100%;
+    }
+
+    .bump-activity__symbol-input {
+        min-width: 4.5rem;
+    }
+}
