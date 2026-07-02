@@ -138,17 +138,29 @@
 
 .bump-activity__header--button {
     text-align: left;
-    background: none;
-    border: none;
-    padding: 0;
+    background: #eef4ff;
+    border: 2px ridge var(--blue-70);
+    border-radius: 999px;
+    padding: 4px 14px;
     font-family: inherit;
+    font-weight: 600;
     color: var(--blue-70);
     cursor: pointer;
-    text-decoration: underline;
+    transition: transform 0.12s ease, box-shadow 0.12s ease,
+        background-color 0.12s ease;
+    box-shadow: 0 2px 0 var(--blue-70);
 }
 
 .bump-activity__header--button:hover {
-    color: darkblue;
+    background: #dbe8ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 4px 0 var(--blue-70);
+}
+
+.bump-activity__header--button:active {
+    background: #c7dbff;
+    transform: translateY(2px);
+    box-shadow: 0 0 0 var(--blue-70);
 }
 
 .bump-activity__symbol-input {
