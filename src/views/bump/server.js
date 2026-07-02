@@ -1,11 +1,11 @@
-export const sendBumpNotification = async (button) => {
+export const sendBumpNotification = async (header) => {
     try {
         await fetch('.netlify/functions/notify', {
             method: 'POST',
             body: JSON.stringify({
                 source: 'TommysThoughts',
                 event: 'bump',
-                message: `Someone clicked the ${button} button on Bump.`,
+                message: `Someone's up for a ${header}.`,
             }),
         });
     } catch (error) {
