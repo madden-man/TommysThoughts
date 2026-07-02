@@ -11,6 +11,7 @@ import {
     addActivity,
     updateActivity,
     deleteActivity,
+    sendActivityQuestion,
 } from './server';
 
 const IconSelect = ({ value, onChange, labelId }) => (
@@ -158,7 +159,14 @@ export const BumpActivities = ({ initialFilter = null }) => {
                             ) : (
                                 <>
                                     <span className="bump-activity__symbol">{activity.symbol}</span>
-                                    <span className="bump-activity__header">{activity.header}</span>
+                                    <button
+                                        type="button"
+                                        className="bump-activity__header bump-activity__header--button"
+                                        onClick={() => sendActivityQuestion(activity.header)}
+                                        title={`Send "${activity.header}?"`}
+                                    >
+                                        {activity.header}
+                                    </button>
                                     <Button onClick={() => startEdit(activity)}>Edit</Button>
                                     <Button color="error" onClick={() => removeActivity(activity._id)}>Delete</Button>
                                 </>

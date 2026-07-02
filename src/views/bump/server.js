@@ -28,14 +28,14 @@ export const deleteActivity = async (id) => {
     }).then((response) => response.json());
 };
 
-export const sendBumpNotification = async (header) => {
+const postNotification = async (message) => {
     try {
         await fetch('.netlify/functions/notify', {
             method: 'POST',
             body: JSON.stringify({
                 source: 'TommysThoughts',
                 event: 'bump',
-                message: `Someone's up for a ${header}.`,
+                message,
             }),
         });
     } catch (error) {
@@ -43,3 +43,9 @@ export const sendBumpNotification = async (header) => {
         console.error('Failed to send bump notification', error);
     }
 };
+
+export const sendBumpNotification = (header) =>
+    postNotification(`Someone's up for a ${header}.`);
+
+export const sendActivityQuestion = (name) =>
+    postNotification(`${name}?`);
