@@ -1,0 +1,54 @@
+.bumper__title {
+    text-align: center;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 24px;
+    margin-top: 1rem;
+}
+
+.bumper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    min-height: 60vh;
+    flex-wrap: wrap;
+}
+
+.bumper__button {
+    width: 120px;
+    height: 120px;
+    font-size: 3rem;
+    border-radius: 16px;
+    border: 2px solid #333;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.bumper__button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.bumper__button:active {
+    transform: translateY(0);
+}
+
+.bump {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.bump > div,
+.bump > p {
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-size: 1.5rem;
+    text-align: center;
+}

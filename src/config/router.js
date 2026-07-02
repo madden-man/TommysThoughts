@@ -9,6 +9,8 @@ import { DartWallPage } from '../views/darts/DartWallPage';
 import { NeighborhoodPage } from '../views/neighborhoods/NeighborhoodPage';
 import { CreativeCalendar } from '../views/creative-calendar/CreativeCalendar';
 import { WellOfWisdomPage } from '../views/wisdomWell/WellOfWisdomPage';
+import { BumperPage } from '../views/bump/BumperPage';
+import { BumpPage } from '../views/bump/BumpPage';
 
 export const router = createBrowserRouter([
     {
@@ -50,6 +52,14 @@ export const router = createBrowserRouter([
     {
       path: '/well-o-wisdom',
       element: <WellOfWisdomPage />
+    },
+    {
+      path: '/bumper',
+      element: <BumperPage />
+    },
+    {
+      path: '/bump',
+      element: <BumpPage />
     },
     {
       path: '*',
