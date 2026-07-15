@@ -11,6 +11,7 @@ import { CreativeCalendar } from '../views/creative-calendar/CreativeCalendar';
 import { WellOfWisdomPage } from '../views/wisdomWell/WellOfWisdomPage';
 import { BumperPage } from '../views/bump/BumperPage';
 import { BumpPage } from '../views/bump/BumpPage';
+import { QuestionsPage } from '../views/questions/QuestionsPage';
 
 export const router = createBrowserRouter([
     {
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
     {
       path: '/bump',
       element: <BumpPage />
+    },
+    {
+      path: '/questions',
+      element: <QuestionsPage />
     },
     {
       path: '*',

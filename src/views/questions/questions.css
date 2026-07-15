@@ -1,0 +1,104 @@
+.questions-page {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.questions {
+    width: 100%;
+    max-width: 32rem;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 16px 16px;
+}
+
+.questions__title {
+    text-align: center;
+}
+
+.questions__controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.questions__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.questions__empty {
+    text-align: center;
+    color: #666;
+    padding: 0.5rem 0;
+    list-style: none;
+}
+
+.question {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.question--new {
+    border-bottom: none;
+    padding-top: 1rem;
+}
+
+.question__text {
+    flex: 1;
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+
+.question__input {
+    flex: 1;
+}
+
+.question__depth {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--blue-70);
+    border: 1px solid var(--blue-70);
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+.question__depth-input {
+    min-width: 5rem;
+}
+
+@media (max-width: 600px) {
+    .questions-page {
+        padding: 0.5rem;
+    }
+
+    .questions {
+        padding: 8px 10px 12px;
+    }
+
+    /* Let each question row wrap instead of crushing its contents. */
+    .question {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    /* Trim MUI button padding so Edit/Delete fit alongside the text. */
+    .question .MuiButton-root {
+        min-width: 0;
+        padding: 4px 8px;
+    }
+
+    /* Edit / new rows: give the text field its own full-width line. */
+    .question__input {
+        flex: 1 1 100%;
+    }
+}
