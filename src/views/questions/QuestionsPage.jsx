@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -38,9 +38,12 @@ export const QuestionsPage = () => {
     const [newQuestion, setNewQuestion] = useState(emptyDraft);
     // null = original order, 'asc' = shallowest first, 'desc' = deepest first
     const [depthSort, setDepthSort] = useState(null);
+    const addRowRef = useRef(null);
+    const newQuestionInputRef = useRef(null);
 
+    // Silent by default so background re-syncs (e.g. after a failed write)
+    // don't blank the list back to the loading state.
     const fetchQuestions = useCallback(async () => {
-        setLoading(true);
         try {
             const results = await getQuestions();
             setQuestions(Array.isArray(results) ? results : []);
@@ -92,10 +95,22 @@ export const QuestionsPage = () => {
     const createQuestion = async () => {
         if (!newQuestion.question.trim()) return;
         const payload = { question: newQuestion.question.trim(), depth: newQuestion.depth };
+        const tempId = `tmp-${Date.now()}`;
+        // Append immediately so the new question shows up at the bottom of the
+        // list without waiting on the server; swap in the real _id once saved.
+        setQuestions((prev) => [...prev, { ...payload, _id: tempId }]);
         setNewQuestion(emptyDraft);
+        // Keep the keyboard/caret in the input and the add row on screen so
+        // questions can be added back-to-back without the page jumping away.
+        newQuestionInputRef.current?.focus();
+        requestAnimationFrame(() => {
+            addRowRef.current?.scrollIntoView?.({ block: 'nearest' });
+        });
         try {
             const created = await addQuestion(payload);
-            setQuestions((prev) => [...prev, created?._id ? created : { ...payload, _id: `tmp-${Date.now()}` }]);
+            if (created?._id) {
+                setQuestions((prev) => prev.map((q) => (q._id === tempId ? created : q)));
+            }
         } catch (error) {
             console.error('Failed to add question', error);
             fetchQuestions();
@@ -176,7 +191,7 @@ export const QuestionsPage = () => {
                         </ul>
                     )}
 
-                    <div className="question question--new">
+                    <div className="question question--new" ref={addRowRef}>
                         <TextField
                             className="question__input"
                             label="New question"
@@ -184,13 +199,22 @@ export const QuestionsPage = () => {
                             onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                             size="small"
                             multiline
+                            inputRef={newQuestionInputRef}
                         />
                         <DepthSelect
                             labelId="depth-new"
                             value={newQuestion.depth}
                             onChange={(e) => setNewQuestion({ ...newQuestion, depth: e.target.value })}
                         />
-                        <Button variant="contained" onClick={createQuestion}>Add</Button>
+                        {/* preventDefault keeps focus in the text field (and the
+                            mobile keyboard open) when Add is tapped. */}
+                        <Button
+                            variant="contained"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={createQuestion}
+                        >
+                            Add
+                        </Button>
                     </div>
                 </div>
             </div>
