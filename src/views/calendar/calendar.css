@@ -1,0 +1,223 @@
+.calendar-page {
+    display: flex;
+    justify-content: center;
+    /* .page centers its children with align-items, which shrink-wraps this
+       wrapper to its content; force full width so the calendar's size comes
+       from the layout, not from whichever month has the longest event. */
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+}
+
+.calendar {
+    width: 100%;
+    max-width: 56rem;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 16px 16px;
+    box-sizing: border-box;
+}
+
+.calendar__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.calendar__toolbar--secondary {
+    justify-content: center;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.calendar__title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.calendar__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: 4px;
+}
+
+.calendar__weekday {
+    text-align: center;
+    font-weight: 600;
+    color: var(--blue-70);
+    padding: 4px 0;
+}
+
+/* Each week is one grid: the day cells span every row as the background
+   layer, and event bars sit in the lane rows on top — a bar spanning
+   several columns reads as one seamless strip across the days. */
+.calendar__week {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    /* row 1 = day number strip, then one row per visible event lane */
+    grid-template-rows: 1.5rem repeat(3, 1.3rem);
+    column-gap: 4px;
+    row-gap: 2px;
+    /* Fixed height so rows line up identically whether a day has zero or
+       three events. */
+    height: 6.5rem;
+    margin-top: 4px;
+    padding-bottom: 2px;
+}
+
+.calendar__day {
+    grid-row: 1 / -1;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px 4px;
+    overflow: hidden;
+}
+
+.calendar__day--empty {
+    border-color: transparent;
+    background-color: #fafafa;
+}
+
+.calendar__day--today {
+    border: 2px solid var(--blue-70);
+    background-color: #f0f6ff;
+}
+
+.calendar__day-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.calendar__day-number {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.calendar__day--today .calendar__day-number {
+    color: var(--blue-70);
+}
+
+.calendar__add {
+    border: none;
+    background: none;
+    color: var(--blue-70);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    opacity: 0.35;
+    border-radius: 4px;
+}
+
+.calendar__day:hover .calendar__add,
+.calendar__add:focus-visible {
+    opacity: 1;
+}
+
+.calendar__add:hover {
+    background-color: #e3edf9;
+}
+
+.calendar__event {
+    display: block;
+    min-width: 0;
+    margin: 0 3px;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    background-color: var(--blue-70);
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1;
+}
+
+/* Bars clipped by the week boundary keep a square edge on the side where
+   the event continues, so consecutive weeks read as one strip. */
+.calendar__event--cont-left {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+}
+
+.calendar__event--cont-right {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+}
+
+.calendar__more {
+    position: absolute;
+    bottom: 1px;
+    right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #666;
+}
+
+.calendar__dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    /* MUI pulls DialogContent up under the title; keep the first field's
+       floating label from clipping. */
+    padding-top: 8px !important;
+}
+
+.calendar__detail {
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 600px) {
+    .calendar-page {
+        padding: 0.5rem;
+    }
+
+    .calendar {
+        padding: 8px 8px 12px;
+    }
+
+    .calendar__title {
+        font-size: 1.1rem;
+    }
+
+    .calendar__toolbar .MuiButton-root {
+        min-width: 0;
+        padding: 4px 8px;
+    }
+
+    .calendar__weekdays,
+    .calendar__week {
+        column-gap: 2px;
+    }
+
+    .calendar__week {
+        grid-template-rows: 1.1rem repeat(3, 1.05rem);
+        height: 5.5rem;
+        margin-top: 2px;
+    }
+
+    .calendar__day {
+        padding: 1px 2px;
+    }
+
+    .calendar__event {
+        font-size: 0.58rem;
+        padding: 1px 3px;
+        margin: 0 1px;
+    }
+}

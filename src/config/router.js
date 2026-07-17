@@ -12,6 +12,7 @@ import { WellOfWisdomPage } from '../views/wisdomWell/WellOfWisdomPage';
 import { BumperPage } from '../views/bump/BumperPage';
 import { BumpPage } from '../views/bump/BumpPage';
 import { QuestionsPage } from '../views/questions/QuestionsPage';
+import { CalendarPage } from '../views/calendar/CalendarPage';
 
 export const router = createBrowserRouter([
     {
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
     {
       path: '/questions',
       element: <QuestionsPage />
+    },
+    {
+      path: '/calendar',
+      element: <CalendarPage />
     },
     {
       path: '*',
