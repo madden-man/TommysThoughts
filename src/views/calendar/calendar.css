@@ -209,10 +209,17 @@
     color: #3d2168;
 }
 
-/* Movies — Friday nights, from the Movies board. */
+/* A new restaurant to try, Friday nights. */
+.calendar__event--restaurant {
+    background-color: #d6ecf4;
+    color: #0a4356;
+}
+
+/* Movies — nightly, from the Movies board. Crimson keeps it clear of the dinner
+   purple; the two were close enough to read as one track. */
 .calendar__event--movie {
-    background-color: #f2dcf0;
-    color: #5c2157;
+    background-color: #fad9e6;
+    color: #6b0f3c;
 }
 
 /* Holidays are context rather than plan, so they go recessive and leave the
@@ -283,8 +290,9 @@
 .calendar__slate-bar--heart { background-color: #c2440f; }
 .calendar__slate-bar--head { background-color: #0f7a52; }
 .calendar__slate-bar--dinner { background-color: #6b3fa0; }
-.calendar__slate-bar--movie { background-color: #7a3b8f; }
-.calendar__slate-bar--activity { background-color: #8a6d3b; }
+.calendar__slate-bar--movie { background-color: #a3195b; }
+.calendar__slate-bar--restaurant { background-color: #0b6a86; }
+.calendar__slate-bar--activity { background-color: #96631a; }
 
 .calendar__slate-body {
     display: flex;
@@ -343,8 +351,9 @@
 .calendar__track-dot--heart { background-color: #c2440f; }
 .calendar__track-dot--head { background-color: #0f7a52; }
 .calendar__track-dot--dinner { background-color: #6b3fa0; }
-.calendar__track-dot--movie { background-color: #7a3b8f; }
-.calendar__track-dot--activity { background-color: #8a6d3b; }
+.calendar__track-dot--movie { background-color: #a3195b; }
+.calendar__track-dot--restaurant { background-color: #0b6a86; }
+.calendar__track-dot--activity { background-color: #96631a; }
 
 /* Jump-to-month/year: the plan runs three years, so stepping a month at a
    time is not a real way to get around. */
@@ -443,8 +452,9 @@
 .calendar__inflight-fill--heart { background-color: #c2440f; }
 .calendar__inflight-fill--head { background-color: #0f7a52; }
 .calendar__inflight-fill--dinner { background-color: #6b3fa0; }
-.calendar__inflight-fill--movie { background-color: #7a3b8f; }
-.calendar__inflight-fill--activity { background-color: #8a6d3b; }
+.calendar__inflight-fill--movie { background-color: #a3195b; }
+.calendar__inflight-fill--restaurant { background-color: #0b6a86; }
+.calendar__inflight-fill--activity { background-color: #96631a; }
 
 .calendar__inflight-count {
     flex: none;
@@ -463,7 +473,7 @@
 }
 
 .calendar__recipe--unverified {
-    color: #8a6d3b;
+    color: #96631a;
     text-decoration-style: dotted;
 }
 
@@ -555,3 +565,97 @@
         display: none;
     }
 }
+
+/* ---- The "in rotation" strip -------------------------------------------- */
+/* Each row is a button: press one and its track traces a throughline across the
+   month, including tracks the grid is normally silent about. */
+
+.calendar__inflight-row {
+    width: 100%;
+    border: none;
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 3px 6px;
+    border-left: 3px solid transparent;
+    transition: background-color 160ms ease, border-left-color 160ms ease,
+                opacity 160ms ease, transform 160ms ease;
+}
+
+.calendar__inflight-row:hover {
+    background-color: #f4f7fb;
+    transform: translateX(2px);
+}
+
+.calendar__inflight-row--on { background-color: #eef4fc; }
+.calendar__inflight-row--off { opacity: 0.42; }
+
+.calendar__inflight-row--gut.calendar__inflight-row--on { border-left-color: #256abf; background-color: #eaf2fd; }
+.calendar__inflight-row--heart.calendar__inflight-row--on { border-left-color: #c2440f; background-color: #fdefe8; }
+.calendar__inflight-row--head.calendar__inflight-row--on { border-left-color: #0f7a52; background-color: #e9f6f0; }
+.calendar__inflight-row--dinner.calendar__inflight-row--on { border-left-color: #6b3fa0; background-color: #f2ecfa; }
+.calendar__inflight-row--movie.calendar__inflight-row--on { border-left-color: #a3195b; background-color: #fdeaf1; }
+.calendar__inflight-row--activity.calendar__inflight-row--on { border-left-color: #96631a; background-color: #fbf3e6; }
+.calendar__inflight-row--restaurant.calendar__inflight-row--on { border-left-color: #0b6a86; background-color: #e8f4f8; }
+
+/* the progress bar fills rather than snapping */
+.calendar__inflight-fill { transition: width 420ms cubic-bezier(.4, 0, .2, 1); }
+
+.calendar__track-icon {
+    display: inline-block;
+    transition: transform 200ms ease;
+}
+
+.calendar__inflight-row:hover .calendar__track-icon { transform: scale(1.25) rotate(-6deg); }
+
+/* ---- Throughline -------------------------------------------------------- */
+
+.calendar__week--focused .calendar__event { opacity: 0.3; transition: opacity 160ms ease; }
+
+.calendar__thru {
+    align-self: end;
+    height: 15px;
+    margin: 0 3px 1px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: 2;
+    animation: calendar-thru-in 220ms ease both;
+}
+
+@keyframes calendar-thru-in {
+    from { opacity: 0; transform: scaleX(0.92); }
+    to   { opacity: 1; transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .calendar__thru { animation: none; }
+    .calendar__inflight-row,
+    .calendar__inflight-fill,
+    .calendar__track-icon { transition: none; }
+    .calendar__inflight-row:hover { transform: none; }
+}
+
+.calendar__thru--open-left { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: 0; }
+.calendar__thru--open-right { border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: 0; }
+
+.calendar__thru-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: white;
+    padding: 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar__thru--gut { background-color: #256abf; }
+.calendar__thru--heart { background-color: #c2440f; }
+.calendar__thru--head { background-color: #0f7a52; }
+.calendar__thru--dinner { background-color: #6b3fa0; }
+.calendar__thru--movie { background-color: #a3195b; }
+.calendar__thru--activity { background-color: #96631a; }
+.calendar__thru--restaurant { background-color: #0b6a86; }

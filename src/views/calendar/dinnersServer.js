@@ -27,3 +27,20 @@ export const getMovies = async () => {
         body: JSON.stringify({ board: 'Movies' }),
     }).then((response) => response.json());
 };
+
+// --- Restaurants ---
+// The `restaurants` collection in tommy-data — new places to try on a Friday.
+export const getRestaurants = async () => {
+    return fetch('.netlify/functions/get_restaurants', { method: 'POST' })
+        .then((response) => response.json());
+};
+
+// --- Shows ---
+// The Shows board of the darts collection. New darts appear here and get queued
+// at the end of their track without re-running the scheduler.
+export const getShows = async () => {
+    return fetch('.netlify/functions/get_darts', {
+        method: 'POST',
+        body: JSON.stringify({ board: 'Shows' }),
+    }).then((response) => response.json());
+};

@@ -19,6 +19,50 @@ const toIso = (d) =>
 
 export const MIN_STARS = 4;
 
+// Films from the board that suit a given cuisine, so a Japanese dinner can be
+// paired with a Japanese film. Only confident pairings are listed — several
+// cuisines on the menu have no matching film on the board at all, and those
+// nights fall back to food films and then to the general ranked pool rather
+// than forcing a bad match.
+const CUISINE_FILMS = {
+    japanese: ['Princess Mononoke', 'My Neighbor Totoro', 'Grave of the Fireflies',
+        'Castle in the Sky', 'Nausicaä of the Valley of the Wind', 'Akira', 'Your Name',
+        'Suzume', 'The Boy and the Heron', 'Demon Slayer', 'Toshikoshi'],
+    korean: ['Parasite', 'KPop Demon Hunters', 'Past Lives'],
+    chinese: ['Everything, Everywhere, All at Once', 'Crazy Rich Asians', 'Dìdi'],
+    indian: ['Slumdog Millionaire', 'The Big Sick'],
+    french: ['Ratatouille', 'La Haine'],
+    italian: ['The Italian Job', 'The Talented Mr. Ripley'],
+    'italian-american': ['The Italian Job', 'The Talented Mr. Ripley'],
+    irish: ['Song of the Sea'],
+    german: ['Jojo Rabbit'],
+    polish: ["Schindler's List"],
+    jewish: ["Schindler's List"],
+    greek: ['The Odyssey'],
+    mediterranean: ['The Odyssey'],
+    american: ['Forrest Gump', 'Talladega Nights', 'Independence Day', 'Top Gun',
+        'National Treasure', 'Do the Right Thing', 'Moneyball', 'Little Miss Sunshine',
+        'Captain America: The First Avenger'],
+    hawaiian: ["Surf's Up", 'Point Break'],
+    cajun: ['Sinners'],
+    louisiana: ['Sinners'],
+};
+
+// Films about food itself — a decent pairing for any dinner whose cuisine has no
+// film on the board.
+const FOOD_FILMS = ['Chef', 'The Menu', 'Ratatouille'];
+
+const cuisineKeys = (cuisine = '') => {
+    const c = cuisine.toLowerCase();
+    const hit = Object.keys(CUISINE_FILMS).filter((k) => c.includes(k));
+    // "Italian-American" should prefer the italian-american list over plain italian
+    return hit.sort((a, b) => b.length - a.length);
+};
+
+const matches = (film, needles) =>
+    needles.some((n) => film.name.toLowerCase().includes(n.toLowerCase()));
+
+
 /**
  * Rank the board so the best candidates come up first — there are more films than
  * nights in the plan, so ordering decides what actually gets watched.
@@ -39,18 +83,52 @@ export const rankMovies = (movies) => [...movies]
             || a.name.localeCompare(b.name);
     });
 
-export const buildMovieRuns = (movies, planStart, planEnd) => {
+export const buildMovieRuns = (movies, dinnerRuns, planStart, planEnd) => {
     const pool = rankMovies(Array.isArray(movies) ? movies : []);
     if (!pool.length) return [];
+
+    // what cuisine is on the menu each night
+    const cuisineOn = new Map();
+    (dinnerRuns ?? []).forEach((r) => {
+        const from = new Date(`${r.show.start}T00:00:00`);
+        const to = new Date(`${r.show.end}T00:00:00`);
+        for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+            cuisineOn.set(toIso(d), r.show.cuisine);
+        }
+    });
 
     const runs = [];
     const start = new Date(`${planStart}T00:00:00`);
     const end = new Date(`${planEnd}T00:00:00`);
     let i = 0;
+    const usedBy = new Map();   // cuisine key -> how far through its film list
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const film = pool[i++ % pool.length];   // wraps when the pool runs dry
         const iso = toIso(d);
+        const cuisine = cuisineOn.get(iso);
+
+        // pair with the dinner where the board actually has a suitable film
+        let film = null;
+        let pairedTo = null;
+        for (const key of cuisineKeys(cuisine)) {
+            const shortlist = pool.filter((m) => matches(m, CUISINE_FILMS[key]));
+            if (!shortlist.length) continue;
+            const n = usedBy.get(key) ?? 0;
+            film = shortlist[n % shortlist.length];
+            usedBy.set(key, n + 1);
+            pairedTo = cuisine;
+            break;
+        }
+        if (!film && cuisine) {
+            const foodies = pool.filter((m) => matches(m, FOOD_FILMS));
+            if (foodies.length) {
+                const n = usedBy.get('__food') ?? 0;
+                film = foodies[n % foodies.length];
+                usedBy.set('__food', n + 1);
+                pairedTo = `${cuisine} — no film for that cuisine, so a food film`;
+            }
+        }
+        if (!film) film = pool[i++ % pool.length];   // wraps when the pool runs dry
         runs.push({
             id: `movie-${iso}`,
             code: 'm',
@@ -68,6 +146,8 @@ export const buildMovieRuns = (movies, planStart, planEnd) => {
                 curated: film.enneagram !== undefined,
                 poolSize: pool.length,
                 minStars: MIN_STARS,
+                pairedTo,
+                dinnerCuisine: cuisine,
                 letterboxdUri: film.letterboxdUri,
             },
         });

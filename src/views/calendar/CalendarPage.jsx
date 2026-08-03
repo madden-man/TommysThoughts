@@ -11,7 +11,9 @@ import { PLAN_START, PLAN_END, TRACKS, TRACK_RUNS } from './watchPlan';
 import { buildDinnerRuns } from './dinnerRotation';
 import { buildActivityRuns } from './activityRotation';
 import { buildMovieRuns } from './movieRotation';
-import { getDinners, getMovies } from './dinnersServer';
+import { buildRestaurantRuns } from './restaurantRotation';
+import { buildNewShowRuns } from './newShowRotation';
+import { getDinners, getMovies, getRestaurants, getShows } from './dinnersServer';
 import { getActivities } from '../bump/server';
 
 import './calendar.css';
@@ -150,6 +152,7 @@ export const CalendarPage = () => {
     // read-only, so it never has to be copied on every add or delete.
     const [events, setEvents] = useState(EVENTS);
     const [selectedDay, setSelectedDay] = useState(null);
+    const [focusedTrack, setFocusedTrack] = useState(null);
     const [draft, setDraft] = useState(null);
 
     // Dinners and activities live in Mongo rather than in the bundle, so both
@@ -158,6 +161,8 @@ export const CalendarPage = () => {
     const [dinners, setDinners] = useState([]);
     const [activities, setActivities] = useState([]);
     const [movies, setMovies] = useState([]);
+    const [restaurants, setRestaurants] = useState([]);
+    const [shows, setShows] = useState([]);
     useEffect(() => {
         let live = true;
         getDinners()
@@ -169,15 +174,30 @@ export const CalendarPage = () => {
         getMovies()
             .then((rows) => { if (live && Array.isArray(rows)) setMovies(rows); })
             .catch(() => { /* calendar still works without movies */ });
+        getRestaurants()
+            .then((rows) => { if (live && Array.isArray(rows)) setRestaurants(rows); })
+            .catch(() => { /* calendar still works without restaurants */ });
+        getShows()
+            .then((rows) => { if (live && Array.isArray(rows)) setShows(rows); })
+            .catch(() => { /* the generated plan stands on its own */ });
         return () => { live = false; };
     }, []);
 
+    // darts added since the plan was generated, queued after it ends
+    const newShowRuns = useMemo(() => buildNewShowRuns(shows, PLAN_END), [shows]);
+
+    // built first: the movie track pairs itself to whatever dinner is on
+    const dinnerRuns = useMemo(
+        () => buildDinnerRuns(dinners, PLAN_START, PLAN_END), [dinners]);
+
     const planRuns = useMemo(() => [
         ...SHOW_RUNS,
-        ...buildDinnerRuns(dinners, PLAN_START, PLAN_END),
+        ...dinnerRuns,
         ...buildActivityRuns(activities, PLAN_START, PLAN_END),
-        ...buildMovieRuns(movies, PLAN_START, PLAN_END),
-    ], [dinners, activities, movies]);
+        ...buildMovieRuns(movies, dinnerRuns, PLAN_START, PLAN_END),
+        ...buildRestaurantRuns(restaurants, PLAN_START, PLAN_END),
+        ...newShowRuns,
+    ], [dinnerRuns, activities, movies, restaurants, newShowRuns]);
 
     const allEvents = useMemo(
         () => [...changeEventsFor(planRuns), ...events], [planRuns, events]);
@@ -266,10 +286,11 @@ export const CalendarPage = () => {
     const yearOptions = useMemo(() => {
         const currentYear = Number(todayIso.slice(0, 4));
         const years = allEvents.map((e) => Number(e.start.slice(0, 4)));
+        newShowRuns.forEach((r) => years.push(Number(r.show.end.slice(0, 4))));
         const min = Math.min(currentYear, ...years);
         const max = Math.max(currentYear, ...years);
         return Array.from({ length: max - min + 1 }, (_, i) => min + i);
-    }, [allEvents, todayIso]);
+    }, [allEvents, todayIso, newShowRuns]);
 
     return (
         <div className="page">
@@ -324,8 +345,19 @@ export const CalendarPage = () => {
                             </p>
                             {inFlight.map(({ code, run }) => {
                                 const { day, total } = daysInto(run, anchorIso);
+                                const on = focusedTrack === code;
                                 return (
-                                    <div key={code} className="calendar__inflight-row">
+                                    <button
+                                        key={code}
+                                        type="button"
+                                        aria-pressed={on}
+                                        title={on ? 'Hide this track on the calendar'
+                                                  : `Trace ${TRACKS[code].label} through the month`}
+                                        onClick={() => setFocusedTrack(on ? null : code)}
+                                        className={`calendar__inflight-row calendar__inflight-row--${TRACKS[code].key}`
+                                            + (on ? ' calendar__inflight-row--on' : '')
+                                            + (focusedTrack && !on ? ' calendar__inflight-row--off' : '')}
+                                    >
                                         <span className={`calendar__track-dot calendar__track-dot--${TRACKS[code].key}`} />
                                         <span className="calendar__inflight-track">
                                             <span className="calendar__track-icon">{TRACKS[code].icon}</span>
@@ -339,13 +371,15 @@ export const CalendarPage = () => {
                                             />
                                         </span>
                                         <span className="calendar__inflight-count">
-                                            {run.code === 'm'
+                                            {run.code === 'r'
+                                                ? <>{run.show.poolSize}&nbsp;places</>
+                                                : run.code === 'm'
                                                 ? <>{run.show.poolSize}&nbsp;films</>
                                                 : run.show.symbol && run.code !== 'n'
                                                     ? <>{run.show.poolSize}&nbsp;options</>
                                                     : <>{run.show.nights}&nbsp;nights</>}
                                         </span>
-                                    </div>
+                                    </button>
                                 );
                             })}
                         </div>
@@ -358,8 +392,31 @@ export const CalendarPage = () => {
                     </div>
                     {weeks.map((week, w) => {
                         const { segments, overflow } = layoutWeek(week, visibleEvents);
+                        const isos = week.map((c) => c?.iso ?? null);
+                        // The focused track draws a continuous throughline across
+                        // the days it covers — including tracks the grid normally
+                        // stays silent about.
+                        const throughlines = focusedTrack
+                            ? planRuns
+                                .filter((r) => r.code === focusedTrack)
+                                .map((r) => {
+                                    const cols = isos
+                                        .map((iso, c) => (iso && r.show.start <= iso && iso <= r.show.end ? c : null))
+                                        .filter((c) => c !== null);
+                                    if (!cols.length) return null;
+                                    return {
+                                        id: r.id,
+                                        title: r.show.title,
+                                        startCol: cols[0],
+                                        endCol: cols[cols.length - 1],
+                                        opensLeft: r.show.start < isos[cols[0]],
+                                        opensRight: r.show.end > isos[cols[cols.length - 1]],
+                                    };
+                                })
+                                .filter(Boolean)
+                            : [];
                         return (
-                            <div key={w} className="calendar__week">
+                            <div key={w} className={'calendar__week' + (focusedTrack ? ' calendar__week--focused' : '')}>
                                 {week.map((cell, c) => {
                                     if (!cell) {
                                         return (
@@ -400,6 +457,20 @@ export const CalendarPage = () => {
                                         </div>
                                     );
                                 })}
+                                {throughlines.map((t) => (
+                                    <span
+                                        key={`thru-${t.id}`}
+                                        className={
+                                            `calendar__thru calendar__thru--${TRACKS[focusedTrack].key}`
+                                            + (t.opensLeft ? ' calendar__thru--open-left' : '')
+                                            + (t.opensRight ? ' calendar__thru--open-right' : '')
+                                        }
+                                        style={{ gridColumn: `${t.startCol + 1} / ${t.endCol + 2}`, gridRow: 2 }}
+                                        title={t.title}
+                                    >
+                                        <span className="calendar__thru-label">{t.title}</span>
+                                    </span>
+                                ))}
                                 {segments.map(({ event, startCol, endCol, lane, continuesLeft, continuesRight }) => {
                                     const { name, part } = splitTitle(event);
                                     return (
@@ -551,7 +622,19 @@ export const CalendarPage = () => {
                                                     </span>
                                                 )}
                                             </span>
-                                            {run.code === 'm' ? (
+                                            {run.code === 'r' ? (
+                                                <>
+                                                    <span className="calendar__slate-meta">
+                                                        {run.show.cuisine}
+                                                        {run.show.neighborhood && ` · ${run.show.neighborhood}`}
+                                                        {run.show.address && ` · ${run.show.address}`}
+                                                        {` · 1 of ${run.show.poolSize} to try`}
+                                                    </span>
+                                                    {run.show.note && (
+                                                        <span className="calendar__slate-meta">{run.show.note}</span>
+                                                    )}
+                                                </>
+                                            ) : run.code === 'm' ? (
                                                 <>
                                                     <span className="calendar__slate-meta">
                                                         {run.show.curated ? 'a curated pick' : 'from your Letterboxd export'}
@@ -562,6 +645,11 @@ export const CalendarPage = () => {
                                                         {run.show.watched ? ' · seen before' : ' · not seen yet'}
                                                         {` · 1 of ${run.show.poolSize} on this track`}
                                                     </span>
+                                                    {run.show.pairedTo && (
+                                                        <span className="calendar__slate-meta">
+                                                            paired with tonight's {run.show.pairedTo} dinner
+                                                        </span>
+                                                    )}
                                                     {run.show.lists?.length > 0 && (
                                                         <span className="calendar__slate-meta">
                                                             on your list{run.show.lists.length > 1 ? 's' : ''}:{' '}
@@ -632,11 +720,20 @@ export const CalendarPage = () => {
                                                     )}
                                                 </>
                                             ) : (
-                                                <span className="calendar__slate-meta">
-                                                    day {day} of {total} · about {run.show.nights} nights
-                                                    of viewing · {run.show.rating}★ · heartlighted{' '}
-                                                    {run.show.heartlighted} · enneagram {run.show.enneagram}
-                                                </span>
+                                                <>
+                                                    <span className="calendar__slate-meta">
+                                                        day {day} of {total} · about {run.show.nights} nights
+                                                        of viewing · {run.show.rating}★ · heartlighted{' '}
+                                                        {run.show.heartlighted} · enneagram {run.show.enneagram}
+                                                    </span>
+                                                    {run.show.addedLater && (
+                                                        <span className="calendar__slate-meta">
+                                                            added to the board after the plan was built, so it
+                                                            is queued at the end of this track — length is a
+                                                            placeholder, not a real runtime
+                                                        </span>
+                                                    )}
+                                                </>
                                             )}
                                             {(run.show.series || run.show.cut) && (
                                                 <span className="calendar__slate-meta">
