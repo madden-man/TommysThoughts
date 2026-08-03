@@ -58,16 +58,17 @@
 .calendar__week {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    /* row 1 = day number strip, then one row per visible event lane */
-    grid-template-rows: 1.5rem repeat(3, 1.3rem);
+    /* row 1 = day number strip, then one row per event lane. The grid only draws
+       switch-overs and holidays, so a day rarely holds more than two. */
+    grid-template-rows: 1.35rem repeat(3, 1.2rem);
     column-gap: 4px;
-    row-gap: 2px;
-    /* Fixed height so rows line up identically whether a day has zero or
-       three events. */
-    height: 6.5rem;
+    row-gap: 1px;
+    /* Fixed height so rows line up identically whatever a day holds. */
+    height: 5.9rem;
     margin-top: 4px;
     padding-bottom: 2px;
 }
+
 
 .calendar__day {
     grid-row: 1 / -1;
@@ -126,7 +127,9 @@
 }
 
 .calendar__event {
-    display: block;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
     min-width: 0;
     margin: 0 3px;
     border: none;
@@ -141,8 +144,31 @@
     padding: 2px 6px;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     z-index: 1;
+}
+
+/* Only the show name is allowed to truncate. */
+.calendar__event-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Marks the night a show was deliberately placed on a holiday. */
+.calendar__event-anchor {
+    flex: none;
+    font-size: 0.8em;
+    line-height: 1;
+    opacity: 0.95;
+}
+
+/* The season marker is pinned, so you can always tell S1 from S5. */
+.calendar__event-part {
+    flex: none;
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 0.92em;
+    opacity: 0.9;
 }
 
 /* Bars clipped by the week boundary keep a square edge on the side where
@@ -157,6 +183,292 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     margin-right: 0;
+}
+
+/* One colour per watch-plan track, used on the chip marking the day that track
+   switches shows. Soft tints with dark ink rather than saturated fills, so a
+   month of switch-overs stays calm. Every ink/fill pair clears 7:1. */
+.calendar__event--gut {
+    background-color: #d3e5fa;
+    color: #12406f;
+}
+
+.calendar__event--heart {
+    background-color: #fbdccc;
+    color: #7a2c08;
+}
+
+.calendar__event--head {
+    background-color: #cfe9dd;
+    color: #0b5238;
+}
+
+/* Dinners — the fourth track, driven by the `dinners` collection. */
+.calendar__event--dinner {
+    background-color: #e6dbf5;
+    color: #3d2168;
+}
+
+/* Movies — Friday nights, from the Movies board. */
+.calendar__event--movie {
+    background-color: #f2dcf0;
+    color: #5c2157;
+}
+
+/* Holidays are context rather than plan, so they go recessive and leave the
+   filled-colour channel to mean "a track changed here". A filled blue chip
+   would sit ~8 ΔE from the Gut blue — too close to tell apart. */
+.calendar__event--holiday {
+    background-color: white;
+    border: 1px solid #c3c2b7;
+    color: #52514e;
+    padding: 1px 5px;
+}
+
+/* A day with no chips is not an empty day — every track is still mid-show — so
+   the whole cell is a hit target that opens the slate. It sits under the day
+   number and the chips, which keep their own clicks. */
+.calendar__day-open {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.calendar__day-open:hover {
+    background-color: #f4f8fd;
+}
+
+.calendar__day-open:focus-visible {
+    outline: 2px solid var(--blue-50);
+    outline-offset: -2px;
+}
+
+.calendar__track-icon {
+    margin-right: 5px;
+}
+
+/* The day slate: every track at once, which is where "what's on" lives now that
+   the grid only marks switch-overs. */
+.calendar__slate-heading {
+    margin: 0.25rem 0 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--blue-70);
+}
+
+.calendar__slate-row {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.calendar__slate-row:last-of-type {
+    border-bottom: none;
+}
+
+.calendar__slate-bar {
+    flex: none;
+    width: 4px;
+    border-radius: 2px;
+}
+
+.calendar__slate-bar--gut { background-color: #256abf; }
+.calendar__slate-bar--heart { background-color: #c2440f; }
+.calendar__slate-bar--head { background-color: #0f7a52; }
+.calendar__slate-bar--dinner { background-color: #6b3fa0; }
+.calendar__slate-bar--movie { background-color: #7a3b8f; }
+.calendar__slate-bar--activity { background-color: #8a6d3b; }
+
+.calendar__slate-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.calendar__slate-track {
+    font-size: 0.75rem;
+    color: #52514e;
+}
+
+.calendar__slate-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.calendar__slate-new {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background-color: #e3edf9;
+    color: var(--blue-70);
+    font-size: 0.68rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.calendar__slate-new--holiday {
+    background-color: #fbe6d8;
+    color: #7a2c08;
+}
+
+.calendar__slate-meta,
+.calendar__slate-range {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.calendar__slate-range {
+    color: #8a8a8a;
+}
+
+.calendar__track-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    margin-right: 6px;
+    flex: none;
+}
+
+.calendar__track-dot--gut { background-color: #256abf; }
+.calendar__track-dot--heart { background-color: #c2440f; }
+.calendar__track-dot--head { background-color: #0f7a52; }
+.calendar__track-dot--dinner { background-color: #6b3fa0; }
+.calendar__track-dot--movie { background-color: #7a3b8f; }
+.calendar__track-dot--activity { background-color: #8a6d3b; }
+
+/* Jump-to-month/year: the plan runs three years, so stepping a month at a
+   time is not a real way to get around. */
+.calendar__jump select {
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--blue-70);
+    background-color: white;
+    border: 1px solid var(--blue-30);
+    border-radius: 4px;
+    padding: 3px 6px;
+    cursor: pointer;
+}
+
+.calendar__jump select:focus-visible {
+    outline: 2px solid var(--blue-50);
+}
+
+.calendar__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* The three shows you are partway through — the one thing a month grid cannot
+   show, since each track's nights are scattered across the weeks. */
+.calendar__inflight {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.calendar__inflight-title {
+    margin: 0 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--blue-70);
+}
+
+/* Most days carry no chip, so say why rather than letting the grid read empty. */
+.calendar__inflight-hint {
+    font-weight: 400;
+    color: #777;
+    margin-left: 8px;
+}
+
+.calendar__inflight-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    padding: 2px 0;
+}
+
+.calendar__inflight-track {
+    color: #52514e;
+    flex: none;
+    width: 8.5rem;
+}
+
+.calendar__inflight-show {
+    font-weight: 600;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* A track between shows: named, but clearly not started yet. */
+.calendar__inflight-show--pending {
+    font-weight: 400;
+    color: #666;
+    font-style: italic;
+}
+
+.calendar__inflight-progress {
+    flex: none;
+    width: 5rem;
+    height: 7px;
+    border-radius: 4px;
+    background-color: #e1e0d9;
+    overflow: hidden;
+}
+
+.calendar__inflight-fill {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.calendar__inflight-fill--gut { background-color: #256abf; }
+.calendar__inflight-fill--heart { background-color: #c2440f; }
+.calendar__inflight-fill--head { background-color: #0f7a52; }
+.calendar__inflight-fill--dinner { background-color: #6b3fa0; }
+.calendar__inflight-fill--movie { background-color: #7a3b8f; }
+.calendar__inflight-fill--activity { background-color: #8a6d3b; }
+
+.calendar__inflight-count {
+    flex: none;
+    color: #666;
+    font-variant-numeric: tabular-nums;
+    width: 5rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Recipe links inside the day slate; broken ones stay visible but marked. */
+.calendar__recipe {
+    color: var(--blue-70);
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.calendar__recipe--unverified {
+    color: #8a6d3b;
+    text-decoration-style: dotted;
+}
+
+.calendar__detail-muted {
+    color: #666;
 }
 
 .calendar__more {
@@ -206,9 +518,10 @@
     }
 
     .calendar__week {
-        grid-template-rows: 1.1rem repeat(3, 1.05rem);
-        height: 5.5rem;
+        grid-template-rows: 1.05rem repeat(3, 0.95rem);
+        height: 4.5rem;
         margin-top: 2px;
+        row-gap: 1px;
     }
 
     .calendar__day {
@@ -219,5 +532,26 @@
         font-size: 0.58rem;
         padding: 1px 3px;
         margin: 0 1px;
+    }
+
+    .calendar__event--holiday {
+        padding: 0 2px;
+    }
+
+    .calendar__toolbar--secondary {
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .calendar__inflight-row {
+        font-size: 0.72rem;
+        gap: 6px;
+    }
+
+    /* Track name and progress bar are the first things to go when space is
+       tight; the show title is what matters. */
+    .calendar__inflight-track,
+    .calendar__inflight-progress {
+        display: none;
     }
 }

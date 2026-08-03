@@ -1,0 +1,2122 @@
+[
+  {
+    "week": 1,
+    "season": "winter",
+    "occasion": "New Year's Week",
+    "cuisine": "Japanese",
+    "dinner": "Chicken Katsu with Rice & Cabbage",
+    "blurb": "Nothing starts the year better than something crisp, comforting, and satisfying.",
+    "sides": [
+      "Miso Soup",
+      "Pickled Cucumbers"
+    ],
+    "dessert": "Mochi Ice Cream",
+    "produce": [
+      "Cabbage",
+      "Daikon",
+      "Carrots",
+      "Citrus"
+    ],
+    "recipes": [
+      {
+        "label": "Chicken Katsu (Just One Cookbook)",
+        "url": "https://www.justonecookbook.com/chicken-katsu/",
+        "verified": true
+      },
+      {
+        "label": "Miso Soup",
+        "url": "https://www.justonecookbook.com/homemade-miso-soup/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Katsu sandwiches for lunch.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Oyakodon",
+        "cuisine": "Japanese",
+        "servesNights": 1,
+        "note": "Chicken and egg over rice; uses the same onion and dashi."
+      },
+      {
+        "dinner": "Yaki Udon with Cabbage",
+        "cuisine": "Japanese",
+        "servesNights": 2,
+        "note": "Clears the rest of the week's cabbage."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 2,
+    "season": "winter",
+    "occasion": "Cold January",
+    "cuisine": "Korean",
+    "dinner": "Kimchi Jjigae",
+    "blurb": "One of Korea's quintessential winter stews—deeply flavorful, inexpensive, and ready in under an hour.",
+    "sides": [
+      "Steamed rice",
+      "Korean spinach (or sautéed spinach)"
+    ],
+    "dessert": "Fresh pears",
+    "produce": [
+      "Napa cabbage",
+      "Mushrooms",
+      "Green onions"
+    ],
+    "recipes": [
+      {
+        "label": "Kimchi Jjigae (Maangchi)",
+        "url": "https://www.maangchi.com/recipe/kimchi-jjigae",
+        "verified": true
+      }
+    ],
+    "leftovers": "Excellent for lunch the next day.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Bibimbap",
+        "cuisine": "Korean",
+        "servesNights": 1,
+        "note": "Rice bowl built from whatever vegetables are left."
+      },
+      {
+        "dinner": "Japchae",
+        "cuisine": "Korean",
+        "servesNights": 2,
+        "note": "Sweet potato noodles with mushrooms and spinach."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 3,
+    "season": "winter",
+    "occasion": "Comfort Food",
+    "cuisine": "Indian",
+    "dinner": "Butter Chicken",
+    "blurb": "Creamy tomato sauce with warm spices served over basmati rice.",
+    "sides": [
+      "Garlic naan",
+      "Cucumber raita"
+    ],
+    "dessert": "Mango lassi",
+    "produce": [
+      "Cauliflower",
+      "Spinach"
+    ],
+    "recipes": [
+      {
+        "label": "Butter Chicken (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/butter-chicken/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Butter chicken makes fantastic wraps.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Chana Masala",
+        "cuisine": "Indian",
+        "servesNights": 2,
+        "note": "Pantry chickpea curry; same spice base as the butter chicken."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 4,
+    "season": "winter",
+    "occasion": "Lunar New Year",
+    "cuisine": "Chinese",
+    "dinner": "Pork & Cabbage Dumplings",
+    "blurb": "Making dumplings together is a celebration in itself.",
+    "sides": [
+      "Hot & Sour Soup",
+      "Garlic Bok Choy"
+    ],
+    "dessert": "Mandarin oranges",
+    "produce": [
+      "Bok choy",
+      "Napa cabbage",
+      "Mushrooms"
+    ],
+    "recipes": [
+      {
+        "label": "Dumplings (The Woks of Life)",
+        "url": "https://thewoksoflife.com/chinese-dumplings/",
+        "verified": false
+      },
+      {
+        "label": "Hot & Sour Soup",
+        "url": "https://thewoksoflife.com/hot-sour-soup/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Freeze uncooked dumplings for another week.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Egg Drop Soup with Fried Rice",
+        "cuisine": "Chinese",
+        "servesNights": 1,
+        "note": "Uses leftover rice and stray vegetables."
+      },
+      {
+        "dinner": "Beef & Broccoli",
+        "cuisine": "Chinese",
+        "servesNights": 2,
+        "note": "Fast stir fry on the same soy-ginger base."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 5,
+    "season": "winter",
+    "occasion": "Valentine's Week",
+    "cuisine": "French",
+    "dinner": "Steak Frites",
+    "blurb": "Elegant without being difficult.",
+    "sides": [
+      "Green salad with Dijon vinaigrette"
+    ],
+    "dessert": "Chocolate mousse",
+    "produce": [
+      "Shallots",
+      "Potatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Steak Frites (Serious Eats)",
+        "url": "https://www.seriouseats.com/steak-frites-recipe",
+        "verified": true
+      }
+    ],
+    "leftovers": "Steak sandwiches.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Croque Monsieur",
+        "cuisine": "French",
+        "servesNights": 1,
+        "note": "Ham and gruyère; a light night after the steak."
+      },
+      {
+        "dinner": "Coq au Vin",
+        "cuisine": "French",
+        "servesNights": 2,
+        "note": "Braise that reuses the shallots and stock."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 6,
+    "season": "winter",
+    "occasion": "Midwinter",
+    "cuisine": "Moroccan",
+    "dinner": "Chicken & Chickpea Tagine",
+    "blurb": "Sweet spices, olives, lemon, and tender chicken.",
+    "sides": [
+      "Couscous"
+    ],
+    "dessert": "Orange slices with cinnamon",
+    "produce": [
+      "Carrots",
+      "Sweet potatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Chicken Tagine (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/chicken-tagine/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Serve over rice the next day.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Harira",
+        "cuisine": "Moroccan",
+        "servesNights": 2,
+        "note": "Chickpea and lentil soup sharing the tagine's spices."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 7,
+    "season": "winter",
+    "occasion": "Late Winter",
+    "cuisine": "Persian",
+    "dinner": "Joojeh Kabab with Herb Rice",
+    "blurb": "Bright saffron-marinated chicken with fragrant herbs.",
+    "sides": [
+      "Shirazi salad"
+    ],
+    "dessert": "Pistachios and dates",
+    "produce": [
+      "Herbs",
+      "Lemons"
+    ],
+    "recipes": [
+      {
+        "label": "Joojeh Kabab (Persian Mama)",
+        "url": "https://persianmama.com/jujeh-kabab/",
+        "verified": false
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Ghormeh Sabzi",
+        "cuisine": "Persian",
+        "servesNights": 2,
+        "note": "Herb and kidney bean stew; uses up the herb bunches."
+      },
+      {
+        "dinner": "Adas Polo",
+        "cuisine": "Persian",
+        "servesNights": 2,
+        "note": "Lentil rice with raisins — mostly pantry."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 8,
+    "season": "winter",
+    "occasion": "Super Bowl Week",
+    "cuisine": "American",
+    "dinner": "Classic Beef Chili",
+    "blurb": "Perfect for sharing.",
+    "sides": [
+      "Cornbread"
+    ],
+    "dessert": "Brownies",
+    "produce": [
+      "Onions",
+      "Bell peppers"
+    ],
+    "recipes": [
+      {
+        "label": "Classic Beef Chili (Once Upon a Chef)",
+        "url": "https://www.onceuponachef.com/recipes/classic-beef-chili.html",
+        "verified": true
+      }
+    ],
+    "leftovers": "Loaded baked potatoes.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Sheet-Pan Sausage & Peppers",
+        "cuisine": "American",
+        "servesNights": 2,
+        "note": "Same peppers and onions, almost no work."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 9,
+    "season": "winter",
+    "occasion": "St. Patrick's Day",
+    "cuisine": "Irish",
+    "dinner": "Guinness Beef Stew",
+    "blurb": "Rich, slow-cooked comfort food.",
+    "sides": [
+      "Irish soda bread"
+    ],
+    "dessert": "Apple crumble",
+    "produce": [],
+    "recipes": [
+      {
+        "label": "Guinness Beef Stew (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/irish-beef-and-guinness-stew/",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Bangers & Colcannon",
+        "cuisine": "Irish",
+        "servesNights": 2,
+        "note": "Sausages with cabbage-and-potato mash."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 10,
+    "season": "winter",
+    "occasion": "First Hint of Spring",
+    "cuisine": "Greek",
+    "dinner": "Lemon Chicken & Potatoes",
+    "blurb": "Bright citrus begins replacing heavy winter flavors.",
+    "sides": [
+      "Greek salad"
+    ],
+    "dessert": "Greek yogurt with honey",
+    "produce": [],
+    "recipes": [
+      {
+        "label": "Greek Lemon Chicken (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/greek-lemon-chicken/",
+        "verified": false
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Pastitsio",
+        "cuisine": "Greek",
+        "servesNights": 2,
+        "note": "Baked pasta that keeps well for a second night."
+      },
+      {
+        "dinner": "Horiatiki with Grilled Halloumi",
+        "cuisine": "Greek",
+        "servesNights": 1,
+        "note": "No-cook salad night."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 11,
+    "season": "winter",
+    "occasion": "Fresh Herbs",
+    "cuisine": "Vietnamese",
+    "dinner": "Bún Chả",
+    "blurb": "Fresh herbs, grilled pork, rice noodles.",
+    "sides": [
+      "Spring rolls"
+    ],
+    "dessert": "Fresh pineapple",
+    "produce": [],
+    "recipes": [
+      {
+        "label": "Bún Chả (Hungry Huy)",
+        "url": "https://www.hungryhuy.com/bun-cha/",
+        "verified": false
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Chicken Pho",
+        "cuisine": "Vietnamese",
+        "servesNights": 2,
+        "note": "Big pot of broth; better the second day."
+      },
+      {
+        "dinner": "Bánh Mì Night",
+        "cuisine": "Vietnamese",
+        "servesNights": 2,
+        "note": "Uses the pickled carrot and herbs already on hand."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 12,
+    "season": "winter",
+    "occasion": "Early Spring",
+    "cuisine": "Italian",
+    "dinner": "Lasagna with Spring Salad",
+    "blurb": "A classic that bridges winter comfort and spring freshness.",
+    "sides": [
+      "Arugula salad"
+    ],
+    "dessert": "Tiramisu",
+    "produce": [],
+    "recipes": [
+      {
+        "label": "Lasagna Bolognese (Serious Eats)",
+        "url": "https://www.seriouseats.com/lasagna-bolognese-al-forno-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Minestrone",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "Cleans out the vegetable drawer."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 13,
+    "season": "winter",
+    "occasion": "Spring Equinox",
+    "cuisine": "Mediterranean",
+    "dinner": "Falafel Bowls",
+    "blurb": "Crispy falafel with hummus, cucumbers, tomatoes, pickled onions, and pita.",
+    "sides": [
+      "Tabbouleh"
+    ],
+    "dessert": "Baklava",
+    "produce": [
+      "Cucumbers",
+      "Herbs",
+      "Lettuce",
+      "Radishes"
+    ],
+    "recipes": [
+      {
+        "label": "Falafel (Love & Lemons)",
+        "url": "https://www.loveandlemons.com/falafel/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Shakshuka",
+        "cuisine": "Mediterranean",
+        "servesNights": 1,
+        "note": "Eggs poached in spiced tomato; fifteen minutes."
+      },
+      {
+        "dinner": "Lemon Lentil Soup",
+        "cuisine": "Mediterranean",
+        "servesNights": 2,
+        "note": "Pantry soup brightened with the same lemons."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 14,
+    "season": "spring",
+    "occasion": "Easter Week",
+    "cuisine": "Italian",
+    "dinner": "Spring Vegetable Risotto",
+    "blurb": "Creamy Arborio rice with asparagus, peas, lemon, and parmesan.",
+    "sides": [
+      "Arugula salad with lemon vinaigrette",
+      "Roasted carrots"
+    ],
+    "dessert": "Italian lemon cake",
+    "produce": [
+      "Asparagus",
+      "Peas",
+      "Spring onions",
+      "Fresh herbs"
+    ],
+    "recipes": [
+      {
+        "label": "Spring Risotto (Love & Lemons)",
+        "url": "https://www.loveandlemons.com/risotto-recipe/",
+        "verified": false
+      },
+      {
+        "label": "Lemon Cake (Love & Lemons)",
+        "url": "https://www.loveandlemons.com/lemon-cake/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Arancini (crispy risotto balls).",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Cacio e Pepe",
+        "cuisine": "Italian",
+        "servesNights": 1,
+        "note": "Three ingredients, ten minutes."
+      },
+      {
+        "dinner": "Chicken Piccata",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "Lemon and capers, echoing the risotto."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 15,
+    "season": "spring",
+    "occasion": "Earth Day Week",
+    "cuisine": "Lebanese",
+    "dinner": "Chicken Shawarma Bowls",
+    "blurb": "A colorful meal built around spiced chicken, rice, vegetables, and yogurt sauce.",
+    "sides": [
+      "Hummus",
+      "Pita",
+      "Tabbouleh"
+    ],
+    "dessert": "Baklava",
+    "produce": [
+      "Parsley",
+      "Cucumbers",
+      "Radishes",
+      "Lettuce"
+    ],
+    "recipes": [
+      {
+        "label": "Chicken Shawarma (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/chicken-sharwama-middle-eastern/",
+        "verified": true
+      },
+      {
+        "label": "Tabbouleh (The Mediterranean Dish)",
+        "url": "https://www.themediterraneandish.com/tabouli-salad/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Shawarma wraps.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Mujadara",
+        "cuisine": "Lebanese",
+        "servesNights": 2,
+        "note": "Lentils and rice under deeply caramelized onions."
+      },
+      {
+        "dinner": "Fattoush with Grilled Halloumi",
+        "cuisine": "Lebanese",
+        "servesNights": 1,
+        "note": "Uses the remaining cucumbers and parsley."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 16,
+    "season": "spring",
+    "occasion": "Spring Markets",
+    "cuisine": "Turkish",
+    "dinner": "Köfte with Herb Salad and Flatbread",
+    "blurb": "Turkish meatballs with cumin, herbs, and grilled vegetables.",
+    "sides": [
+      "Cacık (yogurt cucumber sauce)",
+      "Rice pilaf"
+    ],
+    "dessert": "Turkish delight",
+    "produce": [
+      "Mint",
+      "Parsley",
+      "Cucumbers",
+      "Tomatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Turkish Köfte (Ozlem's Turkish Table)",
+        "url": "https://ozlemsturkishtable.com/2014/02/turkish-meatballs-kofte/",
+        "verified": false
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Menemen",
+        "cuisine": "Turkish",
+        "servesNights": 1,
+        "note": "Turkish scrambled eggs with peppers and tomato."
+      },
+      {
+        "dinner": "Mercimek Çorbası",
+        "cuisine": "Turkish",
+        "servesNights": 2,
+        "note": "Red lentil soup; cheap and freezes well."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 17,
+    "season": "spring",
+    "occasion": "Cinco de Mayo",
+    "cuisine": "Mexican",
+    "dinner": "Chicken Tinga Tacos",
+    "blurb": "Smoky shredded chicken simmered with tomatoes, onions, and chipotle.",
+    "sides": [
+      "Elote (Mexican street corn)",
+      "Black beans"
+    ],
+    "dessert": "Churros",
+    "produce": [
+      "Cilantro",
+      "Avocados",
+      "Radishes",
+      "Limes"
+    ],
+    "recipes": [
+      {
+        "label": "Chicken Tinga (Serious Eats)",
+        "url": "https://www.seriouseats.com/chicken-tinga-mexican-shredded-chicken-recipe",
+        "verified": true
+      },
+      {
+        "label": "Elote (Simply Recipes)",
+        "url": "https://www.simplyrecipes.com/recipes/elote_mexican_street_corn/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Tostadas or quesadillas.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Sopa de Fideo",
+        "cuisine": "Mexican",
+        "servesNights": 2,
+        "note": "Toasted noodle soup on the same tomato-chipotle base."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 18,
+    "season": "spring",
+    "occasion": "Mother's Day",
+    "cuisine": "French",
+    "dinner": "Salmon with Lemon Herb Butter",
+    "blurb": "Elegant but weeknight-friendly.",
+    "sides": [
+      "Roasted asparagus",
+      "Baby potatoes"
+    ],
+    "dessert": "Crème brûlée",
+    "produce": [
+      "Asparagus",
+      "Peas",
+      "Fresh herbs"
+    ],
+    "recipes": [
+      {
+        "label": "Salmon with Herb Butter (Once Upon a Chef)",
+        "url": "https://www.onceuponachef.com/recipes/salmon-with-creamy-dill-sauce.html",
+        "verified": false
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Ratatouille",
+        "cuisine": "French",
+        "servesNights": 2,
+        "note": "Better on day two; good with eggs or bread."
+      },
+      {
+        "dinner": "Quiche Lorraine",
+        "cuisine": "French",
+        "servesNights": 2,
+        "note": "One bake covers two nights, hot or cold."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 19,
+    "season": "spring",
+    "occasion": "Late Spring",
+    "cuisine": "German",
+    "dinner": "Schnitzel with Warm Potato Salad",
+    "blurb": "Crispy cutlets paired with a bright vinegar-based potato salad.",
+    "sides": [
+      "Cucumber salad",
+      "Roasted asparagus"
+    ],
+    "dessert": "Apple strudel",
+    "produce": [
+      "Potatoes",
+      "Asparagus",
+      "Cucumbers"
+    ],
+    "recipes": [
+      {
+        "label": "Schnitzel (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/schnitzel/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Kartoffelsuppe",
+        "cuisine": "German",
+        "servesNights": 2,
+        "note": "Potato soup using the same potatoes and stock."
+      },
+      {
+        "dinner": "Currywurst with Fries",
+        "cuisine": "German",
+        "servesNights": 1,
+        "note": "Deliberately lazy night."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 20,
+    "season": "spring",
+    "occasion": "Memorial Day Weekend",
+    "cuisine": "American BBQ",
+    "dinner": "Grilled Burgers with Summer Slaw",
+    "blurb": "The unofficial start of grilling season.",
+    "sides": [
+      "Potato salad",
+      "Grilled corn"
+    ],
+    "dessert": "Strawberry shortcake",
+    "produce": [
+      "Strawberries",
+      "Corn",
+      "Lettuce"
+    ],
+    "recipes": [
+      {
+        "label": "Smashed Burgers (Serious Eats)",
+        "url": "https://www.seriouseats.com/the-best-smashed-burgers-recipe",
+        "verified": true
+      },
+      {
+        "label": "Strawberry Shortcake (King Arthur Baking)",
+        "url": "https://www.kingarthurbaking.com/recipes/strawberry-shortcake-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "BBQ Chicken Thighs",
+        "cuisine": "American BBQ",
+        "servesNights": 2,
+        "note": "Grill is already out; thighs reheat well."
+      },
+      {
+        "dinner": "Grilled Sausages with Pasta Salad",
+        "cuisine": "American BBQ",
+        "servesNights": 2,
+        "note": "Cookout leftovers repurposed."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 21,
+    "season": "spring",
+    "occasion": "Early Summer",
+    "cuisine": "Brazilian",
+    "dinner": "Churrasco (Brazilian Grilled Steak)",
+    "blurb": "Simple grilled meat with bright sauces.",
+    "sides": [
+      "Farofa",
+      "Brazilian vinaigrette",
+      "Rice and beans"
+    ],
+    "dessert": "Passionfruit mousse",
+    "produce": [
+      "Tomatoes",
+      "Herbs",
+      "Citrus"
+    ],
+    "recipes": [
+      {
+        "label": "Brazilian Steak (The Spruce Eats)",
+        "url": "https://www.thespruceeats.com/brazilian-steak-333751",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Feijoada",
+        "cuisine": "Brazilian",
+        "servesNights": 2,
+        "note": "Black bean and pork stew; improves overnight."
+      },
+      {
+        "dinner": "Pão de Queijo with Soup",
+        "cuisine": "Brazilian",
+        "servesNights": 1,
+        "note": "Cheese bread and something simple."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 22,
+    "season": "spring",
+    "occasion": "Graduation / Celebration Week",
+    "cuisine": "Hawaiian",
+    "dinner": "Huli Huli Chicken",
+    "blurb": "Sweet-savory grilled chicken perfect for gatherings.",
+    "sides": [
+      "Coconut rice",
+      "Pineapple salsa"
+    ],
+    "dessert": "Haupia (coconut pudding)",
+    "produce": [
+      "Pineapple",
+      "Mango",
+      "Cabbage"
+    ],
+    "recipes": [
+      {
+        "label": "Huli Huli Chicken (The Recipe Critic)",
+        "url": "https://therecipecritic.com/huli-huli-chicken/",
+        "verified": false
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Kalua Pork",
+        "cuisine": "Hawaiian",
+        "servesNights": 2,
+        "note": "Slow-roasted pork; endless leftovers."
+      },
+      {
+        "dinner": "Saimin",
+        "cuisine": "Hawaiian",
+        "servesNights": 1,
+        "note": "Island noodle soup, quick."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 23,
+    "season": "spring",
+    "occasion": "Garden Season",
+    "cuisine": "Italian",
+    "dinner": "Pasta Primavera",
+    "blurb": "Fresh vegetables tossed with pasta, olive oil, and parmesan.",
+    "sides": [
+      "Caprese salad"
+    ],
+    "dessert": "Affogato",
+    "produce": [
+      "Zucchini",
+      "Peas",
+      "Basil"
+    ],
+    "recipes": [
+      {
+        "label": "Pasta Primavera (Serious Eats)",
+        "url": "https://www.seriouseats.com/pasta-primavera-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Chicken Parmesan",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "Uses the same tomatoes and basil."
+      },
+      {
+        "dinner": "Zucchini & Ricotta Galette",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "Handles a glut of summer squash."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 24,
+    "season": "spring",
+    "occasion": "Warm Evenings",
+    "cuisine": "Thai",
+    "dinner": "Thai Green Curry",
+    "blurb": "A flexible curry that works with chicken, tofu, shrimp, or vegetables.",
+    "sides": [
+      "Jasmine rice",
+      "Cucumber salad"
+    ],
+    "dessert": "Mango sticky rice",
+    "produce": [
+      "Basil",
+      "Peppers",
+      "Eggplant"
+    ],
+    "recipes": [
+      {
+        "label": "Thai Green Curry (Hot Thai Kitchen)",
+        "url": "https://hot-thai-kitchen.com/green-curry-new/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Pad See Ew",
+        "cuisine": "Thai",
+        "servesNights": 1,
+        "note": "Wide noodles, fast wok night."
+      },
+      {
+        "dinner": "Tom Kha Gai",
+        "cuisine": "Thai",
+        "servesNights": 2,
+        "note": "Coconut soup sharing the curry pantry."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 25,
+    "season": "spring",
+    "occasion": "Summer Approaches",
+    "cuisine": "Spanish",
+    "dinner": "Paella",
+    "blurb": "A celebratory meal built around rice, seafood, chicken, and vegetables.",
+    "sides": [
+      "Simple tomato salad"
+    ],
+    "dessert": "Crema catalana",
+    "produce": [
+      "Peppers",
+      "Tomatoes",
+      "Green beans"
+    ],
+    "recipes": [
+      {
+        "label": "Paella (Spanish Sabores)",
+        "url": "https://spanishsabores.com/paella-recipe/",
+        "verified": false
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Gambas al Ajillo with Bread",
+        "cuisine": "Spanish",
+        "servesNights": 1,
+        "note": "Garlic shrimp; ten minutes."
+      },
+      {
+        "dinner": "Lentejas",
+        "cuisine": "Spanish",
+        "servesNights": 2,
+        "note": "Spanish lentil stew, better reheated."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 26,
+    "season": "spring",
+    "occasion": "Summer Kickoff",
+    "cuisine": "Peruvian",
+    "dinner": "Lomo Saltado",
+    "blurb": "A Peruvian-Chinese fusion stir fry with beef, tomatoes, onions, and fries.",
+    "sides": [
+      "Simple avocado salad"
+    ],
+    "dessert": "Alfajores",
+    "produce": [
+      "Tomatoes",
+      "Potatoes",
+      "Cilantro"
+    ],
+    "recipes": [
+      {
+        "label": "Lomo Saltado (A Cozy Kitchen)",
+        "url": "https://www.acozykitchen.com/lomo-saltado",
+        "verified": false
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Ají de Gallina",
+        "cuisine": "Peruvian",
+        "servesNights": 2,
+        "note": "Creamy shredded chicken over rice and potato."
+      },
+      {
+        "dinner": "Causa with Rotisserie Chicken",
+        "cuisine": "Peruvian",
+        "servesNights": 2,
+        "note": "Cold layered potato dish; no stove."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 27,
+    "season": "summer",
+    "occasion": "Fourth of July Week",
+    "cuisine": "American BBQ",
+    "dinner": "Smoked Ribs with Cornbread and Coleslaw",
+    "blurb": "A classic summer gathering meal.",
+    "sides": [
+      "Grilled corn with chili-lime butter",
+      "Baked beans"
+    ],
+    "dessert": "Peach cobbler",
+    "produce": [
+      "Corn",
+      "Peaches",
+      "Tomatoes",
+      "Cabbage"
+    ],
+    "recipes": [
+      {
+        "label": "BBQ Ribs (Serious Eats)",
+        "url": "https://www.seriouseats.com/slow-smoked-pork-ribs-recipe",
+        "verified": true
+      },
+      {
+        "label": "Peach Cobbler (King Arthur Baking)",
+        "url": "https://www.kingarthurbaking.com/recipes/peach-cobbler-recipe",
+        "verified": false
+      }
+    ],
+    "leftovers": "Pulled rib sandwiches.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Grilled Chicken with Potato Salad",
+        "cuisine": "American BBQ",
+        "servesNights": 2,
+        "note": "Rides the same holiday sides."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 28,
+    "season": "summer",
+    "occasion": "Tomato Season",
+    "cuisine": "Italian",
+    "dinner": "Fresh Tomato Pasta with Basil and Burrata",
+    "blurb": "A meal that celebrates summer simplicity.",
+    "sides": [
+      "Grilled zucchini",
+      "Arugula salad"
+    ],
+    "dessert": "Panna cotta with berries",
+    "produce": [
+      "Tomatoes",
+      "Basil",
+      "Zucchini",
+      "Peaches"
+    ],
+    "recipes": [
+      {
+        "label": "Fresh Tomato Pasta (Gimme Some Oven)",
+        "url": "https://www.gimmesomeoven.com/fresh-tomato-pasta/",
+        "verified": false
+      },
+      {
+        "label": "Panna Cotta (Serious Eats)",
+        "url": "https://www.seriouseats.com/panna-cotta-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Eggplant Parmesan",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "A bake that covers two nights."
+      },
+      {
+        "dinner": "Panzanella with Grilled Sausage",
+        "cuisine": "Italian",
+        "servesNights": 2,
+        "note": "Uses stale bread and peak tomatoes."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 29,
+    "season": "summer",
+    "occasion": "Hot Weather Week",
+    "cuisine": "Vietnamese",
+    "dinner": "Bún Chả / Vietnamese Noodle Bowls",
+    "blurb": "Cold rice noodles, herbs, grilled meat, and bright dipping sauce.",
+    "sides": [
+      "Summer rolls"
+    ],
+    "dessert": "Fresh mango",
+    "produce": [
+      "Mint",
+      "Basil",
+      "Cucumbers",
+      "Carrots"
+    ],
+    "recipes": [
+      {
+        "label": "Bún Chả (Hungry Huy)",
+        "url": "https://www.hungryhuy.com/bun-cha/",
+        "verified": false
+      },
+      {
+        "label": "Summer Rolls (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/vietnamese-rice-paper-rolls-spring-rolls/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Turn extra meat into lettuce wraps.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Cơm Tấm",
+        "cuisine": "Vietnamese",
+        "servesNights": 2,
+        "note": "Broken rice with grilled pork; same marinade."
+      },
+      {
+        "dinner": "Summer Roll Night",
+        "cuisine": "Vietnamese",
+        "servesNights": 1,
+        "note": "Everyone rolls their own; no cooking."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 30,
+    "season": "summer",
+    "occasion": "Garden Harvest",
+    "cuisine": "Mexican",
+    "dinner": "Carne Asada Tacos",
+    "blurb": "Grilled steak with bright toppings.",
+    "sides": [
+      "Elote",
+      "Pinto beans",
+      "Pico de gallo"
+    ],
+    "dessert": "Tres leches cake",
+    "produce": [
+      "Tomatoes",
+      "Corn",
+      "Jalapeños",
+      "Cilantro"
+    ],
+    "recipes": [
+      {
+        "label": "Carne Asada (Serious Eats)",
+        "url": "https://www.seriouseats.com/carne-asada-food-lab-recipe",
+        "verified": true
+      },
+      {
+        "label": "Tres Leches Cake (Simply Recipes)",
+        "url": "https://www.simplyrecipes.com/recipes/tres_leches_cake/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Chiles Rellenos",
+        "cuisine": "Mexican",
+        "servesNights": 2,
+        "note": "Uses the season's peppers."
+      },
+      {
+        "dinner": "Esquites & Quesadillas",
+        "cuisine": "Mexican",
+        "servesNights": 1,
+        "note": "Corn off the cob, fast."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 31,
+    "season": "summer",
+    "occasion": "Late Summer",
+    "cuisine": "Lebanese",
+    "dinner": "Chicken Shawarma Plate",
+    "blurb": "Spiced chicken with garlic sauce, rice, vegetables, and pita.",
+    "sides": [
+      "Fattoush salad",
+      "Hummus"
+    ],
+    "dessert": "Baklava",
+    "produce": [
+      "Cucumbers",
+      "Tomatoes",
+      "Parsley",
+      "Eggplant"
+    ],
+    "recipes": [
+      {
+        "label": "Chicken Shawarma (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/chicken-sharwama-middle-eastern/",
+        "verified": true
+      },
+      {
+        "label": "Fattoush Salad (The Mediterranean Dish)",
+        "url": "https://www.themediterraneandish.com/fattoush-salad/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Kafta Skewers",
+        "cuisine": "Lebanese",
+        "servesNights": 2,
+        "note": "Grilled spiced beef; same garlic sauce."
+      },
+      {
+        "dinner": "Mezze Night",
+        "cuisine": "Lebanese",
+        "servesNights": 1,
+        "note": "Hummus, labneh, bread, whatever is left."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 32,
+    "season": "summer",
+    "occasion": "Beach / Vacation Week",
+    "cuisine": "Hawaiian",
+    "dinner": "Poke Bowls",
+    "blurb": "Fresh fish (or tofu), rice, vegetables, and flavorful toppings.",
+    "sides": [
+      "Seaweed salad",
+      "Edamame"
+    ],
+    "dessert": "Pineapple coconut sorbet",
+    "produce": [
+      "Pineapple",
+      "Avocado",
+      "Cucumber"
+    ],
+    "recipes": [
+      {
+        "label": "Ahi Poke Bowl (Downshiftology)",
+        "url": "https://downshiftology.com/recipes/ahi-tuna-poke-bowl/",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Loco Moco",
+        "cuisine": "Hawaiian",
+        "servesNights": 2,
+        "note": "Rice, burger patty, egg, gravy."
+      },
+      {
+        "dinner": "Grilled Mahi with Pineapple Rice",
+        "cuisine": "Hawaiian",
+        "servesNights": 2,
+        "note": "Uses the rest of the pineapple."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 33,
+    "season": "summer",
+    "occasion": "Farmers Market Peak",
+    "cuisine": "Thai",
+    "dinner": "Pad Thai with Fresh Vegetables",
+    "blurb": "Fast, bright, and adaptable.",
+    "sides": [
+      "Thai cucumber salad"
+    ],
+    "dessert": "Mango sticky rice",
+    "produce": [
+      "Bean sprouts",
+      "Herbs",
+      "Peppers",
+      "Mango"
+    ],
+    "recipes": [
+      {
+        "label": "Pad Thai (Hot Thai Kitchen)",
+        "url": "https://hot-thai-kitchen.com/best-pad-thai/",
+        "verified": true
+      },
+      {
+        "label": "Mango Sticky Rice (Hot Thai Kitchen)",
+        "url": "https://hot-thai-kitchen.com/mango-sticky-rice/",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Larb with Sticky Rice",
+        "cuisine": "Thai",
+        "servesNights": 2,
+        "note": "Herby minced meat salad; no wok needed."
+      },
+      {
+        "dinner": "Panang Curry",
+        "cuisine": "Thai",
+        "servesNights": 2,
+        "note": "Richer curry from the same paste and coconut milk."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 34,
+    "season": "summer",
+    "occasion": "End of Summer Celebration",
+    "cuisine": "Korean",
+    "dinner": "Korean BBQ Bulgogi",
+    "blurb": "Sweet-savory grilled beef with rice and vegetables.",
+    "sides": [
+      "Kimchi",
+      "Cucumber salad",
+      "Lettuce wraps"
+    ],
+    "dessert": "Bingsu (shaved ice)",
+    "produce": [
+      "Cucumbers",
+      "Lettuce",
+      "Peppers"
+    ],
+    "recipes": [
+      {
+        "label": "Bulgogi (Maangchi)",
+        "url": "https://www.maangchi.com/recipe/bulgogi",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Bibim Guksu",
+        "cuisine": "Korean",
+        "servesNights": 1,
+        "note": "Cold spicy noodles for a hot night."
+      },
+      {
+        "dinner": "Dakgalbi",
+        "cuisine": "Korean",
+        "servesNights": 2,
+        "note": "Spicy chicken stir fry with cabbage."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 35,
+    "season": "summer",
+    "occasion": "Corn & Pepper Season",
+    "cuisine": "Cajun / Louisiana",
+    "dinner": "Shrimp Étouffée",
+    "blurb": "A flavorful one-pot meal.",
+    "sides": [
+      "Rice",
+      "Cornbread"
+    ],
+    "dessert": "Banana pudding",
+    "produce": [
+      "Corn",
+      "Peppers",
+      "Tomatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Shrimp Étouffée (Simply Recipes)",
+        "url": "https://www.simplyrecipes.com/recipes/shrimp_etouffee/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Red Beans & Rice",
+        "cuisine": "Cajun / Louisiana",
+        "servesNights": 3,
+        "note": "Classic Monday pot; stretches for days."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 36,
+    "season": "summer",
+    "occasion": "Labor Day Week",
+    "cuisine": "American Grill",
+    "dinner": "Tri-Tip with Chimichurri",
+    "blurb": "A final big grilling meal before fall.",
+    "sides": [
+      "Grilled vegetables",
+      "Potato salad"
+    ],
+    "dessert": "Berry crisp",
+    "produce": [
+      "Tomatoes",
+      "Berries",
+      "Squash"
+    ],
+    "recipes": [
+      {
+        "label": "Tri-Tip (Serious Eats)",
+        "url": "https://www.seriouseats.com/grilled-tri-tip-roast-recipe",
+        "verified": true
+      },
+      {
+        "label": "Chimichurri (Serious Eats)",
+        "url": "https://www.seriouseats.com/chimichurri-sauce-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Grilled Chicken Caesar",
+        "cuisine": "American Grill",
+        "servesNights": 1,
+        "note": "Light night after the tri-tip."
+      },
+      {
+        "dinner": "Corn & Zucchini Skillet with Sausage",
+        "cuisine": "American Grill",
+        "servesNights": 2,
+        "note": "End-of-summer produce dump."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 37,
+    "season": "summer",
+    "occasion": "Late Summer Harvest",
+    "cuisine": "Spanish",
+    "dinner": "Gazpacho + Tortilla Española",
+    "blurb": "A no-stress dinner built around peak produce.",
+    "sides": [
+      "Manchego cheese",
+      "Olives"
+    ],
+    "dessert": "Churros",
+    "produce": [
+      "Tomatoes",
+      "Peppers",
+      "Potatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Gazpacho (Serious Eats)",
+        "url": "https://www.seriouseats.com/andalusian-gazpacho-recipe",
+        "verified": true
+      },
+      {
+        "label": "Spanish Tortilla (Serious Eats)",
+        "url": "https://www.seriouseats.com/tortilla-espanola-spanish-potato-omelette-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Pisto with Fried Eggs",
+        "cuisine": "Spanish",
+        "servesNights": 2,
+        "note": "Spanish ratatouille; good hot or cold."
+      },
+      {
+        "dinner": "Bocadillos",
+        "cuisine": "Spanish",
+        "servesNights": 1,
+        "note": "Sandwiches with the manchego and olives."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 38,
+    "season": "summer",
+    "occasion": "Transition Toward Fall",
+    "cuisine": "Ethiopian",
+    "dinner": "Misir Wat (Spiced Lentils)",
+    "blurb": "A flavorful vegetarian meal as evenings cool.",
+    "sides": [
+      "Injera",
+      "Cabbage and carrots"
+    ],
+    "dessert": "Fresh fruit",
+    "produce": [
+      "Carrots",
+      "Cabbage",
+      "Lentils"
+    ],
+    "recipes": [
+      {
+        "label": "Misir Wat (Daring Gourmet)",
+        "url": "https://www.daringgourmet.com/misir-wat-ethiopian-spiced-red-lentils/",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Gomen with Injera",
+        "cuisine": "Ethiopian",
+        "servesNights": 2,
+        "note": "Collards with garlic and ginger."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 39,
+    "season": "summer",
+    "occasion": "End of Summer",
+    "cuisine": "Peruvian",
+    "dinner": "Chicken Tacos with Aji Verde",
+    "blurb": "Peruvian flavors with easy weeknight preparation.",
+    "sides": [
+      "Potato salad",
+      "Corn"
+    ],
+    "dessert": "Alfajores",
+    "produce": [
+      "Corn",
+      "Potatoes",
+      "Peppers"
+    ],
+    "recipes": [
+      {
+        "label": "Aji Verde Sauce (A Cozy Kitchen)",
+        "url": "https://www.acozykitchen.com/aji-verde",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Arroz con Pollo",
+        "cuisine": "Peruvian",
+        "servesNights": 3,
+        "note": "Big one-pot rice; reheats all week."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 40,
+    "season": "fall",
+    "occasion": "Oktoberfest",
+    "cuisine": "German",
+    "dinner": "Schnitzel with Spaetzle and Cucumber Salad",
+    "blurb": "A celebratory German meal that feels festive without requiring all-day cooking.",
+    "sides": [
+      "Spaetzle with butter and herbs",
+      "Gurkensalat (German cucumber salad)"
+    ],
+    "dessert": "Apple strudel",
+    "produce": [
+      "Apples",
+      "Cabbage",
+      "Potatoes",
+      "Cucumbers"
+    ],
+    "recipes": [
+      {
+        "label": "Pork Schnitzel (RecipeTin Eats)",
+        "url": "https://www.recipetineats.com/schnitzel/",
+        "verified": true
+      },
+      {
+        "label": "Spaetzle (Serious Eats)",
+        "url": "https://www.seriouseats.com/spaetzle-recipe",
+        "verified": true
+      }
+    ],
+    "leftovers": "Schnitzel sandwiches with mustard.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Sauerbraten-Style Pot Roast",
+        "cuisine": "German",
+        "servesNights": 3,
+        "note": "Long braise that carries three nights."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 41,
+    "season": "fall",
+    "occasion": "First Cold Nights",
+    "cuisine": "French",
+    "dinner": "French Onion Soup with Gruyère Toasts",
+    "blurb": "A simple meal that captures the beginning of autumn.",
+    "sides": [
+      "Green salad with walnuts"
+    ],
+    "dessert": "Pear tart",
+    "produce": [
+      "Onions",
+      "Pears",
+      "Mushrooms"
+    ],
+    "recipes": [
+      {
+        "label": "French Onion Soup (Serious Eats)",
+        "url": "https://www.seriouseats.com/french-onion-soup-recipe",
+        "verified": true
+      }
+    ],
+    "leftovers": "Soup freezes beautifully.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Chicken Provençal",
+        "cuisine": "French",
+        "servesNights": 2,
+        "note": "Braised with tomato, olives and herbs."
+      },
+      {
+        "dinner": "Croque Madame",
+        "cuisine": "French",
+        "servesNights": 1,
+        "note": "Soup night's easy companion."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 42,
+    "season": "fall",
+    "occasion": "Harvest Season",
+    "cuisine": "Chinese",
+    "dinner": "Mapo Tofu",
+    "blurb": "A Sichuan classic that balances spice, richness, and comfort.",
+    "sides": [
+      "Jasmine rice",
+      "Garlic green beans"
+    ],
+    "dessert": "Fresh citrus",
+    "produce": [
+      "Mushrooms",
+      "Green beans",
+      "Bok choy"
+    ],
+    "recipes": [
+      {
+        "label": "Mapo Tofu (The Woks of Life)",
+        "url": "https://thewoksoflife.com/ma-po-tofu-real-deal/",
+        "verified": true
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Dan Dan Noodles",
+        "cuisine": "Chinese",
+        "servesNights": 1,
+        "note": "Twenty minutes, same chili oil."
+      },
+      {
+        "dinner": "Char Siu with Rice",
+        "cuisine": "Chinese",
+        "servesNights": 2,
+        "note": "Roast pork; excellent cold in lunches."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 43,
+    "season": "fall",
+    "occasion": "Halloween Week",
+    "cuisine": "Mexican",
+    "dinner": "Pozole Rojo",
+    "blurb": "A festive red chile stew perfect for a chilly October night.",
+    "sides": [
+      "Tostadas",
+      "Cabbage slaw",
+      "Radishes"
+    ],
+    "dessert": "Pan de muerto (if celebrating Día de los Muertos)",
+    "produce": [
+      "Cabbage",
+      "Radishes",
+      "Squash",
+      "Chiles"
+    ],
+    "recipes": [
+      {
+        "label": "Pozole Rojo (Simply Recipes)",
+        "url": "https://www.simplyrecipes.com/recipes/pozole_rojo/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Pozole improves after a day or two.",
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Enchiladas Verdes",
+        "cuisine": "Mexican",
+        "servesNights": 2,
+        "note": "A bake that reheats well after the pozole."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 44,
+    "season": "fall",
+    "occasion": "Deep Autumn",
+    "cuisine": "Moroccan",
+    "dinner": "Beef or Vegetable Tagine with Couscous",
+    "blurb": "A slow, warming meal built around fall vegetables.",
+    "sides": [
+      "Mint tea",
+      "Roasted carrots"
+    ],
+    "dessert": "Dates with almonds",
+    "produce": [
+      "Squash",
+      "Carrots",
+      "Sweet potatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Moroccan Vegetable Tagine (The Mediterranean Dish)",
+        "url": "https://www.themediterraneandish.com/moroccan-vegetable-tagine/",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Chickpea & Squash Stew",
+        "cuisine": "Moroccan",
+        "servesNights": 2,
+        "note": "Same squash and warm spices, vegetarian."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 45,
+    "season": "fall",
+    "occasion": "Early November",
+    "cuisine": "Ethiopian",
+    "dinner": "Doro Wat",
+    "blurb": "A rich Ethiopian chicken stew with berbere spices.",
+    "sides": [
+      "Injera",
+      "Lentils",
+      "Greens"
+    ],
+    "dessert": "Honey and tea",
+    "produce": [
+      "Collard greens",
+      "Onions",
+      "Root vegetables"
+    ],
+    "recipes": [
+      {
+        "label": "Doro Wat (Daring Gourmet)",
+        "url": "https://www.daringgourmet.com/doro-wat/",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Shiro Wat",
+        "cuisine": "Ethiopian",
+        "servesNights": 2,
+        "note": "Chickpea flour stew; pantry-fast."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 46,
+    "season": "fall",
+    "occasion": "Thanksgiving Week",
+    "cuisine": "American",
+    "dinner": "Thanksgiving Turkey Dinner",
+    "blurb": "The centerpiece of the year.",
+    "sides": [
+      "Stuffing",
+      "Mashed potatoes",
+      "Cranberry sauce",
+      "Green beans"
+    ],
+    "dessert": "Pumpkin pie",
+    "produce": [
+      "Squash",
+      "Cranberries",
+      "Sweet potatoes",
+      "Brussels sprouts"
+    ],
+    "recipes": [
+      {
+        "label": "Roast Turkey (Serious Eats)",
+        "url": "https://www.seriouseats.com/the-best-simple-roast-turkey-gravy-recipe",
+        "verified": true
+      }
+    ],
+    "leftovers": "Turkey sandwiches, turkey soup, turkey pot pie.",
+    "servesNights": 4,
+    "supporting": [
+      {
+        "dinner": "Butternut Squash Soup",
+        "cuisine": "American",
+        "servesNights": 1,
+        "note": "Something light beside the turkey leftovers."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 47,
+    "season": "fall",
+    "occasion": "Thanksgiving Recovery",
+    "cuisine": "Vietnamese",
+    "dinner": "Turkey Pho",
+    "blurb": "A perfect bridge between holiday leftovers and lighter winter eating.",
+    "sides": [
+      "Fresh herbs",
+      "Bean sprouts",
+      "Lime"
+    ],
+    "dessert": "Coconut rice pudding",
+    "produce": [
+      "Herbs",
+      "Ginger",
+      "Citrus"
+    ],
+    "recipes": [
+      {
+        "label": "Pho Ga / Chicken Pho (Andrea Nguyen)",
+        "url": "https://www.vietworldkitchen.com/blog/2012/11/chicken-pho-noodle-soup-pho-ga-recipe.html",
+        "verified": false
+      }
+    ],
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Turkey Bánh Mì",
+        "cuisine": "Vietnamese",
+        "servesNights": 1,
+        "note": "Leftover turkey, pickles, herbs."
+      },
+      {
+        "dinner": "Ginger Turkey Congee",
+        "cuisine": "Vietnamese",
+        "servesNights": 2,
+        "note": "Uses the carcass and the last of the meat."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 48,
+    "season": "fall",
+    "occasion": "Early December",
+    "cuisine": "Polish",
+    "dinner": "Pierogi with Caramelized Onions",
+    "blurb": "A cozy meal that works beautifully for gatherings.",
+    "sides": [
+      "Beet salad",
+      "Sausage"
+    ],
+    "dessert": "Poppy seed cake",
+    "produce": [
+      "Potatoes",
+      "Cabbage",
+      "Beets"
+    ],
+    "recipes": [
+      {
+        "label": "Pierogi Ruskie (Polonist)",
+        "url": "https://www.polonist.com/pierogi-ruskie/",
+        "verified": true
+      }
+    ],
+    "leftovers": "Freeze extra pierogi.",
+    "servesNights": 2,
+    "supporting": [
+      {
+        "dinner": "Bigos",
+        "cuisine": "Polish",
+        "servesNights": 3,
+        "note": "Hunter's stew; famously better each day."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 49,
+    "season": "fall",
+    "occasion": "Hanukkah Week",
+    "cuisine": "Jewish",
+    "dinner": "Brisket with Latkes",
+    "blurb": "A celebration meal built around tradition and family.",
+    "sides": [
+      "Applesauce",
+      "Roasted vegetables"
+    ],
+    "dessert": "Sufganiyot (jelly doughnuts)",
+    "produce": [
+      "Potatoes",
+      "Apples",
+      "Root vegetables"
+    ],
+    "recipes": [
+      {
+        "label": "Brisket (Once Upon a Chef)",
+        "url": "https://www.onceuponachef.com/recipes/moms-brisket.html",
+        "verified": false
+      },
+      {
+        "label": "Latkes (Serious Eats)",
+        "url": "https://www.seriouseats.com/potato-latkes-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Matzo Ball Soup",
+        "cuisine": "Jewish",
+        "servesNights": 2,
+        "note": "Made from the brisket night's stock."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 50,
+    "season": "fall",
+    "occasion": "Christmas Eve",
+    "cuisine": "Italian-American",
+    "dinner": "Feast of the Seven Fishes",
+    "blurb": "A seafood-centered celebration from Italian-American tradition.",
+    "sides": [
+      "Garlic bread",
+      "Fennel salad"
+    ],
+    "dessert": "Cannoli",
+    "produce": [
+      "Citrus",
+      "Fennel",
+      "Greens"
+    ],
+    "recipes": [
+      {
+        "label": "Shrimp Scampi (Serious Eats)",
+        "url": "https://www.seriouseats.com/shrimp-scampi-recipe",
+        "verified": true
+      }
+    ],
+    "menu": [
+      "Shrimp scampi",
+      "Calamari",
+      "Clams linguine",
+      "Baked cod"
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Linguine with Clams",
+        "cuisine": "Italian-American",
+        "servesNights": 2,
+        "note": "Extends the seafood theme."
+      },
+      {
+        "dinner": "Sausage & Peppers",
+        "cuisine": "Italian-American",
+        "servesNights": 2,
+        "note": "Feeds a crowd around the holiday."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 51,
+    "season": "fall",
+    "occasion": "Christmas Day",
+    "cuisine": "Italian-American / European",
+    "dinner": "Baked Ziti or Prime Rib Feast",
+    "blurb": "A flexible holiday meal depending on family tradition.",
+    "sides": [
+      "Caesar salad",
+      "Roasted vegetables"
+    ],
+    "dessert": "Tiramisu",
+    "produce": [
+      "Winter greens",
+      "Mushrooms",
+      "Potatoes"
+    ],
+    "recipes": [
+      {
+        "label": "Baked Ziti (Serious Eats)",
+        "url": "https://www.seriouseats.com/baked-ziti-recipe",
+        "verified": true
+      }
+    ],
+    "servesNights": 3,
+    "supporting": [
+      {
+        "dinner": "Prime Rib Hash & Soup",
+        "cuisine": "Italian-American / European",
+        "servesNights": 2,
+        "note": "Turns the roast into two more nights."
+      }
+    ],
+    "flexNights": 2
+  },
+  {
+    "week": 52,
+    "season": "fall",
+    "occasion": "New Year's Eve",
+    "cuisine": "Japanese / Global Celebration",
+    "dinner": "Sukiyaki or Hot Pot Night",
+    "blurb": "A communal meal to close the year. Everyone cooks together at the table—perfect for reflection and celebration.",
+    "sides": [
+      "Soba noodles",
+      "Pickled vegetables"
+    ],
+    "dessert": "Mochi",
+    "produce": [
+      "Napa cabbage",
+      "Mushrooms",
+      "Green onions"
+    ],
+    "recipes": [
+      {
+        "label": "Sukiyaki (Just One Cookbook)",
+        "url": "https://www.justonecookbook.com/sukiyaki/",
+        "verified": true
+      },
+      {
+        "label": "Japanese Hot Pot (Just One Cookbook)",
+        "url": "https://www.justonecookbook.com/nabemono-japanese-hot-pot/",
+        "verified": true
+      }
+    ],
+    "servesNights": 1,
+    "supporting": [
+      {
+        "dinner": "Toshikoshi Soba",
+        "cuisine": "Japanese",
+        "servesNights": 1,
+        "note": "Year-crossing noodles on New Year's Eve."
+      },
+      {
+        "dinner": "Oden",
+        "cuisine": "Japanese",
+        "servesNights": 3,
+        "note": "Simmered hot pot that sits on the stove for days."
+      }
+    ],
+    "flexNights": 2
+  }
+]
