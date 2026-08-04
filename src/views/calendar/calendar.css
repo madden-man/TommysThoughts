@@ -222,6 +222,13 @@
     color: #6b0f3c;
 }
 
+/* Activities you scheduled yourself. Amber matches the activity colour already
+   used by the slate bar and dot, and is the one warm hue no watch track claims. */
+.calendar__event--activity {
+    background-color: #f7e6c8;
+    color: #5c3d05;
+}
+
 /* Holidays are context rather than plan, so they go recessive and leave the
    filled-colour channel to mean "a track changed here". A filled blue chip
    would sit ~8 ΔE from the Gut blue — too close to tell apart. */
@@ -293,6 +300,9 @@
 .calendar__slate-bar--movie { background-color: #a3195b; }
 .calendar__slate-bar--restaurant { background-color: #0b6a86; }
 .calendar__slate-bar--activity { background-color: #96631a; }
+/* Nala's menu — the second dinner track. A deep teal-green: near enough the
+   restaurant blue-teal to read as food, far enough not to be mistaken for it. */
+.calendar__slate-bar--nalas { background-color: #14625f; }
 
 .calendar__slate-body {
     display: flex;
@@ -334,6 +344,19 @@
     color: #666;
 }
 
+/* The method for a hand-written meal. Nothing else on the slate has steps —
+   the other tracks link out, this one is the recipe. */
+.calendar__steps {
+    margin: 4px 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.75rem;
+    color: #444;
+}
+
+.calendar__steps li {
+    margin-bottom: 2px;
+}
+
 .calendar__slate-range {
     color: #8a8a8a;
 }
@@ -354,6 +377,7 @@
 .calendar__track-dot--movie { background-color: #a3195b; }
 .calendar__track-dot--restaurant { background-color: #0b6a86; }
 .calendar__track-dot--activity { background-color: #96631a; }
+.calendar__track-dot--nalas { background-color: #14625f; }
 
 /* Jump-to-month/year: the plan runs three years, so stepping a month at a
    time is not a real way to get around. */
@@ -455,6 +479,7 @@
 .calendar__inflight-fill--movie { background-color: #a3195b; }
 .calendar__inflight-fill--restaurant { background-color: #0b6a86; }
 .calendar__inflight-fill--activity { background-color: #96631a; }
+.calendar__inflight-fill--nalas { background-color: #14625f; }
 
 .calendar__inflight-count {
     flex: none;
@@ -502,6 +527,68 @@
 .calendar__detail {
     margin: 0;
     overflow-wrap: break-word;
+}
+
+.calendar__dialog-error {
+    margin: 0;
+    color: #a3195b;
+    font-size: 0.85rem;
+}
+
+/* Which of the three activity kinds this is — the symbol carries the meaning,
+   so it leads and the label explains it. */
+.calendar__kind-picker {
+    display: flex;
+    gap: 8px;
+}
+
+.calendar__kind {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font: inherit;
+    color: #333;
+}
+
+.calendar__kind--on {
+    background-color: #fbf3e6;
+    border-color: #96631a;
+    box-shadow: inset 0 0 0 1px #96631a;
+}
+
+.calendar__kind-symbol {
+    font-size: 1.2rem;
+}
+
+.calendar__kind-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.calendar__kind-hint {
+    font-size: 0.68rem;
+    color: #666;
+    line-height: 1.2;
+}
+
+/* The scheduled activities for a day, above the read-only rotation. */
+.calendar__activities {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.calendar__activities .calendar__kind-symbol {
+    margin-right: 6px;
 }
 
 @media (max-width: 600px) {
@@ -599,6 +686,7 @@
 .calendar__inflight-row--movie.calendar__inflight-row--on { border-left-color: #a3195b; background-color: #fdeaf1; }
 .calendar__inflight-row--activity.calendar__inflight-row--on { border-left-color: #96631a; background-color: #fbf3e6; }
 .calendar__inflight-row--restaurant.calendar__inflight-row--on { border-left-color: #0b6a86; background-color: #e8f4f8; }
+.calendar__inflight-row--nalas.calendar__inflight-row--on { border-left-color: #14625f; background-color: #e7f3f2; }
 
 /* the progress bar fills rather than snapping */
 .calendar__inflight-fill { transition: width 420ms cubic-bezier(.4, 0, .2, 1); }
@@ -659,3 +747,4 @@
 .calendar__thru--movie { background-color: #a3195b; }
 .calendar__thru--activity { background-color: #96631a; }
 .calendar__thru--restaurant { background-color: #0b6a86; }
+.calendar__thru--nalas { background-color: #14625f; }

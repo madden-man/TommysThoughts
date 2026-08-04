@@ -4,16 +4,35 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import { Button } from '@mui/material';
 import { Header } from '../../components/Header';
 import { EVENTS } from './calendarConstants';
 import { PLAN_START, PLAN_END, TRACKS, TRACK_RUNS } from './watchPlan';
 import { buildDinnerRuns } from './dinnerRotation';
-import { buildActivityRuns } from './activityRotation';
+import {
+    ACTIVITY_KINDS,
+    RECURRENCES,
+    describeRecurrence,
+    expandActivityEvents,
+    isRecurring,
+} from './activityEvents';
 import { buildMovieRuns } from './movieRotation';
+import { buildNalasMenuRuns } from './nalasMenuRotation';
 import { buildRestaurantRuns } from './restaurantRotation';
 import { buildNewShowRuns } from './newShowRotation';
-import { getDinners, getMovies, getRestaurants, getShows } from './dinnersServer';
+import {
+    getDinners,
+    getMovies,
+    getNalasMenu,
+    getRestaurants,
+    getShows,
+} from './dinnersServer';
+import {
+    addActivityEvent,
+    deleteActivityEvent,
+    getActivityEvents,
+} from './activityEventsServer';
 import { getActivities } from '../bump/server';
 
 import './calendar.css';
@@ -99,6 +118,9 @@ const buildWeeks = (year, month) => {
 
 const LANE_COUNT = 3;
 
+// Which events keep their lane when a week runs out of room.
+const rank = (event) => (event.run ? 2 : event.activity ? 1 : 0);
+
 // Only switch-overs and holidays reach the grid, so a day carries one or two
 // marks at most and simple packing is enough — reserving a lane per track would
 // leave rows that are empty nearly every day, and would grow with track count.
@@ -109,8 +131,9 @@ const layoutWeek = (week, events) => {
         .sort((a, b) =>
             a.start.localeCompare(b.start) ||
             b.end.localeCompare(a.end) ||
-            // a show taking over its track outranks the holiday it lands on
-            (b.run ? 1 : 0) - (a.run ? 1 : 0) ||
+            // a show taking over its track, then something you scheduled, then
+            // whatever holiday they happen to land on
+            rank(b) - rank(a) ||
             a.title.localeCompare(b.title));
 
     const lanes = [];
@@ -144,6 +167,16 @@ const layoutWeek = (week, events) => {
 
 const emptyDraft = { start: '', end: '', title: '', time: '', notes: '' };
 
+const emptyActivityDraft = {
+    kind: 'ah',
+    title: '',
+    date: '',
+    time: '',
+    recurrence: 'once',
+    until: '',
+    notes: '',
+};
+
 export const CalendarPage = () => {
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
@@ -154,12 +187,19 @@ export const CalendarPage = () => {
     const [selectedDay, setSelectedDay] = useState(null);
     const [focusedTrack, setFocusedTrack] = useState(null);
     const [draft, setDraft] = useState(null);
+    const [activityDraft, setActivityDraft] = useState(null);
+    const [activitySaving, setActivitySaving] = useState(false);
+    const [activityError, setActivityError] = useState(null);
 
-    // Dinners and activities live in Mongo rather than in the bundle, so both
-    // rotations pick up new or edited rows on the next load. Either failing just
-    // omits that track.
+    // Dinners live in Mongo rather than in the bundle, so the rotation picks up
+    // new or edited rows on the next load; failing just omits that track.
+    // `activities` is the /bump pool — it stocks the activity dialog's picker
+    // rather than a rotation. `activityEntries` are the scheduling rules you
+    // saved, which is the only way anything gets onto a day now.
     const [dinners, setDinners] = useState([]);
+    const [nalasMenu, setNalasMenu] = useState([]);
     const [activities, setActivities] = useState([]);
+    const [activityEntries, setActivityEntries] = useState([]);
     const [movies, setMovies] = useState([]);
     const [restaurants, setRestaurants] = useState([]);
     const [shows, setShows] = useState([]);
@@ -168,9 +208,15 @@ export const CalendarPage = () => {
         getDinners()
             .then((rows) => { if (live && Array.isArray(rows)) setDinners(rows); })
             .catch(() => { /* calendar still works without dinners */ });
+        getNalasMenu()
+            .then((rows) => { if (live && Array.isArray(rows)) setNalasMenu(rows); })
+            .catch(() => { /* calendar still works without the second dinner track */ });
         getActivities()
             .then((rows) => { if (live && Array.isArray(rows)) setActivities(rows); })
-            .catch(() => { /* calendar still works without activities */ });
+            .catch(() => { /* the dialog still takes a typed-in activity */ });
+        getActivityEvents()
+            .then((rows) => { if (live && Array.isArray(rows)) setActivityEntries(rows); })
+            .catch(() => { /* calendar still works without scheduled activities */ });
         getMovies()
             .then((rows) => { if (live && Array.isArray(rows)) setMovies(rows); })
             .catch(() => { /* calendar still works without movies */ });
@@ -193,25 +239,40 @@ export const CalendarPage = () => {
     const planRuns = useMemo(() => [
         ...SHOW_RUNS,
         ...dinnerRuns,
-        ...buildActivityRuns(activities, PLAN_START, PLAN_END),
+        ...buildNalasMenuRuns(nalasMenu, PLAN_START, PLAN_END),
         ...buildMovieRuns(movies, dinnerRuns, PLAN_START, PLAN_END),
         ...buildRestaurantRuns(restaurants, PLAN_START, PLAN_END),
         ...newShowRuns,
-    ], [dinnerRuns, activities, movies, restaurants, newShowRuns]);
+    ], [dinnerRuns, nalasMenu, movies, restaurants, newShowRuns]);
+
+    const weeks = useMemo(() => buildWeeks(year, month), [year, month]);
+
+    // The span the grid is showing, padding included.
+    const gridRange = useMemo(() => {
+        const cells = weeks.flat().filter(Boolean);
+        if (!cells.length) return null;
+        return { first: cells[0].iso, last: cells[cells.length - 1].iso };
+    }, [weeks]);
+
+    // A repeat is stored as one rule, so it only becomes days when a month asks
+    // for them — a daily activity costs six weeks of events, not three years.
+    const activityEvents = useMemo(
+        () => (gridRange
+            ? expandActivityEvents(activityEntries, gridRange.first, gridRange.last)
+            : []),
+        [activityEntries, gridRange]);
 
     const allEvents = useMemo(
-        () => [...changeEventsFor(planRuns), ...events], [planRuns, events]);
-    const weeks = useMemo(() => buildWeeks(year, month), [year, month]);
+        () => [...changeEventsFor(planRuns), ...events, ...activityEvents],
+        [planRuns, events, activityEvents]);
 
     // Only the events touching the visible grid reach layoutWeek — otherwise
     // every week re-scans all ~1,100 plan nights.
     const visibleEvents = useMemo(() => {
-        const cells = weeks.flat().filter(Boolean);
-        if (!cells.length) return [];
-        const first = cells[0].iso;
-        const last = cells[cells.length - 1].iso;
-        return allEvents.filter((e) => e.end >= first && e.start <= last);
-    }, [allEvents, weeks]);
+        if (!gridRange) return [];
+        return allEvents.filter(
+            (e) => e.end >= gridRange.first && e.start <= gridRange.last);
+    }, [allEvents, gridRange]);
 
     const changeMonth = (delta) => {
         const next = new Date(year, month + delta, 1);
@@ -246,6 +307,64 @@ export const CalendarPage = () => {
 
     const deleteEvent = (id) => setEvents((prev) => prev.filter((e) => e.id !== id));
 
+    const openActivity = (isoDate) => {
+        setActivityError(null);
+        // No date given (the toolbar button) means today if it's on screen,
+        // otherwise the first of the month being looked at.
+        setActivityDraft({ ...emptyActivityDraft, date: isoDate ?? anchorIso });
+    };
+
+    // The picker is stocked from the /bump pool for the chosen kind, but the
+    // title stays free text so a one-off doesn't have to be added to /bump first.
+    const activityChoices = useMemo(() => {
+        if (!activityDraft) return [];
+        const symbol = ACTIVITY_KINDS[activityDraft.kind].symbol;
+        return activities
+            .filter((a) => a && a.header && a.symbol === symbol)
+            .map((a) => a.header)
+            .sort((a, b) => a.localeCompare(b));
+    }, [activities, activityDraft]);
+
+    // Saving stays open until the write lands: a rule that only exists in this
+    // tab would quietly disappear on reload, and the whole point is that these
+    // are the days you chose.
+    const saveActivity = async () => {
+        const title = activityDraft.title.trim();
+        if (!title || !activityDraft.date) return;
+        const repeats = isRecurring(activityDraft.recurrence);
+        const entry = {
+            kind: activityDraft.kind,
+            title,
+            date: activityDraft.date,
+            recurrence: activityDraft.recurrence,
+            until: repeats && activityDraft.until > activityDraft.date
+                ? activityDraft.until : '',
+            time: activityDraft.time || '',
+            notes: activityDraft.notes.trim(),
+        };
+        setActivitySaving(true);
+        setActivityError(null);
+        try {
+            const saved = await addActivityEvent(entry);
+            setActivityEntries((prev) => [
+                ...prev,
+                saved && saved._id ? saved : { ...entry, _id: `local-${Date.now()}` },
+            ]);
+            setActivityDraft(null);
+        } catch (error) {
+            setActivityError("That didn't save — try again in a moment.");
+        } finally {
+            setActivitySaving(false);
+        }
+    };
+
+    // A recurring activity is one rule, so removing an occurrence removes the
+    // series — the button says so.
+    const deleteActivityEntry = (entryId) => {
+        setActivityEntries((prev) => prev.filter((e) => (e._id ?? e.id) !== entryId));
+        deleteActivityEvent(entryId).catch(() => { /* already gone from the grid */ });
+    };
+
     const monthLabel = new Date(year, month, 1).toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric',
@@ -270,8 +389,9 @@ export const CalendarPage = () => {
         return {
             iso: selectedDay,
             slate: slateFor(selectedDay, planRuns),
+            activities: allEvents.filter((e) => e.activity && e.start === selectedDay),
             others: allEvents.filter(
-                (e) => !e.run && e.start <= selectedDay && selectedDay <= e.end),
+                (e) => !e.run && !e.activity && e.start <= selectedDay && selectedDay <= e.end),
             changes: allEvents.filter((e) => e.run && e.start === selectedDay),
         };
     }, [selectedDay, allEvents, planRuns]);
@@ -287,10 +407,15 @@ export const CalendarPage = () => {
         const currentYear = Number(todayIso.slice(0, 4));
         const years = allEvents.map((e) => Number(e.start.slice(0, 4)));
         newShowRuns.forEach((r) => years.push(Number(r.show.end.slice(0, 4))));
+        // A scheduled activity can sit outside the plan window, so its year has
+        // to be reachable from the jump menu even when no month is showing it.
+        activityEntries.forEach((e) => {
+            if (e?.date) years.push(Number(e.date.slice(0, 4)));
+        });
         const min = Math.min(currentYear, ...years);
         const max = Math.max(currentYear, ...years);
         return Array.from({ length: max - min + 1 }, (_, i) => min + i);
-    }, [allEvents, todayIso, newShowRuns]);
+    }, [allEvents, todayIso, newShowRuns, activityEntries]);
 
     return (
         <div className="page">
@@ -333,6 +458,9 @@ export const CalendarPage = () => {
                         <Button size="small" variant="contained" onClick={() => openCreate()}>
                             + Add event
                         </Button>
+                        <Button size="small" variant="outlined" onClick={() => openActivity()}>
+                            + Add activity
+                        </Button>
                     </div>
 
                     {inFlight.length > 0 && (
@@ -374,10 +502,10 @@ export const CalendarPage = () => {
                                             {run.code === 'r'
                                                 ? <>{run.show.poolSize}&nbsp;places</>
                                                 : run.code === 'm'
-                                                ? <>{run.show.poolSize}&nbsp;films</>
-                                                : run.show.symbol && run.code !== 'n'
-                                                    ? <>{run.show.poolSize}&nbsp;options</>
-                                                    : <>{run.show.nights}&nbsp;nights</>}
+                                                    ? <>{run.show.poolSize}&nbsp;films</>
+                                                    : run.code === 'nm'
+                                                        ? <>{run.show.poolSize}&nbsp;meals</>
+                                                        : <>{run.show.nights}&nbsp;nights</>}
                                         </span>
                                     </button>
                                 );
@@ -483,9 +611,11 @@ export const CalendarPage = () => {
                                             // yourself keep the original blue
                                             (event.run
                                                 ? ` calendar__event--${TRACKS[event.run.code].key}`
-                                                : event.id.startsWith('custom-')
-                                                    ? ''
-                                                    : ' calendar__event--holiday') +
+                                                : event.activity
+                                                    ? ' calendar__event--activity'
+                                                    : event.id.startsWith('custom-')
+                                                        ? ''
+                                                        : ' calendar__event--holiday') +
                                             (continuesLeft ? ' calendar__event--cont-left' : '') +
                                             (continuesRight ? ' calendar__event--cont-right' : '')
                                         }
@@ -493,7 +623,11 @@ export const CalendarPage = () => {
                                             gridColumn: `${startCol + 1} / ${endCol + 2}`,
                                             gridRow: lane + 2,
                                         }}
-                                        title={event.run ? `${event.title} takes over` : event.title}
+                                        title={event.run
+                                            ? `${event.title} takes over`
+                                            : event.activity
+                                                ? `${event.activity.label}: ${event.title}`
+                                                : event.title}
                                         onClick={() => setSelectedDay(event.start)}
                                     >
                                         {event.run && (
@@ -502,6 +636,14 @@ export const CalendarPage = () => {
                                                 aria-hidden="true"
                                             >
                                                 ▶
+                                            </span>
+                                        )}
+                                        {event.activity && (
+                                            <span
+                                                className="calendar__event-anchor"
+                                                aria-hidden="true"
+                                            >
+                                                {event.activity.symbol}
                                             </span>
                                         )}
                                         <span className="calendar__event-name">{name}</span>
@@ -570,6 +712,129 @@ export const CalendarPage = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Activities are scheduled, never assigned: nothing lands on a day
+                unless it comes through here, once or on a repeat. */}
+            <Dialog
+                open={activityDraft !== null}
+                onClose={() => (activitySaving ? null : setActivityDraft(null))}
+                fullWidth
+                maxWidth="xs"
+            >
+                <DialogTitle>Add an activity</DialogTitle>
+                <DialogContent className="calendar__dialog-content">
+                    <div className="calendar__kind-picker" role="group" aria-label="Kind">
+                        {Object.entries(ACTIVITY_KINDS).map(([code, kind]) => (
+                            <button
+                                key={code}
+                                type="button"
+                                aria-pressed={activityDraft?.kind === code}
+                                className={'calendar__kind'
+                                    + (activityDraft?.kind === code ? ' calendar__kind--on' : '')}
+                                onClick={() => setActivityDraft({ ...activityDraft, kind: code })}
+                            >
+                                <span className="calendar__kind-symbol">{kind.symbol}</span>
+                                <span className="calendar__kind-label">{kind.label}</span>
+                                <span className="calendar__kind-hint">{kind.hint}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {activityChoices.length > 0 && (
+                        <TextField
+                            label="From your list"
+                            select
+                            value={activityChoices.includes(activityDraft?.title)
+                                ? activityDraft.title : ''}
+                            onChange={(e) =>
+                                setActivityDraft({ ...activityDraft, title: e.target.value })}
+                            size="small"
+                            helperText="or type your own below"
+                        >
+                            {activityChoices.map((header) => (
+                                <MenuItem key={header} value={header}>{header}</MenuItem>
+                            ))}
+                        </TextField>
+                    )}
+
+                    <TextField
+                        label="Activity"
+                        value={activityDraft?.title ?? ''}
+                        onChange={(e) =>
+                            setActivityDraft({ ...activityDraft, title: e.target.value })}
+                        size="small"
+                        autoFocus
+                    />
+                    <TextField
+                        label="Date"
+                        type="date"
+                        value={activityDraft?.date ?? ''}
+                        onChange={(e) =>
+                            setActivityDraft({ ...activityDraft, date: e.target.value })}
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        label="Time (optional)"
+                        type="time"
+                        value={activityDraft?.time ?? ''}
+                        onChange={(e) =>
+                            setActivityDraft({ ...activityDraft, time: e.target.value })}
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        label="Repeats"
+                        select
+                        value={activityDraft?.recurrence ?? 'once'}
+                        onChange={(e) =>
+                            setActivityDraft({ ...activityDraft, recurrence: e.target.value })}
+                        size="small"
+                    >
+                        {Object.entries(RECURRENCES).map(([code, { label }]) => (
+                            <MenuItem key={code} value={code}>{label}</MenuItem>
+                        ))}
+                    </TextField>
+                    {isRecurring(activityDraft?.recurrence) && (
+                        <TextField
+                            label="Until (optional)"
+                            type="date"
+                            value={activityDraft?.until ?? ''}
+                            onChange={(e) =>
+                                setActivityDraft({ ...activityDraft, until: e.target.value })}
+                            size="small"
+                            InputLabelProps={{ shrink: true }}
+                            helperText="leave empty to keep repeating"
+                        />
+                    )}
+                    <TextField
+                        label="Notes (optional)"
+                        value={activityDraft?.notes ?? ''}
+                        onChange={(e) =>
+                            setActivityDraft({ ...activityDraft, notes: e.target.value })}
+                        size="small"
+                        multiline
+                        minRows={2}
+                    />
+                    {activityError && (
+                        <p className="calendar__dialog-error">{activityError}</p>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={activitySaving} onClick={() => setActivityDraft(null)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        disabled={activitySaving
+                            || !activityDraft?.title.trim()
+                            || !activityDraft?.date}
+                        onClick={saveActivity}
+                    >
+                        {activitySaving ? 'Saving…' : 'Save'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Clicking any day shows every track at once — the grid only marks
                 the switch-overs, so this is where "what's on" actually lives. */}
             <Dialog open={!!dayDetail} onClose={() => setSelectedDay(null)} fullWidth maxWidth="sm">
@@ -577,6 +842,41 @@ export const CalendarPage = () => {
                     <>
                         <DialogTitle>{formatIsoDate(dayDetail.iso)}</DialogTitle>
                         <DialogContent className="calendar__dialog-content">
+                            {dayDetail.activities.length > 0 && (
+                                <div className="calendar__activities">
+                                    <p className="calendar__slate-heading">Activities</p>
+                                    {dayDetail.activities.map((e) => {
+                                        const repeat = describeRecurrence(e.activity);
+                                        return (
+                                            <p key={e.id} className="calendar__detail">
+                                                <span className="calendar__kind-symbol">
+                                                    {e.activity.symbol}
+                                                </span>
+                                                <strong>{e.title}</strong>
+                                                {e.time && <> · {formatTime(e.time)}</>}
+                                                <span className="calendar__detail-muted">
+                                                    {' — '}{e.activity.label}
+                                                    {repeat && `, ${repeat}`}
+                                                </span>
+                                                {e.notes && (
+                                                    <span className="calendar__detail-muted">
+                                                        {' · '}{e.notes}
+                                                    </span>
+                                                )}
+                                                <Button
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() =>
+                                                        deleteActivityEntry(e.activity.entryId)}
+                                                >
+                                                    {repeat ? 'Delete series' : 'Delete'}
+                                                </Button>
+                                            </p>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
                             {dayDetail.others.map((e) => (
                                 <p key={e.id} className="calendar__detail">
                                     <strong>{e.title}</strong>
@@ -613,7 +913,9 @@ export const CalendarPage = () => {
                                             </span>
                                             <span className="calendar__slate-title">
                                                 {run.show.title}
-                                                {isNew && (
+                                                {/* A nightly track doesn't "start" — it's just
+                                                    what tonight offers. */}
+                                                {isNew && run.show.end > run.show.start && (
                                                     <span className="calendar__slate-new">starts today</span>
                                                 )}
                                                 {run.show.holidayDate === dayDetail.iso && (
@@ -660,13 +962,40 @@ export const CalendarPage = () => {
                                                         <span className="calendar__slate-meta">{run.show.blurb}</span>
                                                     )}
                                                 </>
-                                            ) : run.show.symbol && run.code !== 'n' ? (
-                                                <span className="calendar__slate-meta">
-                                                    {run.show.involved
-                                                        ? 'the more involved pick, so it sits on a Saturday'
-                                                        : 'an easier option for a weekday'}
-                                                    {' · '}1 of {run.show.poolSize} on this track
-                                                </span>
+                                            ) : run.code === 'nm' ? (
+                                                <>
+                                                    <span className="calendar__slate-meta">
+                                                        {/* No recipe link to chase and nothing to
+                                                            verify — the whole thing is right here. */}
+                                                        one you wrote out · {run.show.steps.length} step
+                                                        {run.show.steps.length === 1 ? '' : 's'}
+                                                        {` · 1 of ${run.show.poolSize} on the menu`}
+                                                    </span>
+                                                    {run.show.description && (
+                                                        <span className="calendar__slate-meta">
+                                                            {run.show.description}
+                                                        </span>
+                                                    )}
+                                                    {run.show.ingredients.length > 0 && (
+                                                        <span className="calendar__slate-meta">
+                                                            <strong>Ingredients:</strong>{' '}
+                                                            {run.show.ingredients.join(' · ')}
+                                                        </span>
+                                                    )}
+                                                    {run.show.options.length > 0 && (
+                                                        <span className="calendar__slate-meta">
+                                                            <strong>Your pick:</strong>{' '}
+                                                            {run.show.options.join(' · ')}
+                                                        </span>
+                                                    )}
+                                                    {run.show.steps.length > 0 && (
+                                                        <ol className="calendar__steps">
+                                                            {run.show.steps.map((s, i) => (
+                                                                <li key={i}>{s}</li>
+                                                            ))}
+                                                        </ol>
+                                                    )}
+                                                </>
                                             ) : run.code === 'n' ? (
                                                 <>
                                                     <span className="calendar__slate-meta">
@@ -746,7 +1075,9 @@ export const CalendarPage = () => {
                                                 </span>
                                             )}
                                             <span className="calendar__slate-range">
-                                                {formatIsoDate(run.show.start)} – {formatIsoDate(run.show.end)}
+                                                {run.show.start === run.show.end
+                                                    ? formatIsoDate(run.show.start)
+                                                    : <>{formatIsoDate(run.show.start)} – {formatIsoDate(run.show.end)}</>}
                                             </span>
                                         </span>
                                     </div>
@@ -758,6 +1089,7 @@ export const CalendarPage = () => {
                             </p>
                         </DialogContent>
                         <DialogActions>
+                            <Button onClick={() => openActivity(dayDetail.iso)}>Add activity</Button>
                             <Button onClick={() => openCreate(dayDetail.iso)}>Add event</Button>
                             <Button variant="contained" onClick={() => setSelectedDay(null)}>Close</Button>
                         </DialogActions>

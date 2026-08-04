@@ -29,20 +29,22 @@ export const PLAN_END = '2029-05-21';
 export const DINNER_TRACK = 'n';
 
 // `gridSilent` keeps a track out of the month grid entirely — it still appears
-// in the day slate, it just never draws a change marker. Activities change every
-// day, which would bury the handful of marks that actually matter.
+// in the day slate, it just never draws a change marker. Movies change nightly,
+// which would bury the handful of marks that actually matter.
+//
+// Activities are deliberately *not* a track: they used to cycle through three
+// pools and assign themselves to every day, which asserted plans nobody made.
+// They are now scheduled by hand — see activityEvents.js.
 export const TRACKS = {
     n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️' },
+    // The second dinner track. Nightly, so it stays off the grid for the same
+    // reason movies do — see nalasMenuRotation.js.
+    nm: { key: 'nalas', label: "Nala's menu", types: 'meals you wrote out', family: 'eat',
+          icon: '🥘', gridSilent: true },
     m: { key: 'movie', label: 'Movies', types: '4★ and up', family: 'watch', icon: '🎬',
          gridSilent: true },
     r: { key: 'restaurant', label: 'New restaurant', types: 'Friday nights, Lakewood',
          family: 'eat', icon: '🍴' },
-    ap: { key: 'activity', label: "Let's go play", types: 'Saturdays only', family: 'do',
-          icon: '🏓', gridSilent: true },
-    aw: { key: 'activity', label: 'Time to work', types: 'weekdays', family: 'do',
-          icon: '🔨', gridSilent: true },
-    ah: { key: 'activity', label: 'Low key hang', types: 'weekdays', family: 'do',
-          icon: '🏠', gridSilent: true },
     g: { key: 'gut', label: 'Gut / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
     h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
     d: { key: 'head', label: 'Head / Thinking', types: 'types 5, 6, 7', family: 'watch', icon: '🧠' },

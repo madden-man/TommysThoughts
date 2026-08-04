@@ -19,6 +19,15 @@ export const saveDinner = async (dinner) => {
     }).then((response) => response.json());
 };
 
+// --- Nala's menu ---
+// The `nalas-menu` collection in tommy-data: the meals written out by hand,
+// ingredients and steps and all, rather than a link to someone else's recipe.
+// The second dinner track runs off these.
+export const getNalasMenu = async () => {
+    return fetch('.netlify/functions/get_nalas_menu', { method: 'POST' })
+        .then((response) => response.json());
+};
+
 // --- Movies ---
 // The Movies board of the darts collection, via server/get_darts.
 export const getMovies = async () => {
