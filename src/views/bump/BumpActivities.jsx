@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -28,6 +29,7 @@ const IconSelect = ({ value, onChange, labelId }) => (
 const emptyDraft = { symbol: '', header: '' };
 
 export const BumpActivities = ({ initialFilter = null }) => {
+    const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState(null);
@@ -98,6 +100,16 @@ export const BumpActivities = ({ initialFilter = null }) => {
         }
     };
 
+    // Two things you can do with an activity: ask about it now, or put it on a
+    // day. The name is the first — clicking it sends the question. This is the
+    // second: hand the activity to the calendar, which opens its add-activity
+    // dialog already filled in. Passed as router state rather than in the URL so
+    // the emoji needs no encoding and a refresh doesn't reopen the dialog.
+    const scheduleActivity = (activity) =>
+        navigate('/calendar', {
+            state: { scheduleActivity: { header: activity.header, symbol: activity.symbol } },
+        });
+
     const visibleActivities = filter
         ? activities.filter((a) => a.symbol === filter)
         : activities;
@@ -163,10 +175,18 @@ export const BumpActivities = ({ initialFilter = null }) => {
                                         type="button"
                                         className="bump-activity__header bump-activity__header--button"
                                         onClick={() => sendActivityQuestion(activity.header)}
-                                        title={`Send "${activity.header}?"`}
+                                        title={`Bump — send "${activity.header}?"`}
                                     >
                                         {activity.header}
                                     </button>
+                                    <Button
+                                        className="bump-activity__schedule"
+                                        variant="outlined"
+                                        onClick={() => scheduleActivity(activity)}
+                                        title={`Put "${activity.header}" on a day`}
+                                    >
+                                        Schedule
+                                    </Button>
                                     <Button onClick={() => startEdit(activity)}>Edit</Button>
                                     <Button color="error" onClick={() => removeActivity(activity._id)}>Delete</Button>
                                 </>

@@ -8,7 +8,9 @@ const clientPromise = mongoClient.connect();
 // codes the calendar knows how to expand; `until` bounds a repeat and is
 // optional, in which case it repeats as far as the calendar is browsed.
 const KINDS = ['ap', 'aw', 'ah'];
-const RECURRENCES = ['once', 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'];
+// `monthly` repeats on the same weekday of the month (the second Tuesday);
+// `monthlyDate` repeats on the same date. The calendar expands both.
+const RECURRENCES = ['once', 'daily', 'weekly', 'biweekly', 'monthly', 'monthlyDate', 'yearly'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const handler = async (event) => {

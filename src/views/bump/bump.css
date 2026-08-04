@@ -163,6 +163,12 @@
     box-shadow: 0 0 0 var(--blue-70);
 }
 
+/* Secondary to the name pill — clicking the name bumps, this puts it on a day. */
+.bump-activity__schedule {
+    flex: none;
+    white-space: nowrap;
+}
+
 .bump-activity__symbol-input {
     min-width: 5.5rem;
 }

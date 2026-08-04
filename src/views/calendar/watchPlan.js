@@ -41,9 +41,10 @@ export const DINNER_TRACK = 'n';
 // pools and assign themselves to every day, which asserted plans nobody made.
 // They are now scheduled by hand — see activityEvents.js — and being hand-made
 // is exactly what earns them a place on the grid.
+// Declaration order is display order, in the strip and in the day slate alike.
+// The 52-week menu goes last: it's the one that changes least often and the one
+// you're least likely to be checking, so it shouldn't lead.
 export const TRACKS = {
-    n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️',
-         gridSilent: true },
     // The second dinner track — see nalasMenuRotation.js.
     nm: { key: 'nalas', label: "Nala's menu", types: 'meals you wrote out', family: 'eat',
           icon: '🥘', gridSilent: true },
@@ -54,6 +55,8 @@ export const TRACKS = {
     g: { key: 'gut', label: 'Gut / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
     h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
     d: { key: 'head', label: 'Head / Thinking', types: 'types 5, 6, 7', family: 'watch', icon: '🧠' },
+    n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️',
+         gridSilent: true },
 };
 
 export const TRACK_RUNS = {

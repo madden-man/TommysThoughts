@@ -27,14 +27,29 @@ export const ACTIVITY_KINDS = {
     ah: { symbol: HOME, label: 'Low key hang', hint: 'reading, puzzles, a fire pit' },
 };
 
+// "Every month" means the same weekday — the second Tuesday, not the 9th.
+// Plans are made of weekdays: a thing that happens on a Tuesday evening keeps
+// happening on a Tuesday evening, while the 9th wanders through the week and
+// lands on a workday half the time. The by-the-date version is still here for
+// the cases that really are about the date, it just isn't the default.
+// The /bump list stores a symbol, not a kind code — this is the way back.
+// Every icon /bump offers is one of the three, so a miss means bad data rather
+// than a fourth kind, and the caller falls back to whatever it had.
+export const kindForSymbol = (symbol) =>
+    Object.keys(ACTIVITY_KINDS).find((code) => ACTIVITY_KINDS[code].symbol === symbol) ?? null;
+
 export const RECURRENCES = {
-    once: { label: 'Just once', repeats: false },
-    daily: { label: 'Every day', repeats: true },
-    weekly: { label: 'Every week', repeats: true },
-    biweekly: { label: 'Every other week', repeats: true },
-    monthly: { label: 'Every month', repeats: true },
-    yearly: { label: 'Every year', repeats: true },
+    once: { label: 'Just once', phrase: 'once', repeats: false },
+    daily: { label: 'Every day', phrase: 'every day', repeats: true },
+    weekly: { label: 'Every week', phrase: 'every week', repeats: true },
+    biweekly: { label: 'Every other week', phrase: 'every other week', repeats: true },
+    monthly: { label: 'Every month, same weekday', phrase: 'every month', repeats: true },
+    monthlyDate: { label: 'Every month, same date', phrase: 'every month', repeats: true },
+    yearly: { label: 'Every year', phrase: 'every year', repeats: true },
 };
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'];
 
 export const isRecurring = (recurrence) => !!RECURRENCES[recurrence]?.repeats;
 
@@ -53,6 +68,25 @@ const DAY_MS = 86400000;
 // one, so a rule whose day of the month doesn't exist in some months (the 31st,
 // Feb 29) skips those months and keeps its date in the rest, instead of
 // drifting forward once and never matching again.
+// The date of the `ordinal`-th `weekday` of a month, or null when the month
+// doesn't reach that far — a fifth Tuesday only happens some months.
+const nthWeekdayOfMonth = (year, month, weekday, ordinal) => {
+    // `month` may be out of range (anchor month + n); Date normalizes it, and
+    // everything below works off the normalized month.
+    const first = new Date(year, month, 1);
+    const lead = (weekday - first.getDay() + 7) % 7;
+    const at = new Date(first.getFullYear(), first.getMonth(), 1 + lead + (ordinal - 1) * 7);
+    return at.getMonth() === first.getMonth() ? at : null;
+};
+
+// Which weekday, and which one of that weekday in its month — "the second
+// Tuesday" is (2, 2). Weeks here are counted from the 1st, not from the first
+// full week, so the 8th–14th is always the second of its weekday.
+export const weekdayPatternOf = (date) => ({
+    weekday: date.getDay(),
+    ordinal: Math.ceil(date.getDate() / 7),
+});
+
 const nthOccurrence = (anchor, recurrence, n) => {
     const days = DAY_STEP[recurrence];
     // Day arithmetic rather than milliseconds: a week is not always 7×24h once
@@ -60,7 +94,11 @@ const nthOccurrence = (anchor, recurrence, n) => {
     if (days) {
         return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + n * days);
     }
-    const months = recurrence === 'monthly' ? n : n * 12;
+    if (recurrence === 'monthly') {
+        const { weekday, ordinal } = weekdayPatternOf(anchor);
+        return nthWeekdayOfMonth(anchor.getFullYear(), anchor.getMonth() + n, weekday, ordinal);
+    }
+    const months = recurrence === 'monthlyDate' ? n : n * 12;
     const at = new Date(anchor.getFullYear(), anchor.getMonth() + months, anchor.getDate());
     // A short month rolls into the next one — that month gets no occurrence.
     return at.getDate() === anchor.getDate() ? at : null;
@@ -76,7 +114,9 @@ const firstIndexNear = (anchor, recurrence, windowStart) => {
     if (days) return Math.floor((start - anchor) / (days * DAY_MS));
     const months = (start.getFullYear() - anchor.getFullYear()) * 12
         + (start.getMonth() - anchor.getMonth());
-    return recurrence === 'monthly' ? Math.max(0, months) : Math.max(0, Math.floor(months / 12));
+    return recurrence === 'yearly'
+        ? Math.max(0, Math.floor(months / 12))
+        : Math.max(0, months);
 };
 
 // The grid asks for about six weeks at a time, so even a daily rule is well
@@ -132,18 +172,39 @@ export const expandActivityEvents = (entries, windowStart, windowEnd) => {
                 label: kind.label,
                 recurrence: entry.recurrence || 'once',
                 until: entry.until || undefined,
+                // The rule's anchor, so the day dialog can say which weekday a
+                // monthly repeat follows rather than just "every month".
+                date: entry.date,
             },
         }));
     });
 };
 
-// How a repeat reads in the day dialog, e.g. "every week · until Mar 1, 2027".
-export const describeRecurrence = ({ recurrence, until }) => {
+// The pattern a monthly rule follows, spelled out: "the second Tuesday". Worth
+// saying, because it's the one repeat whose dates don't look regular on a grid.
+export const monthlyPattern = (date) => {
+    if (!date) return null;
+    const { weekday, ordinal } = weekdayPatternOf(fromIso(date));
+    return `the ${ORDINALS[ordinal - 1]} ${WEEKDAYS[weekday]}`;
+};
+
+// How a repeat reads in the day dialog, e.g.
+// "every month on the second Tuesday · until Mar 1, 2027".
+export const describeRecurrence = ({ recurrence, until, date }) => {
     if (!isRecurring(recurrence)) return null;
-    const word = RECURRENCES[recurrence].label.toLowerCase();
+    let word = RECURRENCES[recurrence].phrase;
+    if (recurrence === 'monthly' && date) word += ` on ${monthlyPattern(date)}`;
+    if (recurrence === 'monthlyDate' && date) {
+        word += ` on the ${fromIso(date).getDate()}${ordinalSuffix(fromIso(date).getDate())}`;
+    }
     if (!until) return word;
     const stops = fromIso(until).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric',
     });
     return `${word} · until ${stops}`;
+};
+
+const ordinalSuffix = (n) => {
+    if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+    return ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th';
 };

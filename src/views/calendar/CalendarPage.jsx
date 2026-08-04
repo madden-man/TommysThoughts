@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,6 +17,8 @@ import {
     describeRecurrence,
     expandActivityEvents,
     isRecurring,
+    kindForSymbol,
+    monthlyPattern,
 } from './activityEvents';
 import { buildMovieRuns } from './movieRotation';
 import { buildNalasMenuRuns } from './nalasMenuRotation';
@@ -178,6 +181,8 @@ const emptyActivityDraft = {
 };
 
 export const CalendarPage = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth());
@@ -307,11 +312,11 @@ export const CalendarPage = () => {
 
     const deleteEvent = (id) => setEvents((prev) => prev.filter((e) => e.id !== id));
 
-    const openActivity = (isoDate) => {
+    const openActivity = (isoDate, prefill) => {
         setActivityError(null);
         // No date given (the toolbar button) means today if it's on screen,
         // otherwise the first of the month being looked at.
-        setActivityDraft({ ...emptyActivityDraft, date: isoDate ?? anchorIso });
+        setActivityDraft({ ...emptyActivityDraft, date: isoDate ?? anchorIso, ...prefill });
     };
 
     // The picker is stocked from the /bump pool for the chosen kind, but the
@@ -379,6 +384,22 @@ export const CalendarPage = () => {
         const last = toIsoDate(year, month, new Date(year, month + 1, 0).getDate());
         return todayIso >= first && todayIso <= last ? todayIso : first;
     }, [year, month, todayIso]);
+
+    // Arriving from /bump's Schedule button: that page hands over an activity,
+    // and the dialog opens on it. The state is cleared straight away so going
+    // back or refreshing doesn't pop the dialog again on a page you were only
+    // trying to look at.
+    useEffect(() => {
+        const handoff = location.state?.scheduleActivity;
+        if (!handoff) return;
+        openActivity(null, {
+            title: handoff.header ?? '',
+            kind: kindForSymbol(handoff.symbol) ?? emptyActivityDraft.kind,
+        });
+        navigate(location.pathname, { replace: true });
+        // openActivity is recreated every render; the handoff is what matters.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location, navigate]);
 
     // Every track is mid-show on any given date — that is the whole slate.
     const inFlight = useMemo(() => slateFor(anchorIso, planRuns), [anchorIso, planRuns]);
@@ -462,56 +483,6 @@ export const CalendarPage = () => {
                             + Add activity
                         </Button>
                     </div>
-
-                    {inFlight.length > 0 && (
-                        <div className="calendar__inflight">
-                            <p className="calendar__inflight-title">
-                                In rotation on {formatIsoDate(anchorIso)}
-                                <span className="calendar__inflight-hint">
-                                    all running at once — click any day to see its slate
-                                </span>
-                            </p>
-                            {inFlight.map(({ code, run }) => {
-                                const { day, total } = daysInto(run, anchorIso);
-                                const on = focusedTrack === code;
-                                return (
-                                    <button
-                                        key={code}
-                                        type="button"
-                                        aria-pressed={on}
-                                        title={on ? 'Hide this track on the calendar'
-                                                  : `Trace ${TRACKS[code].label} through the month`}
-                                        onClick={() => setFocusedTrack(on ? null : code)}
-                                        className={`calendar__inflight-row calendar__inflight-row--${TRACKS[code].key}`
-                                            + (on ? ' calendar__inflight-row--on' : '')
-                                            + (focusedTrack && !on ? ' calendar__inflight-row--off' : '')}
-                                    >
-                                        <span className={`calendar__track-dot calendar__track-dot--${TRACKS[code].key}`} />
-                                        <span className="calendar__inflight-track">
-                                            <span className="calendar__track-icon">{TRACKS[code].icon}</span>
-                                            {TRACKS[code].label}
-                                        </span>
-                                        <span className="calendar__inflight-show">{run.show.title}</span>
-                                        <span className="calendar__inflight-progress">
-                                            <span
-                                                className={`calendar__inflight-fill calendar__inflight-fill--${TRACKS[code].key}`}
-                                                style={{ width: `${Math.min(100, (day / total) * 100)}%` }}
-                                            />
-                                        </span>
-                                        <span className="calendar__inflight-count">
-                                            {run.code === 'r'
-                                                ? <>{run.show.poolSize}&nbsp;places</>
-                                                : run.code === 'm'
-                                                    ? <>{run.show.poolSize}&nbsp;films</>
-                                                    : run.code === 'nm'
-                                                        ? <>{run.show.poolSize}&nbsp;meals</>
-                                                        : <>{run.show.nights}&nbsp;nights</>}
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
 
                     <div className="calendar__weekdays">
                         {WEEKDAYS.map((name) => (
@@ -654,6 +625,56 @@ export const CalendarPage = () => {
                             </div>
                         );
                     })}
+
+                    {inFlight.length > 0 && (
+                        <div className="calendar__inflight">
+                            <p className="calendar__inflight-title">
+                                In rotation on {formatIsoDate(anchorIso)}
+                                <span className="calendar__inflight-hint">
+                                    all running at once — click any day to see its slate
+                                </span>
+                            </p>
+                            {inFlight.map(({ code, run }) => {
+                                const { day, total } = daysInto(run, anchorIso);
+                                const on = focusedTrack === code;
+                                return (
+                                    <button
+                                        key={code}
+                                        type="button"
+                                        aria-pressed={on}
+                                        title={on ? 'Hide this track on the calendar'
+                                                  : `Trace ${TRACKS[code].label} through the month`}
+                                        onClick={() => setFocusedTrack(on ? null : code)}
+                                        className={`calendar__inflight-row calendar__inflight-row--${TRACKS[code].key}`
+                                            + (on ? ' calendar__inflight-row--on' : '')
+                                            + (focusedTrack && !on ? ' calendar__inflight-row--off' : '')}
+                                    >
+                                        <span className={`calendar__track-dot calendar__track-dot--${TRACKS[code].key}`} />
+                                        <span className="calendar__inflight-track">
+                                            <span className="calendar__track-icon">{TRACKS[code].icon}</span>
+                                            {TRACKS[code].label}
+                                        </span>
+                                        <span className="calendar__inflight-show">{run.show.title}</span>
+                                        <span className="calendar__inflight-progress">
+                                            <span
+                                                className={`calendar__inflight-fill calendar__inflight-fill--${TRACKS[code].key}`}
+                                                style={{ width: `${Math.min(100, (day / total) * 100)}%` }}
+                                            />
+                                        </span>
+                                        <span className="calendar__inflight-count">
+                                            {run.code === 'r'
+                                                ? <>{run.show.poolSize}&nbsp;places</>
+                                                : run.code === 'm'
+                                                    ? <>{run.show.poolSize}&nbsp;films</>
+                                                    : run.code === 'nm'
+                                                        ? <>{run.show.poolSize}&nbsp;meals</>
+                                                        : <>{run.show.nights}&nbsp;nights</>}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -789,6 +810,11 @@ export const CalendarPage = () => {
                         onChange={(e) =>
                             setActivityDraft({ ...activityDraft, recurrence: e.target.value })}
                         size="small"
+                        // Monthly follows the weekday, which isn't obvious from the
+                        // word alone — say which weekday it worked out to be.
+                        helperText={activityDraft?.recurrence === 'monthly' && activityDraft.date
+                            ? `on ${monthlyPattern(activityDraft.date)} of each month`
+                            : undefined}
                     >
                         {Object.entries(RECURRENCES).map(([code, { label }]) => (
                             <MenuItem key={code} value={code}>{label}</MenuItem>
