@@ -1003,6 +1003,12 @@ export const CalendarPage = () => {
                                                         {run.show.occasion && ` · ${run.show.occasion}`}
                                                         {' · '}serves {run.show.servesNights} night
                                                         {run.show.servesNights === 1 ? '' : 's'}
+                                                        {/* The week is divided between its meals, so a
+                                                            meal can hold more nights than it serves.
+                                                            Say both rather than let the dates imply
+                                                            you're eating it four days running. */}
+                                                        {run.show.coversNights !== run.show.servesNights
+                                                            && `, on for ${run.show.coversNights}`}
                                                     </span>
                                                     {run.show.blurb && (
                                                         <span className="calendar__slate-meta">

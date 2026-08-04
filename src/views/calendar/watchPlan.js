@@ -29,22 +29,28 @@ export const PLAN_END = '2029-05-21';
 export const DINNER_TRACK = 'n';
 
 // `gridSilent` keeps a track out of the month grid entirely — it still appears
-// in the day slate, it just never draws a change marker. Movies change nightly,
-// which would bury the handful of marks that actually matter.
+// in the day slate and the in-rotation strip, it just never draws a chip.
+//
+// Every generated track is silent now. The grid is left to say only two things:
+// a show took over its track, and you put something on this day yourself. Food
+// runs continuously — a dinner every night of every week, a menu meal every
+// night, a restaurant every Friday — so drawn on the grid it stopped being news
+// and started being wallpaper. It all still lives one click away in the day.
 //
 // Activities are deliberately *not* a track: they used to cycle through three
 // pools and assign themselves to every day, which asserted plans nobody made.
-// They are now scheduled by hand — see activityEvents.js.
+// They are now scheduled by hand — see activityEvents.js — and being hand-made
+// is exactly what earns them a place on the grid.
 export const TRACKS = {
-    n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️' },
-    // The second dinner track. Nightly, so it stays off the grid for the same
-    // reason movies do — see nalasMenuRotation.js.
+    n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️',
+         gridSilent: true },
+    // The second dinner track — see nalasMenuRotation.js.
     nm: { key: 'nalas', label: "Nala's menu", types: 'meals you wrote out', family: 'eat',
           icon: '🥘', gridSilent: true },
     m: { key: 'movie', label: 'Movies', types: '4★ and up', family: 'watch', icon: '🎬',
          gridSilent: true },
     r: { key: 'restaurant', label: 'New restaurant', types: 'Friday nights, Lakewood',
-         family: 'eat', icon: '🍴' },
+         family: 'eat', icon: '🍴', gridSilent: true },
     g: { key: 'gut', label: 'Gut / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
     h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
     d: { key: 'head', label: 'Head / Thinking', types: 'types 5, 6, 7', family: 'watch', icon: '🧠' },

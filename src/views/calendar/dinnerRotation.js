@@ -4,6 +4,10 @@
 // as there are dinner documents, so adding a 53rd week — or dropping to 40 —
 // reflows the rotation on the next load with no code change. Meals added to an
 // existing week widen that week's slate without moving any boundary.
+//
+// A dinner week covers all seven nights. The meals in it divide the week between
+// them by weight rather than each taking only the nights it serves, so there is
+// always something on for tonight — the track never goes quiet mid-week.
 
 const toIso = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -73,10 +77,7 @@ export const buildDinnerRuns = (dinners, planStart, planEnd) => {
                 weekPlanned: plannedNights(dinner),
             };
 
-            // Each meal occupies exactly the nights it can realistically carry.
-            // The featured dinner leads, then its supporting meals. Whatever is
-            // left at the end of the week stays unscheduled — a flex night — so
-            // nothing is stretched to fill a week it cannot fill.
+            // The featured dinner leads, then its supporting meals.
             const meals = [
                 {
                     title: dinner.dinner,
@@ -104,15 +105,33 @@ export const buildDinnerRuns = (dinners, planStart, planEnd) => {
                 })),
             ];
 
+            // The week's meals divide the whole week between them — every night
+            // belongs to one of them, none is left blank. The split is weighted
+            // by how many nights each meal actually serves, so a dinner that
+            // stretches to three holds more of the week than a one-night meal,
+            // but the same floor-based slicing used for the year above keeps the
+            // boundaries flush: no gaps, no overlaps, whatever the weights.
+            //
+            // A meal can still come out with nothing when a week is crowded —
+            // eight meals cannot each take a night out of seven — and that meal
+            // simply sits the week out.
             const weekLength = Math.round((weekEnd - weekStart) / 86400000) + 1;
-            let offset = 0;
+            const weights = meals.map((meal) => Math.max(1, meal.nights));
+            const totalWeight = weights.reduce((n, w) => n + w, 0);
+            let carried = 0;
             meals.forEach((meal, m) => {
-                if (offset >= weekLength) return;          // week is full
-                const span = Math.min(meal.nights, weekLength - offset);
-                const start = toIso(addDays(weekStart, offset));
-                const end = toIso(addDays(weekStart, offset + span - 1));
-                offset += span;
+                const from = Math.floor((carried * weekLength) / totalWeight);
+                carried += weights[m];
+                const to = Math.floor((carried * weekLength) / totalWeight);
+                if (to <= from) return;                    // no room this week
+                const start = toIso(addDays(weekStart, from));
+                const end = toIso(addDays(weekStart, to - 1));
                 if (end < planStart || start > planEnd) return;
+                // Clamp first, then measure: the weeks at either end of the plan
+                // are clipped, and a run there covers the nights it actually
+                // gets, not the nights the week would have given it.
+                const fromIso = start < planStart ? planStart : start;
+                const toIsoClamped = end > planEnd ? planEnd : end;
                 runs.push({
                     id: `dinner-${year}-${dinner.week}-${m}`,
                     code: 'n',
@@ -120,9 +139,15 @@ export const buildDinnerRuns = (dinners, planStart, planEnd) => {
                         ...weekContext,
                         ...meal,
                         cuisine: meal.mealCuisine ?? weekContext.cuisine,
-                        start: start < planStart ? planStart : start,
-                        end: end > planEnd ? planEnd : end,
-                        servesNights: span,
+                        start: fromIso,
+                        end: toIsoClamped,
+                        // What the food does, and what the calendar gives it —
+                        // now two different numbers, since a meal is spread to
+                        // fill the week rather than trimmed to what it serves.
+                        servesNights: meal.nights,
+                        coversNights: Math.round(
+                            (new Date(`${toIsoClamped}T00:00:00`)
+                                - new Date(`${fromIso}T00:00:00`)) / 86400000) + 1,
                     },
                 });
             });
