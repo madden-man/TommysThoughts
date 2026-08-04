@@ -82,63 +82,150 @@
 
 .bump-activities__title {
     text-align: center;
+    margin-bottom: 0.15rem;
+}
+
+.bump-activities__hint {
+    margin: 0 0 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
 }
 
 .bump-activities__filters {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
     padding-bottom: 0.75rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     border-bottom: 1px solid #ddd;
 }
 
+/* Filters read as little tags: symbol, what it is, how many there are. */
 .bump-filter {
-    min-width: 3rem;
-    font-size: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 4px 10px;
+    border: 1.5px solid #d8d8d8;
+    border-radius: 999px;
+    background: #fafafa;
+    font: inherit;
+    font-size: 0.82rem;
+    color: #555;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease,
+        color 0.12s ease, transform 0.12s ease;
 }
+
+.bump-filter:hover {
+    transform: translateY(-1px);
+    border-color: #bbb;
+}
+
+.bump-filter__symbol {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.bump-filter__count {
+    min-width: 1.15rem;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.07);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* The three kinds keep the same colours the calendar gives them, so an
+   activity looks like itself in both places. */
+.bump-filter--on { color: white; border-color: transparent; }
+.bump-filter--on .bump-filter__count { background: rgba(255, 255, 255, 0.28); }
+.bump-filter--on:not([class*="--paddle"]):not([class*="--hammer"]):not([class*="--house"]) {
+    background: var(--blue-70);
+}
+.bump-filter--paddle.bump-filter--on { background: #0f7a52; }
+.bump-filter--hammer.bump-filter--on { background: #96631a; }
+.bump-filter--house.bump-filter--on { background: #6b3fa0; }
 
 .bump-activities__list {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
 .bump-activities__empty {
     text-align: center;
     color: #666;
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
     list-style: none;
 }
 
+/* Each activity is a little card tinted by its kind rather than a row in a
+   table — three families you can pick out without reading. */
 .bump-activity {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #ddd;
+    padding: 0.4rem 0.5rem;
+    border: 1.5px solid #e6e6e6;
+    border-left: 5px solid #ccc;
+    border-radius: 10px;
+    background: #fcfcfc;
+    transition: border-color 0.12s ease, background-color 0.12s ease,
+        box-shadow 0.12s ease;
 }
 
+.bump-activity:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.bump-activity--paddle { border-left-color: #0f7a52; background: #f4fbf8; }
+.bump-activity--hammer { border-left-color: #96631a; background: #fdfaf3; }
+.bump-activity--house { border-left-color: #6b3fa0; background: #f9f6fd; }
+
 .bump-activity--new {
-    border-bottom: none;
-    padding-top: 1rem;
+    border: none;
+    background: none;
+    padding: 0.9rem 0 0;
+    margin-top: 0.4rem;
+    border-top: 1px solid #ddd;
+    border-radius: 0;
 }
 
 .bump-activity__symbol {
-    font-size: 1.5rem;
-    width: 2rem;
-    text-align: center;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 1.2rem;
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 50%;
 }
 
 .bump-activity__header {
-    flex: 1;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
 }
 
+/* Hugs its name rather than stretching the row — a pill the width of the words
+   reads as a thing to press, a full-width bar reads as a table cell. The auto
+   margin keeps the icons pinned right whatever the name's length. */
 .bump-activity__header--button {
+    flex: 0 1 auto;
+    margin-right: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
     text-align: left;
-    background: #eef4ff;
+    background: white;
     border: 2px ridge var(--blue-70);
     border-radius: 999px;
     padding: 4px 14px;
@@ -151,25 +238,160 @@
     box-shadow: 0 2px 0 var(--blue-70);
 }
 
+.bump-activity__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .bump-activity__header--button:hover {
-    background: #dbe8ff;
+    background: #eef4ff;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 4px 0 var(--blue-70);
 }
 
 .bump-activity__header--button:active {
-    background: #c7dbff;
+    background: #dbe8ff;
     transform: translateY(2px);
     box-shadow: 0 0 0 var(--blue-70);
 }
 
-/* Secondary to the name pill — clicking the name bumps, this puts it on a day. */
-.bump-activity__schedule {
-    flex: none;
-    white-space: nowrap;
+/* The pill takes its kind's colour too, so a card is one colour from edge to
+   edge instead of a coloured border wrapped around a blue button. */
+.bump-activity--paddle .bump-activity__header--button {
+    border-color: #0f7a52;
+    color: #0f7a52;
+    box-shadow: 0 2px 0 #0f7a52;
+}
+.bump-activity--paddle .bump-activity__header--button:hover {
+    background: #e9f6f0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 4px 0 #0f7a52;
+}
+.bump-activity--paddle .bump-activity__header--button:active {
+    background: #d5ede3;
+    box-shadow: 0 0 0 #0f7a52;
 }
 
-.bump-activity__symbol-input {
+.bump-activity--hammer .bump-activity__header--button {
+    border-color: #96631a;
+    color: #7d5215;
+    box-shadow: 0 2px 0 #96631a;
+}
+.bump-activity--hammer .bump-activity__header--button:hover {
+    background: #fbf3e6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 4px 0 #96631a;
+}
+.bump-activity--hammer .bump-activity__header--button:active {
+    background: #f5e7cd;
+    box-shadow: 0 0 0 #96631a;
+}
+
+.bump-activity--house .bump-activity__header--button {
+    border-color: #6b3fa0;
+    color: #6b3fa0;
+    box-shadow: 0 2px 0 #6b3fa0;
+}
+.bump-activity--house .bump-activity__header--button:hover {
+    background: #f2ecfa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 4px 0 #6b3fa0;
+}
+.bump-activity--house .bump-activity__header--button:active {
+    background: #e7dcf5;
+    box-shadow: 0 0 0 #6b3fa0;
+}
+
+/* The receipt for a bump: the notification goes out silently otherwise, and a
+   button that does nothing visible feels broken. */
+.bump-activity__sent {
+    flex: none;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #0f7a52;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.bump-activity--bumped .bump-activity__sent {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bump-activity--bumped .bump-activity__symbol {
+    animation: bump-pop 0.45s ease;
+}
+
+@keyframes bump-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.22) rotate(-8deg); }
+    100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bump-activity--bumped .bump-activity__symbol { animation: none; }
+    .bump-activity,
+    .bump-activity__header--button,
+    .bump-filter,
+    .bump-icon-button { transition: none; }
+}
+
+.bump-activity__actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+/* Round, quiet until you go near them — the icons shouldn't compete with the
+   name, which is the thing you actually came to press. */
+.bump-icon-button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #7a7a7a;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: background-color 0.12s ease, color 0.12s ease,
+        opacity 0.12s ease, transform 0.12s ease;
+}
+
+.bump-activity:hover .bump-icon-button,
+.bump-icon-button:focus-visible {
+    opacity: 1;
+}
+
+.bump-icon-button:hover {
+    background: rgba(0, 0, 0, 0.07);
+    transform: translateY(-1px);
+}
+
+.bump-icon-button--schedule:hover { color: var(--blue-70); }
+.bump-icon-button--save { color: #0f7a52; opacity: 1; }
+.bump-icon-button--save:hover { background: #e9f6f0; }
+.bump-icon-button--delete:hover { color: #c62828; background: #fdeaea; }
+
+.bump-icon-button:focus-visible {
+    outline: 2px solid var(--blue-70);
+    outline-offset: 1px;
+}
+
+/* Touch devices get no hover, so the actions stay legible there. */
+@media (hover: none) {
+    .bump-icon-button { opacity: 1; }
+}
+
+/* Never let the flex row squeeze the icon picker down to an ellipsis. Scoped to
+   the row so it outweighs MUI's own `min-width: 0` on the FormControl, which is
+   injected after this sheet and would otherwise win on order alone. */
+.bump-activity .bump-activity__symbol-input {
+    flex: none;
     min-width: 5.5rem;
 }
 

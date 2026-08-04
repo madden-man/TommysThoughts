@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
@@ -6,7 +6,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { Button } from '@mui/material';
-import { ICON_OPTIONS } from './constants';
+import { BUMP_BUTTONS, ICON_OPTIONS, getBumpKeyForSymbol } from './constants';
+import { CalendarIcon, CheckIcon, CrossIcon, PencilIcon } from './icons';
 import {
     getActivities,
     addActivity,
@@ -26,6 +27,20 @@ const IconSelect = ({ value, onChange, labelId }) => (
     </FormControl>
 );
 
+// A round icon button. The label is the whole accessible name — the glyph is
+// decorative — so every action still reads out loud as a sentence.
+const IconButton = ({ label, onClick, className = '', children }) => (
+    <button
+        type="button"
+        className={`bump-icon-button ${className}`}
+        onClick={onClick}
+        title={label}
+        aria-label={label}
+    >
+        {children}
+    </button>
+);
+
 const emptyDraft = { symbol: '', header: '' };
 
 export const BumpActivities = ({ initialFilter = null }) => {
@@ -36,6 +51,10 @@ export const BumpActivities = ({ initialFilter = null }) => {
     const [draft, setDraft] = useState(emptyDraft);
     const [newActivity, setNewActivity] = useState(emptyDraft);
     const [filter, setFilter] = useState(initialFilter);
+    // The card that was just bumped, so the click has something to show for
+    // itself — the notification goes out silently otherwise.
+    const [bumpedId, setBumpedId] = useState(null);
+    const bumpTimer = useRef(null);
 
     const fetchActivities = useCallback(async () => {
         setLoading(true);
@@ -52,6 +71,15 @@ export const BumpActivities = ({ initialFilter = null }) => {
     useEffect(() => {
         fetchActivities();
     }, [fetchActivities]);
+
+    useEffect(() => () => clearTimeout(bumpTimer.current), []);
+
+    const bump = (activity) => {
+        sendActivityQuestion(activity.header);
+        setBumpedId(activity._id);
+        clearTimeout(bumpTimer.current);
+        bumpTimer.current = setTimeout(() => setBumpedId(null), 1800);
+    };
 
     const startEdit = (activity) => {
         setEditingId(activity._id);
@@ -114,27 +142,36 @@ export const BumpActivities = ({ initialFilter = null }) => {
         ? activities.filter((a) => a.symbol === filter)
         : activities;
 
+    const countFor = (symbol) => activities.filter((a) => a.symbol === symbol).length;
+
     return (
         <div className="bump-activities">
             <h2 className="bump-activities__title">Activities</h2>
+            <p className="bump-activities__hint">
+                Tap a name to ask about it — or put it on a day.
+            </p>
 
             <div className="bump-activities__filters">
-                <Button
-                    className="bump-filter"
-                    variant={filter === null ? 'contained' : 'outlined'}
+                <button
+                    type="button"
+                    className={'bump-filter' + (filter === null ? ' bump-filter--on' : '')}
                     onClick={() => setFilter(null)}
                 >
-                    All
-                </Button>
-                {ICON_OPTIONS.map((icon) => (
-                    <Button
-                        key={icon}
-                        className="bump-filter"
-                        variant={filter === icon ? 'contained' : 'outlined'}
-                        onClick={() => setFilter(icon)}
+                    <span className="bump-filter__label">Everything</span>
+                    <span className="bump-filter__count">{activities.length}</span>
+                </button>
+                {BUMP_BUTTONS.map(({ key, symbol, header }) => (
+                    <button
+                        key={key}
+                        type="button"
+                        className={`bump-filter bump-filter--${key}`
+                            + (filter === symbol ? ' bump-filter--on' : '')}
+                        onClick={() => setFilter(filter === symbol ? null : symbol)}
                     >
-                        {icon}
-                    </Button>
+                        <span className="bump-filter__symbol">{symbol}</span>
+                        <span className="bump-filter__label">{header}</span>
+                        <span className="bump-filter__count">{countFor(symbol)}</span>
+                    </button>
                 ))}
             </div>
 
@@ -145,54 +182,92 @@ export const BumpActivities = ({ initialFilter = null }) => {
                     {visibleActivities.length === 0 && (
                         <li className="bump-activities__empty">
                             {activities.length === 0
-                                ? 'No activities yet — add one below.'
-                                : 'No activities match this filter.'}
+                                ? 'Nothing here yet — add the first one below.'
+                                : 'Nothing under this one. Try another, or add it below.'}
                         </li>
                     )}
-                    {visibleActivities.map((activity) => (
-                        <li key={activity._id} className="bump-activity">
-                            {editingId === activity._id ? (
-                                <>
-                                    <IconSelect
-                                        labelId={`icon-${activity._id}`}
-                                        value={draft.symbol}
-                                        onChange={(e) => setDraft({ ...draft, symbol: e.target.value })}
-                                    />
-                                    <TextField
-                                        className="bump-activity__header-input"
-                                        label="Activity"
-                                        value={draft.header}
-                                        onChange={(e) => setDraft({ ...draft, header: e.target.value })}
-                                        size="small"
-                                    />
-                                    <Button variant="contained" onClick={saveEdit}>Save</Button>
-                                    <Button onClick={cancelEdit}>Cancel</Button>
-                                </>
-                            ) : (
-                                <>
-                                    <span className="bump-activity__symbol">{activity.symbol}</span>
-                                    <button
-                                        type="button"
-                                        className="bump-activity__header bump-activity__header--button"
-                                        onClick={() => sendActivityQuestion(activity.header)}
-                                        title={`Bump — send "${activity.header}?"`}
-                                    >
-                                        {activity.header}
-                                    </button>
-                                    <Button
-                                        className="bump-activity__schedule"
-                                        variant="outlined"
-                                        onClick={() => scheduleActivity(activity)}
-                                        title={`Put "${activity.header}" on a day`}
-                                    >
-                                        Schedule
-                                    </Button>
-                                    <Button onClick={() => startEdit(activity)}>Edit</Button>
-                                    <Button color="error" onClick={() => removeActivity(activity._id)}>Delete</Button>
-                                </>
-                            )}
-                        </li>
-                    ))}
+                    {visibleActivities.map((activity) => {
+                        const kind = getBumpKeyForSymbol(activity.symbol);
+                        const editing = editingId === activity._id;
+                        return (
+                            <li
+                                key={activity._id}
+                                className={`bump-activity${kind ? ` bump-activity--${kind}` : ''}`
+                                    + (editing ? ' bump-activity--editing' : '')
+                                    + (bumpedId === activity._id ? ' bump-activity--bumped' : '')}
+                            >
+                                {editing ? (
+                                    <>
+                                        <IconSelect
+                                            labelId={`icon-${activity._id}`}
+                                            value={draft.symbol}
+                                            onChange={(e) => setDraft({ ...draft, symbol: e.target.value })}
+                                        />
+                                        <TextField
+                                            className="bump-activity__header-input"
+                                            label="Activity"
+                                            value={draft.header}
+                                            onChange={(e) => setDraft({ ...draft, header: e.target.value })}
+                                            size="small"
+                                            autoFocus
+                                        />
+                                        <span className="bump-activity__actions">
+                                            <IconButton
+                                                label="Save changes"
+                                                className="bump-icon-button--save"
+                                                onClick={saveEdit}
+                                            >
+                                                <CheckIcon />
+                                            </IconButton>
+                                            <IconButton label="Cancel" onClick={cancelEdit}>
+                                                <CrossIcon />
+                                            </IconButton>
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="bump-activity__symbol" aria-hidden="true">
+                                            {activity.symbol}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className="bump-activity__header bump-activity__header--button"
+                                            onClick={() => bump(activity)}
+                                            title={`Ask "${activity.header}?"`}
+                                        >
+                                            <span className="bump-activity__name">{activity.header}</span>
+                                            {/* Swaps in for a moment after a bump, then leaves. */}
+                                            <span className="bump-activity__sent" aria-live="polite">
+                                                {bumpedId === activity._id ? 'sent!' : ''}
+                                            </span>
+                                        </button>
+                                        <span className="bump-activity__actions">
+                                            <IconButton
+                                                label={`Put "${activity.header}" on a day`}
+                                                className="bump-icon-button--schedule"
+                                                onClick={() => scheduleActivity(activity)}
+                                            >
+                                                <CalendarIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                label={`Edit "${activity.header}"`}
+                                                onClick={() => startEdit(activity)}
+                                            >
+                                                <PencilIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                label={`Delete "${activity.header}"`}
+                                                className="bump-icon-button--delete"
+                                                onClick={() => removeActivity(activity._id)}
+                                            >
+                                                <CrossIcon />
+                                            </IconButton>
+                                        </span>
+                                    </>
+                                )}
+                            </li>
+                        );
+                    })}
                 </ul>
             )}
 
@@ -204,9 +279,10 @@ export const BumpActivities = ({ initialFilter = null }) => {
                 />
                 <TextField
                     className="bump-activity__header-input"
-                    label="New activity"
+                    label="Something else you'd do"
                     value={newActivity.header}
                     onChange={(e) => setNewActivity({ ...newActivity, header: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === 'Enter') createActivity(); }}
                     size="small"
                 />
                 <Button variant="contained" onClick={createActivity}>Add</Button>

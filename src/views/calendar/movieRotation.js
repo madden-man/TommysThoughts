@@ -83,6 +83,12 @@ export const rankMovies = (movies) => [...movies]
             || a.name.localeCompare(b.name);
     });
 
+// How long a film has to sit out before it can come round again. Pairing pulls
+// from lists as short as one film — "cajun" is only Sinners — and a dinner
+// cuisine now holds a whole week, so without this the same film paired itself
+// to all seven nights and read as a film that runs for a week.
+export const MIN_GAP_DAYS = 60;
+
 export const buildMovieRuns = (movies, dinnerRuns, planStart, planEnd) => {
     const pool = rankMovies(Array.isArray(movies) ? movies : []);
     if (!pool.length) return [];
@@ -97,13 +103,37 @@ export const buildMovieRuns = (movies, dinnerRuns, planStart, planEnd) => {
         }
     });
 
+    // Shortlists don't change night to night, so build them once rather than
+    // re-filtering the whole board for every day of the plan.
+    const shortlists = new Map();
+    Object.keys(CUISINE_FILMS).forEach((key) => {
+        shortlists.set(key, pool.filter((m) => matches(m, CUISINE_FILMS[key])));
+    });
+    const foodShortlist = pool.filter((m) => matches(m, FOOD_FILMS));
+
     const runs = [];
     const start = new Date(`${planStart}T00:00:00`);
     const end = new Date(`${planEnd}T00:00:00`);
-    let i = 0;
-    const usedBy = new Map();   // cuisine key -> how far through its film list
+    const lastUsed = new Map();   // film name -> the day index it last came up
+    let dayIndex = 0;
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    // Never seen? Take it, and because the pool is ranked, that's the best film
+    // still unwatched. Otherwise offer the one that's been waiting longest, and
+    // only if it has waited long enough — a caller that gets null tries a less
+    // specific source rather than repeating a film.
+    const pick = (candidates, { force = false } = {}) => {
+        let waiting = null;
+        let waitingSince = Infinity;
+        for (const film of candidates) {
+            const at = lastUsed.get(film.name);
+            if (at === undefined) return film;
+            if (at < waitingSince) { waiting = film; waitingSince = at; }
+        }
+        if (!waiting) return null;
+        return force || dayIndex - waitingSince >= MIN_GAP_DAYS ? waiting : null;
+    };
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1), dayIndex++) {
         const iso = toIso(d);
         const cuisine = cuisineOn.get(iso);
 
@@ -111,24 +141,24 @@ export const buildMovieRuns = (movies, dinnerRuns, planStart, planEnd) => {
         let film = null;
         let pairedTo = null;
         for (const key of cuisineKeys(cuisine)) {
-            const shortlist = pool.filter((m) => matches(m, CUISINE_FILMS[key]));
-            if (!shortlist.length) continue;
-            const n = usedBy.get(key) ?? 0;
-            film = shortlist[n % shortlist.length];
-            usedBy.set(key, n + 1);
+            const choice = pick(shortlists.get(key) ?? []);
+            if (!choice) continue;   // that cuisine's films are all still recent
+            film = choice;
             pairedTo = cuisine;
             break;
         }
         if (!film && cuisine) {
-            const foodies = pool.filter((m) => matches(m, FOOD_FILMS));
-            if (foodies.length) {
-                const n = usedBy.get('__food') ?? 0;
-                film = foodies[n % foodies.length];
-                usedBy.set('__food', n + 1);
+            const choice = pick(foodShortlist);
+            if (choice) {
+                film = choice;
                 pairedTo = `${cuisine} — no film for that cuisine, so a food film`;
             }
         }
-        if (!film) film = pool[i++ % pool.length];   // wraps when the pool runs dry
+        // Falling back to the whole board, and finally to whichever film has
+        // been waiting longest — with fewer films than nights in the plan,
+        // something has to come round again eventually.
+        if (!film) film = pick(pool) ?? pick(pool, { force: true });
+        lastUsed.set(film.name, dayIndex);
         runs.push({
             id: `movie-${iso}`,
             code: 'm',
