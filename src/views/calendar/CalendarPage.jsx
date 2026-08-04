@@ -16,12 +16,13 @@ import {
     RECURRENCES,
     describeRecurrence,
     expandActivityEvents,
+    isBakingActivity,
     isRecurring,
     kindForSymbol,
     monthlyPattern,
 } from './activityEvents';
 import { buildMovieRuns } from './movieRotation';
-import { buildNalasMenuRuns } from './nalasMenuRotation';
+import { buildNalasMenuRuns, recipesOfType } from './nalasMenuRotation';
 import { buildRestaurantRuns } from './restaurantRotation';
 import { buildNewShowRuns } from './newShowRotation';
 import {
@@ -178,6 +179,7 @@ const emptyActivityDraft = {
     recurrence: 'once',
     until: '',
     notes: '',
+    recipe: '',
 };
 
 export const CalendarPage = () => {
@@ -330,6 +332,11 @@ export const CalendarPage = () => {
             .sort((a, b) => a.localeCompare(b));
     }, [activities, activityDraft]);
 
+    // The bakes off Nala's menu — `fun` recipes don't rotate as dinners, so this
+    // picker is where they live.
+    const bakeChoices = useMemo(() => recipesOfType(nalasMenu, 'fun'), [nalasMenu]);
+    const bakingSelected = isBakingActivity(activityDraft?.title);
+
     // Saving stays open until the write lands: a rule that only exists in this
     // tab would quietly disappear on reload, and the whole point is that these
     // are the days you chose.
@@ -346,6 +353,9 @@ export const CalendarPage = () => {
                 ? activityDraft.until : '',
             time: activityDraft.time || '',
             notes: activityDraft.notes.trim(),
+            // Only meaningful for a baking activity; picking a recipe and then
+            // switching to another activity shouldn't smuggle it through.
+            recipe: bakingSelected ? activityDraft.recipe : '',
         };
         setActivitySaving(true);
         setActivityError(null);
@@ -785,6 +795,27 @@ export const CalendarPage = () => {
                         size="small"
                         autoFocus
                     />
+                    {/* Baking is the one activity with something to pick inside
+                        it: the `fun` recipes, which don't rotate as dinners. */}
+                    {bakingSelected && bakeChoices.length > 0 && (
+                        <TextField
+                            label="Baking what?"
+                            select
+                            value={activityDraft?.recipe ?? ''}
+                            onChange={(e) =>
+                                setActivityDraft({ ...activityDraft, recipe: e.target.value })}
+                            size="small"
+                            helperText="optional — from the bakes on Nala's menu"
+                        >
+                            <MenuItem value="">
+                                <span className="calendar__detail-muted">Decide later</span>
+                            </MenuItem>
+                            {bakeChoices.map((r) => (
+                                <MenuItem key={r._id ?? r.name} value={r.name}>{r.name}</MenuItem>
+                            ))}
+                        </TextField>
+                    )}
+
                     <TextField
                         label="Date"
                         type="date"
@@ -873,12 +904,24 @@ export const CalendarPage = () => {
                                     <p className="calendar__slate-heading">Activities</p>
                                     {dayDetail.activities.map((e) => {
                                         const repeat = describeRecurrence(e.activity);
+                                        // A chosen bake is the only place a `fun`
+                                        // recipe appears now that they're out of
+                                        // the dinner rotation, so it brings the
+                                        // whole recipe with it.
+                                        const bake = e.activity.recipe
+                                            && nalasMenu.find((m) => m.name === e.activity.recipe);
                                         return (
-                                            <p key={e.id} className="calendar__detail">
+                                            // A div, not a p: a chosen bake brings an
+                                            // ordered list with it, which a paragraph
+                                            // can't legally hold.
+                                            <div key={e.id} className="calendar__detail">
                                                 <span className="calendar__kind-symbol">
                                                     {e.activity.symbol}
                                                 </span>
                                                 <strong>{e.title}</strong>
+                                                {e.activity.recipe && (
+                                                    <> · <strong>{e.activity.recipe}</strong></>
+                                                )}
                                                 {e.time && <> · {formatTime(e.time)}</>}
                                                 <span className="calendar__detail-muted">
                                                     {' — '}{e.activity.label}
@@ -889,6 +932,23 @@ export const CalendarPage = () => {
                                                         {' · '}{e.notes}
                                                     </span>
                                                 )}
+                                                {bake && (
+                                                    <div className="calendar__bake">
+                                                        {bake.ingredients?.length > 0 && (
+                                                            <span className="calendar__slate-meta">
+                                                                <strong>Ingredients:</strong>{' '}
+                                                                {bake.ingredients.join(' · ')}
+                                                            </span>
+                                                        )}
+                                                        {bake.steps?.length > 0 && (
+                                                            <ol className="calendar__steps">
+                                                                {bake.steps.map((s, i) => (
+                                                                    <li key={i}>{s}</li>
+                                                                ))}
+                                                            </ol>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <Button
                                                     size="small"
                                                     color="error"
@@ -897,7 +957,7 @@ export const CalendarPage = () => {
                                                 >
                                                     {repeat ? 'Delete series' : 'Delete'}
                                                 </Button>
-                                            </p>
+                                            </div>
                                         );
                                     })}
                                 </div>

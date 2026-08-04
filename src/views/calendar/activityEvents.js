@@ -32,6 +32,11 @@ export const ACTIVITY_KINDS = {
 // happening on a Tuesday evening, while the 9th wanders through the week and
 // lands on a workday half the time. The by-the-date version is still here for
 // the cases that really are about the date, it just isn't the default.
+// Which activities open the "what are you baking?" picker. Matching on the word
+// rather than one exact title, so "Baking with a podcast" and any later "Bake
+// bread" both qualify without another list to keep in sync.
+export const isBakingActivity = (title) => /\bbak(e|ing)\b/i.test(title ?? '');
+
 // The /bump list stores a symbol, not a kind code — this is the way back.
 // Every icon /bump offers is one of the three, so a miss means bad data rather
 // than a fourth kind, and the caller falls back to whatever it had.
@@ -175,6 +180,9 @@ export const expandActivityEvents = (entries, windowStart, windowEnd) => {
                 // The rule's anchor, so the day dialog can say which weekday a
                 // monthly repeat follows rather than just "every month".
                 date: entry.date,
+                // A baking activity can name what's being baked — one of the
+                // `fun` recipes off Nala's menu.
+                recipe: entry.recipe || undefined,
             },
         }));
     });

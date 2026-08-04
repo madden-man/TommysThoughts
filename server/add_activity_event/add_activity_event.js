@@ -20,6 +20,7 @@ const handler = async (event) => {
 
         const {
             kind, title, date, recurrence = 'once', until = '', time = '', notes = '',
+            recipe = '',
         } = JSON.parse(event.body || '{}');
 
         if (!KINDS.includes(kind)) {
@@ -46,6 +47,9 @@ const handler = async (event) => {
             until: recurrence === 'once' ? '' : until,
             time,
             notes: notes.trim(),
+            // What's being baked, when the activity is a baking one — the name
+            // of a `fun` recipe from the nalas-menu collection.
+            recipe: typeof recipe === 'string' ? recipe.trim() : '',
         };
         const result = await collection.insertOne(document);
         // Return the full document so the calendar can draw it immediately.

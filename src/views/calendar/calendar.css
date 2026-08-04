@@ -593,6 +593,15 @@
     margin-right: 6px;
 }
 
+/* The recipe for a scheduled bake, indented under the activity it belongs to. */
+.calendar__bake {
+    margin: 4px 0 0 1.9rem;
+}
+
+.calendar__bake .calendar__slate-meta {
+    display: block;
+}
+
 @media (max-width: 600px) {
     .calendar-page {
         padding: 0.5rem;
