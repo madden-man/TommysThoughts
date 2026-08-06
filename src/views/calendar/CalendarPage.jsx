@@ -1052,11 +1052,33 @@ export const CalendarPage = () => {
                                                 <>
                                                     <span className="calendar__slate-meta">
                                                         {/* No recipe link to chase and nothing to
-                                                            verify — the whole thing is right here. */}
-                                                        one you wrote out · {run.show.steps.length} step
-                                                        {run.show.steps.length === 1 ? '' : 's'}
+                                                            verify — the whole thing is right here,
+                                                            unless it hasn't been written down yet.
+                                                            A meal is still a decision about dinner
+                                                            before it's a set of steps. */}
+                                                        {run.show.steps.length === 0
+                                                            ? 'recipe still to come'
+                                                            : `one you wrote out · ${run.show.steps.length} `
+                                                              + `step${run.show.steps.length === 1 ? '' : 's'}`}
                                                         {` · 1 of ${run.show.poolSize} on the menu`}
                                                     </span>
+                                                    {/* The menu rotates store by store, so tonight's
+                                                        meal also says which shopping trip it belongs
+                                                        to and what else that trip is feeding. */}
+                                                    <span className="calendar__slate-meta">
+                                                        <strong>{run.show.store}</strong>
+                                                        {run.show.storeSize > 1
+                                                            && ` · night ${run.show.storeNight} of `
+                                                               + `${run.show.storeSize} on this trip`}
+                                                    </span>
+                                                    {run.show.storeAhead?.length > 0 && (
+                                                        <span className="calendar__slate-meta">
+                                                            <strong>Still to come on this trip:</strong>{' '}
+                                                            {run.show.storeAhead.slice(0, 3).join(' · ')}
+                                                            {run.show.storeAhead.length > 3
+                                                                && ` · +${run.show.storeAhead.length - 3} more`}
+                                                        </span>
+                                                    )}
                                                     {run.show.description && (
                                                         <span className="calendar__slate-meta">
                                                             {run.show.description}

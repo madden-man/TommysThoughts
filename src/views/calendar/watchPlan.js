@@ -42,16 +42,18 @@ export const DINNER_TRACK = 'n';
 // They are now scheduled by hand — see activityEvents.js — and being hand-made
 // is exactly what earns them a place on the grid.
 // Declaration order is display order, in the strip and in the day slate alike.
-// The 52-week menu goes last: it's the one that changes least often and the one
-// you're least likely to be checking, so it shouldn't lead.
+// The restaurant leads the food tracks: it's the one that only comes round on a
+// Friday, so it's the one worth seeing before the menu that offers something
+// every night. The 52-week menu goes last: it's the one that changes least often
+// and the one you're least likely to be checking, so it shouldn't lead.
 export const TRACKS = {
+    r: { key: 'restaurant', label: 'New restaurant', types: 'Friday nights, Lakewood',
+         family: 'eat', icon: '🍴', gridSilent: true },
     // The second dinner track — see nalasMenuRotation.js.
     nm: { key: 'nalas', label: "Nala's menu", types: 'meals you wrote out', family: 'eat',
           icon: '🥘', gridSilent: true },
     m: { key: 'movie', label: 'Movies', types: '4★ and up', family: 'watch', icon: '🎬',
          gridSilent: true },
-    r: { key: 'restaurant', label: 'New restaurant', types: 'Friday nights, Lakewood',
-         family: 'eat', icon: '🍴', gridSilent: true },
     g: { key: 'gut', label: 'Gut / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
     h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
     d: { key: 'head', label: 'Head / Thinking', types: 'types 5, 6, 7', family: 'watch', icon: '🧠' },
