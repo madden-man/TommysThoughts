@@ -10,20 +10,25 @@
 // Only verified meals reach the calendar. An unverified row is a draft, and the
 // point of this track is that everything on it has been made and checked.
 //
-// A recipe also carries a `type`. Only dinners rotate here — breakfasts and the
-// `fun` bakes are real recipes but they aren't answers to "what's for dinner".
-// `fun` surfaces instead under the baking activity in the calendar's add-activity
-// dialog; breakfast is stored and waiting for somewhere to belong.
+// A recipe also carries a `type`. Only meals marked `dinner` rotate here —
+// breakfasts and the `fun` bakes are real recipes but they aren't answers to
+// "what's for dinner". `fun` surfaces instead under the baking activity in the
+// calendar's add-activity dialog; breakfast is stored and waiting for somewhere
+// to belong.
 //
-// Nine meals over a nightly rotation means each comes back about every nine
-// days, which is why this track is gridSilent: it would mark every square.
+// Fifteen meals over a nightly rotation means each comes back about every
+// fortnight, which is why this track is gridSilent: it would mark every square.
 
 const toIso = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-// `type` arrived after the collection did, so a recipe without one is a dinner —
-// that's what they all were. Anything explicitly typed something else opts out.
-export const typeOf = (meal) => meal?.type ?? 'dinner';
+// `type` arrived after the collection did, and for a while an untyped recipe
+// counted as a dinner — that's what they all were before the field existed. But
+// no row was ever actually typed, so the breakfasts and the banana bread went on
+// turning up as tonight's dinner under that fallback. scripts/type-nalas-menu.mjs
+// has since typed all of them, so a recipe now has to say it is a dinner to
+// rotate as one; a new row added without a type sits out until it is given one.
+export const typeOf = (meal) => meal?.type;
 
 export const isVerified = (meal) => !!meal && meal.verified === true && !!(meal.name || meal.dish);
 
