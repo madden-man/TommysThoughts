@@ -229,6 +229,15 @@
     color: #5c3d05;
 }
 
+/* The annual traditions. Olive is the one hue no watch track and no activity
+   claims — the tracks hold blue, peach, mint, violet, cyan and crimson, and the
+   activity amber sits at 38°, far enough round the wheel to stay distinct.
+   Ink/fill clears 7:1 like the rest. */
+.calendar__event--tradition {
+    background-color: #e2ecc4;
+    color: #3f4f0c;
+}
+
 /* Holidays are context rather than plan, so they go recessive and leave the
    filled-colour channel to mean "a track changed here". A filled blue chip
    would sit ~8 ΔE from the Gut blue — too close to tell apart. */
@@ -582,6 +591,28 @@
     line-height: 1.2;
 }
 
+/* The traditions for a day, at the very top — they're what the day IS, where
+   everything under them is what happens to be on. */
+.calendar__traditions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.calendar__traditions .calendar__kind-symbol {
+    margin-right: 6px;
+}
+
+/* The family motto, riding along with the heading rather than taking a line. */
+.calendar__traditions-motto {
+    margin-left: 8px;
+    font-weight: 400;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #7a7a6b;
+}
+
 /* The scheduled activities for a day, above the read-only rotation. */
 .calendar__activities {
     display: flex;
@@ -759,3 +790,33 @@
 .calendar__thru--activity { background-color: #96631a; }
 .calendar__thru--restaurant { background-color: #0b6a86; }
 .calendar__thru--nalas { background-color: #14625f; }
+
+/* "What should I watch?" — the two picks come back on the site's white box so
+   they read as answers rather than more dialog copy. */
+.calendar__tonight {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.calendar__tonight-read {
+    margin: 0;
+    font-style: italic;
+    color: #555;
+}
+
+.calendar__tonight-pick {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.calendar__tonight-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+}

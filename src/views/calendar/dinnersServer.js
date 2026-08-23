@@ -53,3 +53,16 @@ export const getShows = async () => {
         body: JSON.stringify({ board: 'Shows' }),
     }).then((response) => response.json());
 };
+
+// --- Tonight ---
+// Hands a written-out situation to Claude in server/recommend_watch and gets
+// back one film and one show off the boards. Rejects with the function's own
+// message so the dialog can say what went wrong rather than "failed".
+export const recommendWatch = async (situation) => {
+    const response = await fetch('.netlify/functions/recommend_watch', {
+        method: 'POST',
+        body: JSON.stringify({ situation }),
+    });
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
+};

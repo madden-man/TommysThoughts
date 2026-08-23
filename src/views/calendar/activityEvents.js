@@ -75,7 +75,9 @@ const DAY_MS = 86400000;
 // drifting forward once and never matching again.
 // The date of the `ordinal`-th `weekday` of a month, or null when the month
 // doesn't reach that far — a fifth Tuesday only happens some months.
-const nthWeekdayOfMonth = (year, month, weekday, ordinal) => {
+// Exported because traditions.js needs the same answer: a tradition that only
+// names a month ("the family photo, every February") lands on a weekday too.
+export const nthWeekdayOfMonth = (year, month, weekday, ordinal) => {
     // `month` may be out of range (anchor month + n); Date normalizes it, and
     // everything below works off the normalized month.
     const first = new Date(year, month, 1);

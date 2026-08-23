@@ -25,12 +25,14 @@ import { buildMovieRuns } from './movieRotation';
 import { buildNalasMenuRuns, recipesOfType } from './nalasMenuRotation';
 import { buildRestaurantRuns } from './restaurantRotation';
 import { buildNewShowRuns } from './newShowRotation';
+import { expandTraditions } from './traditions';
 import {
     getDinners,
     getMovies,
     getNalasMenu,
     getRestaurants,
     getShows,
+    recommendWatch,
 } from './dinnersServer';
 import {
     addActivityEvent,
@@ -56,6 +58,14 @@ const formatIsoDate = (iso) =>
         month: 'long',
         day: 'numeric',
         year: 'numeric',
+    });
+
+// For a span that's already sitting under its own full date heading, where two
+// more spelled-out dates would be longer than the tradition they describe.
+const formatShortDate = (iso) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
     });
 
 // "14:30" (the time input's value format) -> "2:30 PM".
@@ -122,8 +132,11 @@ const buildWeeks = (year, month) => {
 
 const LANE_COUNT = 3;
 
-// Which events keep their lane when a week runs out of room.
-const rank = (event) => (event.run ? 2 : event.activity ? 1 : 0);
+// Which events keep their lane when a week runs out of room. A tradition sits
+// above an activity because it comes round once a year and the activity comes
+// round every week — losing Christmas to keep the gym would be the wrong trade.
+const rank = (event) =>
+    (event.run ? 3 : event.tradition ? 2 : event.activity ? 1 : 0);
 
 // Only switch-overs and holidays reach the grid, so a day carries one or two
 // marks at most and simple packing is enough — reserving a lane per track would
@@ -135,8 +148,8 @@ const layoutWeek = (week, events) => {
         .sort((a, b) =>
             a.start.localeCompare(b.start) ||
             b.end.localeCompare(a.end) ||
-            // a show taking over its track, then something you scheduled, then
-            // whatever holiday they happen to land on
+            // a show taking over its track, then a tradition, then something you
+            // scheduled, then whatever holiday they happen to land on
             rank(b) - rank(a) ||
             a.title.localeCompare(b.title));
 
@@ -197,6 +210,14 @@ export const CalendarPage = () => {
     const [activityDraft, setActivityDraft] = useState(null);
     const [activitySaving, setActivitySaving] = useState(false);
     const [activityError, setActivityError] = useState(null);
+
+    // "What should I watch?" — a written-out situation goes to the boards and
+    // comes back as one film and one show. `tonight` is null when the dialog is
+    // closed, so opening it is the same shape as the other dialogs here.
+    const [tonight, setTonight] = useState(null);
+    const [tonightPicks, setTonightPicks] = useState(null);
+    const [tonightAsking, setTonightAsking] = useState(false);
+    const [tonightError, setTonightError] = useState(null);
 
     // Dinners live in Mongo rather than in the bundle, so the rotation picks up
     // new or edited rows on the next load; failing just omits that track.
@@ -269,9 +290,16 @@ export const CalendarPage = () => {
             : []),
         [activityEntries, gridRange]);
 
+    // Traditions are rules too, resolved for the window on show rather than
+    // built out year by year — the same deal the activity rules get.
+    const traditionEvents = useMemo(
+        () => (gridRange ? expandTraditions(gridRange.first, gridRange.last) : []),
+        [gridRange]);
+
     const allEvents = useMemo(
-        () => [...changeEventsFor(planRuns), ...events, ...activityEvents],
-        [planRuns, events, activityEvents]);
+        () => [...changeEventsFor(planRuns), ...events, ...traditionEvents,
+            ...activityEvents],
+        [planRuns, events, traditionEvents, activityEvents]);
 
     // Only the events touching the visible grid reach layoutWeek — otherwise
     // every week re-scans all ~1,100 plan nights.
@@ -294,6 +322,29 @@ export const CalendarPage = () => {
 
     const openCreate = (isoDate) =>
         setDraft({ ...emptyDraft, start: isoDate ?? toIsoDate(year, month, 1) });
+
+    const openTonight = () => {
+        setTonight('');
+        setTonightPicks(null);
+        setTonightError(null);
+    };
+
+    // The picks are deliberately not saved anywhere — this answers "tonight",
+    // and the rotations already own what gets planned.
+    const askTonight = async () => {
+        const situation = (tonight ?? '').trim();
+        if (!situation || tonightAsking) return;
+        setTonightAsking(true);
+        setTonightError(null);
+        try {
+            setTonightPicks(await recommendWatch(situation));
+        } catch (error) {
+            setTonightPicks(null);
+            setTonightError(error.message || 'That did not come back.');
+        } finally {
+            setTonightAsking(false);
+        }
+    };
 
     const saveDraft = () => {
         if (!draft.title.trim() || !draft.start) return;
@@ -421,8 +472,13 @@ export const CalendarPage = () => {
             iso: selectedDay,
             slate: slateFor(selectedDay, planRuns),
             activities: allEvents.filter((e) => e.activity && e.start === selectedDay),
+            // A tradition can be a span — the gratitude jar is open all November
+            // — so it counts for every day it covers, not just the day it opens.
+            traditions: allEvents.filter(
+                (e) => e.tradition && e.start <= selectedDay && selectedDay <= e.end),
             others: allEvents.filter(
-                (e) => !e.run && !e.activity && e.start <= selectedDay && selectedDay <= e.end),
+                (e) => !e.run && !e.activity && !e.tradition
+                    && e.start <= selectedDay && selectedDay <= e.end),
             changes: allEvents.filter((e) => e.run && e.start === selectedDay),
         };
     }, [selectedDay, allEvents, planRuns]);
@@ -491,6 +547,9 @@ export const CalendarPage = () => {
                         </Button>
                         <Button size="small" variant="outlined" onClick={() => openActivity()}>
                             + Add activity
+                        </Button>
+                        <Button size="small" variant="outlined" onClick={openTonight}>
+                            What should I watch?
                         </Button>
                     </div>
 
@@ -592,11 +651,13 @@ export const CalendarPage = () => {
                                             // yourself keep the original blue
                                             (event.run
                                                 ? ` calendar__event--${TRACKS[event.run.code].key}`
-                                                : event.activity
-                                                    ? ' calendar__event--activity'
-                                                    : event.id.startsWith('custom-')
-                                                        ? ''
-                                                        : ' calendar__event--holiday') +
+                                                : event.tradition
+                                                    ? ' calendar__event--tradition'
+                                                    : event.activity
+                                                        ? ' calendar__event--activity'
+                                                        : event.id.startsWith('custom-')
+                                                            ? ''
+                                                            : ' calendar__event--holiday') +
                                             (continuesLeft ? ' calendar__event--cont-left' : '') +
                                             (continuesRight ? ' calendar__event--cont-right' : '')
                                         }
@@ -606,9 +667,11 @@ export const CalendarPage = () => {
                                         }}
                                         title={event.run
                                             ? `${event.title} takes over`
-                                            : event.activity
-                                                ? `${event.activity.label}: ${event.title}`
-                                                : event.title}
+                                            : event.tradition
+                                                ? `${event.title} — ${event.tradition.note}`
+                                                : event.activity
+                                                    ? `${event.activity.label}: ${event.title}`
+                                                    : event.title}
                                         onClick={() => setSelectedDay(event.start)}
                                     >
                                         {event.run && (
@@ -625,6 +688,14 @@ export const CalendarPage = () => {
                                                 aria-hidden="true"
                                             >
                                                 {event.activity.symbol}
+                                            </span>
+                                        )}
+                                        {event.tradition && (
+                                            <span
+                                                className="calendar__event-anchor"
+                                                aria-hidden="true"
+                                            >
+                                                {event.tradition.icon}
                                             </span>
                                         )}
                                         <span className="calendar__event-name">{name}</span>
@@ -899,6 +970,43 @@ export const CalendarPage = () => {
                     <>
                         <DialogTitle>{formatIsoDate(dayDetail.iso)}</DialogTitle>
                         <DialogContent className="calendar__dialog-content">
+                            {/* Traditions lead the day: they're the thing the
+                                day IS, where everything below is what's on. */}
+                            {dayDetail.traditions.length > 0 && (
+                                <div className="calendar__traditions">
+                                    <p className="calendar__slate-heading">
+                                        Traditions
+                                        <span className="calendar__traditions-motto">
+                                            Semper Dulce
+                                        </span>
+                                    </p>
+                                    {dayDetail.traditions.map((e) => (
+                                        <p key={e.id} className="calendar__detail">
+                                            <span className="calendar__kind-symbol">
+                                                {e.tradition.icon}
+                                            </span>
+                                            <strong>{e.title}</strong>
+                                            {e.start !== e.end && (
+                                                <span className="calendar__detail-muted">
+                                                    {' · '}{formatShortDate(e.start)}
+                                                    {' – '}{formatShortDate(e.end)}
+                                                </span>
+                                            )}
+                                            {e.tradition.song && (
+                                                <span className="calendar__detail-muted">
+                                                    {' · ♫ '}{e.tradition.song}
+                                                </span>
+                                            )}
+                                            {e.notes && (
+                                                <span className="calendar__detail-muted">
+                                                    {' — '}{e.notes}
+                                                </span>
+                                            )}
+                                        </p>
+                                    ))}
+                                </div>
+                            )}
+
                             {dayDetail.activities.length > 0 && (
                                 <div className="calendar__activities">
                                     <p className="calendar__slate-heading">Activities</p>
@@ -1209,6 +1317,59 @@ export const CalendarPage = () => {
                         </DialogActions>
                     </>
                 )}
+            </Dialog>
+
+            {/* A film and a show for tonight, read off the darts boards. */}
+            <Dialog
+                open={tonight !== null}
+                onClose={() => setTonight(null)}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>What should I watch?</DialogTitle>
+                <DialogContent className="calendar__dialog-content">
+                    <p className="calendar__detail calendar__detail-muted">
+                        Say what kind of stretch you're in and you'll get one film and
+                        one show back, both off the boards at /darts.
+                    </p>
+                    <TextField
+                        label="Where you're at"
+                        value={tonight ?? ''}
+                        onChange={(e) => setTonight(e.target.value)}
+                        multiline
+                        minRows={3}
+                        fullWidth
+                        placeholder="Just bought a house and it's crazy having all this space to myself"
+                    />
+                    {tonightError && (
+                        <p className="calendar__dialog-error">{tonightError}</p>
+                    )}
+                    {tonightPicks && (
+                        <div className="calendar__tonight">
+                            <p className="calendar__tonight-read">{tonightPicks.read}</p>
+                            {[
+                                { label: 'Film', pick: tonightPicks.movie },
+                                { label: 'Show', pick: tonightPicks.show },
+                            ].map(({ label, pick }) => pick && (
+                                <div key={label} className="calendar__tonight-pick">
+                                    <p className="calendar__slate-heading">{label}</p>
+                                    <p className="calendar__tonight-title">{pick.title}</p>
+                                    <p className="calendar__detail">{pick.why}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setTonight(null)}>Close</Button>
+                    <Button
+                        variant="contained"
+                        onClick={askTonight}
+                        disabled={tonightAsking || !(tonight ?? '').trim()}
+                    >
+                        {tonightAsking ? 'Thinking…' : tonightPicks ? 'Ask again' : 'Ask'}
+                    </Button>
+                </DialogActions>
             </Dialog>
         </div>
     );
