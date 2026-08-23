@@ -13,6 +13,7 @@ import { BumperPage } from '../views/bump/BumperPage';
 import { BumpPage } from '../views/bump/BumpPage';
 import { QuestionsPage } from '../views/questions/QuestionsPage';
 import { CalendarPage } from '../views/calendar/CalendarPage';
+import { SpotifyPage } from '../views/spotify/SpotifyPage';
 
 export const router = createBrowserRouter([
     {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
     {
       path: '/calendar',
       element: <CalendarPage />
+    },
+    {
+      path: '/spotify',
+      element: <SpotifyPage />
     },
     {
       path: '*',
