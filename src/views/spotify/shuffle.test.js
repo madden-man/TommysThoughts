@@ -164,6 +164,87 @@ describe('shuffleKeepingAlbums', () => {
     });
 });
 
+// These are the tests the first version of antiClump passed while being badly
+// broken. It scored candidates by how many blocks they had left, which made it a
+// sort by artist frequency: the two biggest artists alternated across the
+// opening and every one-block artist was stranded in the last fifth. Nothing
+// above noticed, because a one-block artist never repeats and so never shows up
+// in any adjacency or gap measurement.
+describe('spread', () => {
+    // A realistic shape: a few prolific artists, a long tail of one-offs.
+    const mixed = () => {
+        const spec = [];
+        [['big', 30], ['mid', 20], ['med', 12]].forEach(([artist, n]) => {
+            for (let i = 0; i < n; i++) spec.push(`${artist}:al-${artist}-${i}`);
+        });
+        for (let i = 0; i < 60; i++) spec.push(`one${i}:al-one-${i}`);
+        return trackList(spec);
+    };
+
+    const pilesByPosition = (out) => {
+        const counts = new Map();
+        out.forEach((t) => counts.set(t.artistIds[0], (counts.get(t.artistIds[0]) ?? 0) + 1));
+        return out.map((t) => counts.get(t.artistIds[0]));
+    };
+
+    it('does not front-load the prolific artists', () => {
+        const out = shuffleKeepingAlbums(mixed(), seededRandom(77));
+        const piles = pilesByPosition(out);
+        const half = Math.floor(piles.length / 2);
+        const mean = (a) => a.reduce((n, x) => n + x, 0) / a.length;
+        const front = mean(piles.slice(0, half));
+        const back = mean(piles.slice(half));
+        // The broken version gave front ~24 and back ~2.
+        expect(Math.abs(front - back) / ((front + back) / 2)).toBeLessThan(0.4);
+    });
+
+    it('does not strand the one-off artists at the end', () => {
+        const out = shuffleKeepingAlbums(mixed(), seededRandom(78));
+        const piles = pilesByPosition(out);
+        const spots = piles
+            .map((n, i) => (n === 1 ? i / piles.length : null))
+            .filter((v) => v !== null);
+        const average = spots.reduce((a, b) => a + b, 0) / spots.length;
+        // The broken version put these at ~0.85 of the way through.
+        expect(average).toBeGreaterThan(0.35);
+        expect(average).toBeLessThan(0.65);
+    });
+
+    it('never lets the two biggest artists ping-pong', () => {
+        const out = shuffleKeepingAlbums(mixed(), seededRandom(79));
+        const artists = out.map((t) => t.artistIds[0]);
+        // The broken version opened big,mid,big,mid,big,mid...
+        const alternating = artists
+            .slice(0, 20)
+            .filter((a, i) => i >= 2 && a === artists[i - 2]).length;
+        expect(alternating).toBeLessThan(4);
+    });
+
+    it('spaces an artist at roughly the stride the section allows', () => {
+        const out = shuffleKeepingAlbums(mixed(), seededRandom(80));
+        const spots = out
+            .map((t, i) => (t.artistIds[0] === 'big' ? i : null))
+            .filter((v) => v !== null);
+        const gaps = spots.slice(1).map((p, i) => p - spots[i]).sort((a, b) => a - b);
+        const ideal = out.length / spots.length;
+        const median = gaps[Math.floor(gaps.length / 2)];
+        // The typical gap is what you hear, so that is what is pinned; the
+        // extremes of thirty gaps wander either side of the stride and pinning
+        // those would be testing the noise.
+        expect(median).toBeGreaterThan(ideal * 0.7);
+        expect(median).toBeLessThan(ideal * 1.3);
+        // Never adjacent, though — that one is a guarantee, not a tendency.
+        expect(gaps[0]).toBeGreaterThanOrEqual(2);
+    });
+
+    it('places the same artist differently on a different draw', () => {
+        const at = (seed) => shuffleKeepingAlbums(mixed(), seededRandom(seed))
+            .map((t, i) => (t.artistIds[0] === 'big' ? i : null))
+            .filter((v) => v !== null);
+        expect(at(81)).not.toEqual(at(82));
+    });
+});
+
 describe('sections', () => {
     const four = () => trackList(
         Array.from({ length: 40 }, (_, i) => `a${i % 7}:al${i % 11}`),

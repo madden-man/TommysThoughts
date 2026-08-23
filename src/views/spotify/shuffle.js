@@ -69,59 +69,83 @@ const shuffled = (list, random) => {
     return out;
 };
 
+// Once everything is placed, an artist can still land beside themselves where
+// two strides happen to collide. This walks the result and swaps the second of
+// any such pair with a nearby block that fits in both places — a local repair,
+// so it costs almost nothing and barely disturbs the spacing.
+const separateNeighbours = (list) => {
+    const keyAt = (i) => (i >= 0 && i < list.length ? artistKeyOf(list[i]) : null);
+    const REACH = 12;
+
+    for (let i = 1; i < list.length; i++) {
+        if (keyAt(i) !== keyAt(i - 1)) continue;
+        const mine = keyAt(i);
+
+        for (let step = 2; step <= REACH; step++) {
+            let swapped = false;
+            for (const j of [i + step, i - step]) {
+                if (j < 0 || j >= list.length) continue;
+                const theirs = keyAt(j);
+                // The incoming block must not clash with i's neighbours...
+                if (theirs === mine || theirs === keyAt(i - 1) || theirs === keyAt(i + 1)) continue;
+                // ...and mine must not clash with the neighbours it moves next to.
+                if ((j - 1 !== i && keyAt(j - 1) === mine)
+                    || (j + 1 !== i && keyAt(j + 1) === mine)) continue;
+                [list[i], list[j]] = [list[j], list[i]];
+                swapped = true;
+                break;
+            }
+            if (swapped) break;
+        }
+    }
+    return list;
+};
+
 /**
- * Deal blocks out so the same artist recurs as rarely as the playlist allows.
+ * Spread the blocks so each artist recurs as rarely as the section allows.
  *
- * At each slot it takes the artist with the most blocks still waiting, never the
- * artist it just played unless nothing else is left. Taking the biggest pile
- * first is what stops one prolific artist from being squeezed into a solid run
- * at the end — the failure mode of just picking whoever waited longest.
+ * Every artist is dealt across the WHOLE section rather than picked one slot at
+ * a time: an artist holding `k` of the `n` blocks wants one every `n / k`, so
+ * their blocks ask for positions `(j + u) * n / k` under a single random phase
+ * `u`, and everything is then sorted by the position it asked for.
+ *
+ * Placing by stride rather than by greed is the point. An earlier version scored
+ * candidates by how many blocks they had left, which is a sort by artist
+ * frequency wearing a shuffle\'s clothes: the two biggest artists ping-ponged
+ * across the opening — Ed Sheeran, Quinn XCII, Ed Sheeran, Quinn XCII — while
+ * every artist with a single block scored lowest and was stranded in the last
+ * fifth of the season. Spacing is a property of the whole section, so it has to
+ * be decided for the whole section at once rather than one slot at a time.
+ *
+ * The phase is per artist and random, so the same playlist comes out differently
+ * every run while each artist stays evenly spread.
  *
  * When one artist holds more than half the blocks, some adjacency is arithmetic
  * rather than a bug: there are not enough other blocks to separate them.
  */
 export const antiClump = (blocks, random = Math.random) => {
-    const waiting = new Map();
+    if (blocks.length <= 1) return [...blocks];
+
+    const byArtist = new Map();
     blocks.forEach((block) => {
         const key = artistKeyOf(block);
-        if (!waiting.has(key)) waiting.set(key, []);
-        waiting.get(key).push(block);
+        if (!byArtist.has(key)) byArtist.set(key, []);
+        byArtist.get(key).push(block);
     });
-    // Shuffled within each artist, so asking twice doesn't give the same answer
-    // even though the artist ORDER is decided greedily.
-    waiting.forEach((list, key) => waiting.set(key, shuffled(list, random)));
 
-    const out = [];
-    const playedAt = new Map();
-    let previous = null;
+    const total = blocks.length;
+    const wanted = [];
+    byArtist.forEach((list) => {
+        // Which of an artist\'s blocks takes which slot is itself shuffled, so the
+        // spacing is stable but the running order inside it is not.
+        const order = shuffled(list, random);
+        const stride = total / order.length;
+        const phase = random();
+        order.forEach((block, j) => wanted.push({ block, at: (j + phase) * stride }));
+    });
 
-    while (out.length < blocks.length) {
-        const live = [...waiting.entries()].filter(([, list]) => list.length);
-        // Anyone but whoever just played — unless they're the only one left, in
-        // which case the run is unavoidable and the loop still has to finish.
-        // Held in a const so the filter closes over this pass's value, not the
-        // loop variable everyone else is about to reassign.
-        const justPlayed = previous;
-        const pool = live.length > 1
-            ? live.filter(([key]) => key !== justPlayed)
-            : live;
-        if (!pool.length) break;   // unreachable, but never spin
-
-        let pick = null;
-        let best = -Infinity;
-        pool.forEach(([key, list]) => {
-            const since = out.length - (playedAt.get(key) ?? -1000);
-            // Pile size decides; how long they've waited breaks ties; the last
-            // term keeps equal piles from always resolving the same way.
-            const score = list.length * 1000 + Math.min(since, 999) + random();
-            if (score > best) { best = score; pick = key; }
-        });
-
-        out.push(waiting.get(pick).pop());
-        playedAt.set(pick, out.length - 1);
-        previous = pick;
-    }
-    return out;
+    wanted.sort((a, b) => a.at - b.at);
+    return separateNeighbours(wanted.map((w) => w.block));
 };
 
 /** Blocks back to a flat track list. */
