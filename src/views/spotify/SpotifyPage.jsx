@@ -6,7 +6,9 @@ import {
     describeOrder,
     isSeasonDivider,
     seasonOf,
+    seasonOn,
     seasonSectionsOf,
+    seasonsFrom,
     shuffleKeepingAlbums,
 } from './shuffle';
 import { getPlaylist, writeOrder } from './server';
@@ -26,6 +28,12 @@ export const SpotifyPage = () => {
     // Which of the two shuffles produced `order`, so the preview and the report
     // can say what you are looking at rather than leaving you to guess.
     const [mode, setMode] = useState(null);
+
+    // Which season it is today. The shuffle opens on it and runs the calendar
+    // from there, so the playlist arrives already pointed at the time of year
+    // rather than always starting in Summer because that is how it is filed.
+    const leadWith = useMemo(() => seasonOn(new Date()), []);
+    const running = useMemo(() => seasonsFrom(leadWith), [leadWith]);
 
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
@@ -75,6 +83,7 @@ export const SpotifyPage = () => {
         setOrder(shuffleKeepingAlbums(playlist.tracks, Math.random, {
             isDivider: isSeasonDivider,
             wholeAlbums,
+            leadWith,
         }));
     };
 
@@ -163,6 +172,10 @@ export const SpotifyPage = () => {
                                     Sections:{' '}
                                     {sections.map((s) => `${s.season ?? 'unnamed'} ${s.tracks.length}`)
                                         .join(' · ')}
+                                </p>
+                                <p className="spotify__muted">
+                                    It's <strong>{leadWith}</strong>, so the shuffle runs{' '}
+                                    {running.join(' → ')}.
                                 </p>
                                 {!seasonsLookRight && (
                                     <p className="spotify__warn">

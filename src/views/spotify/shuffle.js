@@ -333,6 +333,44 @@ export const seasonOf = (track) => SEASONS.find((entry) =>
 
 export const isSeasonDivider = (track) => seasonOf(track) !== null;
 
+// The year as it actually turns. Note this is NOT the order the seasons sit in
+// the playlist, where Spring is filed third — the playlist is a filing order and
+// this is a calendar, so the shuffle reorders to match the calendar.
+export const SEASON_CYCLE = ['Summer', 'Fall', 'Winter', 'Spring'];
+
+// Equinoxes and solstices wander a day or two from year to year — the September
+// equinox lands anywhere from the 21st to the 24th. These are the usual dates
+// rather than the computed ones: being a day out decides which season leads a
+// playlist on one day of the year, which is not worth an astronomical almanac.
+export const SEASON_STARTS = [
+    { season: 'Winter', month: 12, day: 21 },
+    { season: 'Fall', month: 9, day: 22 },
+    { season: 'Summer', month: 6, day: 21 },
+    { season: 'Spring', month: 3, day: 20 },
+];
+
+/** Which season a date falls in, north of the equator. */
+export const seasonOn = (date = new Date()) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const reached = ({ month: m, day: d }) => month > m || (month === m && day >= d);
+    // January through to the March equinox is the tail of the previous winter,
+    // which is the one stretch no start date in this year has been reached for.
+    return (SEASON_STARTS.find(reached) ?? { season: 'Winter' }).season;
+};
+
+/**
+ * The four seasons in calendar order, beginning with the one given — so once the
+ * fall equinox comes round the playlist opens on Fall and runs Fall, Winter,
+ * Spring, Summer.
+ */
+export const seasonsFrom = (season) => {
+    const at = SEASON_CYCLE.indexOf(season);
+    return at < 0
+        ? [...SEASON_CYCLE]
+        : [...SEASON_CYCLE.slice(at), ...SEASON_CYCLE.slice(0, at)];
+};
+
 /**
  * The playlist as labelled seasons: each one led by the song that names it, with
  * the tracks that follow it up to the next divider.
@@ -374,7 +412,7 @@ export const seasonSectionsOf = (tracks, isDivider = isSeasonDivider) => {
 export const shuffleKeepingAlbums = (
     tracks,
     random = Math.random,
-    { isDivider = null, sectionStarts = [], wholeAlbums = false } = {},
+    { isDivider = null, sectionStarts = [], wholeAlbums = false, leadWith = null } = {},
 ) => {
     // The two modes differ only in what counts as one indivisible thing: a run
     // of tracks that were already adjacent, or an entire record. Everything
@@ -382,6 +420,24 @@ export const shuffleKeepingAlbums = (
     // seasons — is the same either way.
     const toBlocks = wholeAlbums ? albumBlocksOf : blocksOf;
     const shuffle = (list) => flatten(antiClump(toBlocks(list), random));
+
+    if (isDivider && leadWith) {
+        // Whole seasons move here, so the dividers do NOT stay on the indices
+        // they held — that guarantee is about a season keeping its own tracks,
+        // and each still opens its own season wherever that season now sits.
+        const wanted = seasonsFrom(leadWith);
+        const rank = (section) => wanted.indexOf(section.season);
+        return [...seasonSectionsOf(tracks, isDivider)]
+            // A stretch before the first divider belongs to no season and leads,
+            // rather than being shuffled in among ones that do. Sort is stable,
+            // so several of them keep their order relative to each other.
+            .sort((a, b) => rank(a) - rank(b))
+            .flatMap((section) => [
+                ...(section.divider ? [section.divider] : []),
+                ...shuffle(section.tracks),
+            ]);
+    }
+
     if (isDivider) {
         return partsOf(tracks, isDivider)
             .flatMap((part) => (part.divider ? [part.divider] : shuffle(part.tracks)));

@@ -9,7 +9,10 @@ import {
     isSeasonDivider,
     partsOf,
     sectionsOf,
+    SEASON_CYCLE,
     seasonOf,
+    seasonOn,
+    seasonsFrom,
     seasonSectionsOf,
     seededRandom,
     shuffleKeepingAlbums,
@@ -442,6 +445,127 @@ describe('whole-album mode', () => {
         const clash = blocks.filter((b, i) =>
             i > 0 && artistKeyOf(blocks[i - 1]) === artistKeyOf(b));
         expect(clash).toHaveLength(0);
+    });
+});
+
+describe('the season the year is actually in', () => {
+    const on = (iso) => seasonOn(new Date(`${iso}T12:00:00`));
+
+    it('reads the date against the equinoxes and solstices', () => {
+        expect(on('2026-01-15')).toBe('Winter');   // tail of the old winter
+        expect(on('2026-03-19')).toBe('Winter');   // day before the equinox
+        expect(on('2026-03-20')).toBe('Spring');
+        expect(on('2026-06-20')).toBe('Spring');
+        expect(on('2026-06-21')).toBe('Summer');
+        expect(on('2026-08-23')).toBe('Summer');
+        expect(on('2026-09-21')).toBe('Summer');   // day before the equinox
+        expect(on('2026-09-22')).toBe('Fall');
+        expect(on('2026-12-20')).toBe('Fall');
+        expect(on('2026-12-21')).toBe('Winter');
+        expect(on('2026-12-31')).toBe('Winter');
+    });
+
+    it('runs the cycle from whichever season it is', () => {
+        expect(seasonsFrom('Summer')).toEqual(['Summer', 'Fall', 'Winter', 'Spring']);
+        expect(seasonsFrom('Fall')).toEqual(['Fall', 'Winter', 'Spring', 'Summer']);
+        expect(seasonsFrom('Winter')).toEqual(['Winter', 'Spring', 'Summer', 'Fall']);
+        expect(seasonsFrom('Spring')).toEqual(['Spring', 'Summer', 'Fall', 'Winter']);
+    });
+
+    it('falls back to the plain cycle for a season it does not know', () => {
+        expect(seasonsFrom('Monsoon')).toEqual(SEASON_CYCLE);
+    });
+});
+
+describe('leading with the current season', () => {
+    const song = (name, artist, album, num) => ({
+        uri: `spotify:track:${name}`, name, artistIds: [artist], artistNames: [artist],
+        albumId: album, albumName: album, discNumber: 1, trackNumber: num,
+    });
+    const divider = (title, artist) => song(title, artist, `dv-${title}`, 1);
+
+    // The playlist as it actually is: Summer, Fall, SPRING, Winter — the
+    // filing order, which is not the calendar order.
+    const seasonal = () => [
+        divider('Casita', 'goth'), song('s1', 'S1', 'as1', 1), song('s2', 'S2', 'as2', 1),
+        divider('doomsday', 'lizzy'), song('f1', 'F1', 'af1', 1), song('f2', 'F2', 'af2', 1),
+        divider('Analie', 'Stolen Gin'), song('p1', 'P1', 'ap1', 1), song('p2', 'P2', 'ap2', 1),
+        divider("Don't Panic", 'cold'), song('w1', 'W1', 'aw1', 1), song('w2', 'W2', 'aw2', 1),
+    ];
+
+    const run = (leadWith) => seasonSectionsOf(
+        shuffleKeepingAlbums(seasonal(), seededRandom(3), {
+            isDivider: isSeasonDivider, leadWith,
+        }),
+    ).map((s) => s.season);
+
+    it('puts the current season first and runs the calendar from there', () => {
+        expect(run('Summer')).toEqual(['Summer', 'Fall', 'Winter', 'Spring']);
+        expect(run('Fall')).toEqual(['Fall', 'Winter', 'Spring', 'Summer']);
+        expect(run('Winter')).toEqual(['Winter', 'Spring', 'Summer', 'Fall']);
+        expect(run('Spring')).toEqual(['Spring', 'Summer', 'Fall', 'Winter']);
+    });
+
+    it('fixes the filing order even when Summer already leads', () => {
+        // The playlist files Spring third; the calendar puts Winter there.
+        expect(seasonSectionsOf(seasonal()).map((s) => s.season))
+            .toEqual(['Summer', 'Fall', 'Spring', 'Winter']);
+        expect(run('Summer')).toEqual(['Summer', 'Fall', 'Winter', 'Spring']);
+    });
+
+    it('carries each divider along at the head of its own season', () => {
+        const out = shuffleKeepingAlbums(seasonal(), seededRandom(4), {
+            isDivider: isSeasonDivider, leadWith: 'Fall',
+        });
+        expect(out[0].name).toBe('doomsday');
+        expect(seasonSectionsOf(out).map((s) => s.divider.name))
+            .toEqual(['doomsday', "Don't Panic", 'Analie', 'Casita']);
+    });
+
+    it('keeps every season holding exactly its own tracks', () => {
+        const before = seasonSectionsOf(seasonal());
+        const after = seasonSectionsOf(shuffleKeepingAlbums(seasonal(), seededRandom(5), {
+            isDivider: isSeasonDivider, leadWith: 'Winter',
+        }));
+        before.forEach((was) => {
+            const now = after.find((s) => s.season === was.season);
+            expect(now.tracks.map((t) => t.uri).sort())
+                .toEqual(was.tracks.map((t) => t.uri).sort());
+        });
+    });
+
+    it('loses nothing when the seasons move', () => {
+        const src = seasonal();
+        const out = shuffleKeepingAlbums(src, seededRandom(6), {
+            isDivider: isSeasonDivider, leadWith: 'Spring',
+        });
+        expect(out.map((t) => t.uri).sort()).toEqual(src.map((t) => t.uri).sort());
+    });
+
+    it('leaves the order alone when no season is named', () => {
+        const out = shuffleKeepingAlbums(seasonal(), seededRandom(7), {
+            isDivider: isSeasonDivider,
+        });
+        expect(seasonSectionsOf(out).map((s) => s.season))
+            .toEqual(['Summer', 'Fall', 'Spring', 'Winter']);
+    });
+
+    it('leads with a stretch that belongs to no season', () => {
+        const stray = [song('stray', 'X', 'ax', 1), ...seasonal()];
+        const out = shuffleKeepingAlbums(stray, seededRandom(8), {
+            isDivider: isSeasonDivider, leadWith: 'Winter',
+        });
+        expect(out[0].name).toBe('stray');
+        expect(seasonSectionsOf(out).map((s) => s.season))
+            .toEqual([null, 'Winter', 'Spring', 'Summer', 'Fall']);
+    });
+
+    it('works the same in whole-album mode', () => {
+        const out = shuffleKeepingAlbums(seasonal(), seededRandom(9), {
+            isDivider: isSeasonDivider, leadWith: 'Fall', wholeAlbums: true,
+        });
+        expect(seasonSectionsOf(out).map((s) => s.season))
+            .toEqual(['Fall', 'Winter', 'Spring', 'Summer']);
     });
 });
 
