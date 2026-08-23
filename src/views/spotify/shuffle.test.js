@@ -1,5 +1,6 @@
 import {
     antiClump,
+    albumBlocksOf,
     artistKeyOf,
     blocksOf,
     describeOrder,
@@ -242,6 +243,205 @@ describe('spread', () => {
             .map((t, i) => (t.artistIds[0] === 'big' ? i : null))
             .filter((v) => v !== null);
         expect(at(81)).not.toEqual(at(82));
+    });
+});
+
+describe('album order across a broken-up record', () => {
+    // One album's tracks scattered among other artists, plus a second album to
+    // prove the two are ordered independently.
+    const scattered = () => {
+        const t = (name, artist, albumId, trackNumber) => ({
+            uri: `spotify:track:${name}`,
+            name,
+            artistIds: [artist],
+            artistNames: [artist],
+            albumId,
+            albumName: albumId,
+            discNumber: 1,
+            trackNumber,
+        });
+        return [
+            t('rec-9', 'A', 'REC', 9), t('x1', 'X', 'x1', 1),
+            t('rec-2', 'A', 'REC', 2), t('y1', 'Y', 'y1', 1),
+            t('other-5', 'B', 'OTHER', 5), t('z1', 'Z', 'z1', 1),
+            t('rec-5', 'A', 'REC', 5), t('w1', 'W', 'w1', 1),
+            t('other-1', 'B', 'OTHER', 1), t('v1', 'V', 'v1', 1),
+            t('rec-1', 'A', 'REC', 1), t('u1', 'U', 'u1', 1),
+        ];
+    };
+
+    const orderOf = (out, album) => out
+        .filter((t) => t.albumId === album)
+        .map((t) => t.trackNumber);
+
+    it('plays a scattered album in album order, not playlist order', () => {
+        const out = shuffleKeepingAlbums(scattered(), seededRandom(5));
+        expect(orderOf(out, 'REC')).toEqual([1, 2, 5, 9]);
+    });
+
+    it('orders each album independently', () => {
+        const out = shuffleKeepingAlbums(scattered(), seededRandom(6));
+        expect(orderOf(out, 'REC')).toEqual([1, 2, 5, 9]);
+        expect(orderOf(out, 'OTHER')).toEqual([1, 5]);
+    });
+
+    it('holds for every draw', () => {
+        for (let seed = 0; seed < 30; seed++) {
+            expect(orderOf(shuffleKeepingAlbums(scattered(), seededRandom(seed)), 'REC'))
+                .toEqual([1, 2, 5, 9]);
+        }
+    });
+
+    it('still spreads the album out rather than regrouping it', () => {
+        const out = shuffleKeepingAlbums(scattered(), seededRandom(9));
+        const at = out.map((t, i) => (t.albumId === 'REC' ? i : null)).filter((i) => i !== null);
+        // Four blocks in twelve slots: never adjacent, and reaching both ends.
+        at.slice(1).forEach((p, i) => expect(p - at[i]).toBeGreaterThan(1));
+    });
+
+    it('uses disc number before track number', () => {
+        const t = (n, disc, num) => ({
+            uri: `spotify:track:${n}`, name: n, artistIds: ['A'], artistNames: ['A'],
+            albumId: 'D', albumName: 'D', discNumber: disc, trackNumber: num,
+        });
+        const other = (n) => ({
+            uri: `spotify:track:${n}`, name: n, artistIds: [n], artistNames: [n],
+            albumId: n, albumName: n, discNumber: 1, trackNumber: 1,
+        });
+        const out = shuffleKeepingAlbums(
+            [t('d2t1', 2, 1), other('p'), t('d1t9', 1, 9), other('q')],
+            seededRandom(4),
+        );
+        expect(out.filter((x) => x.albumId === 'D').map((x) => x.name))
+            .toEqual(['d1t9', 'd2t1']);
+    });
+
+    it('falls back to the original order when tracks carry no numbering', () => {
+        const bare = (n, album) => ({
+            uri: `spotify:track:${n}`, name: n, artistIds: ['A'], artistNames: ['A'],
+            albumId: album, albumName: album,
+        });
+        const other = (n) => ({
+            uri: `spotify:track:${n}`, name: n, artistIds: [n], artistNames: [n],
+            albumId: n, albumName: n,
+        });
+        const src = [bare('first', 'N'), other('p'), bare('second', 'N'), other('q')];
+        const out = shuffleKeepingAlbums(src, seededRandom(3));
+        expect(out.filter((x) => x.albumId === 'N').map((x) => x.name))
+            .toEqual(['first', 'second']);
+    });
+
+    it('leaves a welded run alone — it was already in order', () => {
+        const t = (n, num) => ({
+            uri: `spotify:track:${n}`, name: n, artistIds: ['A'], artistNames: ['A'],
+            albumId: 'R', albumName: 'R', discNumber: 1, trackNumber: num,
+        });
+        // Adjacent in the source, so one block, and its internal order stands
+        // even though the track numbers descend.
+        const out = shuffleKeepingAlbums([t('c', 7), t('b', 3), t('a', 1)], seededRandom(1));
+        expect(out.map((x) => x.name)).toEqual(['c', 'b', 'a']);
+    });
+});
+
+describe('whole-album mode', () => {
+    const t = (name, artist, album, num) => ({
+        uri: `spotify:track:${name}`,
+        name,
+        artistIds: [artist],
+        artistNames: [artist],
+        albumId: album,
+        albumName: album,
+        discNumber: 1,
+        trackNumber: num,
+    });
+
+    // Two records, deliberately scattered and out of order, plus filler.
+    const scattered = () => [
+        t('rec-3', 'A', 'REC', 3), t('p', 'P', 'p', 1),
+        t('two-2', 'B', 'TWO', 2), t('q', 'Q', 'q', 1),
+        t('rec-1', 'A', 'REC', 1), t('r', 'R', 'r', 1),
+        t('two-1', 'B', 'TWO', 1), t('s', 'S', 's', 1),
+        t('rec-2', 'A', 'REC', 2), t('u', 'U', 'u', 1),
+    ];
+
+    const whole = { wholeAlbums: true };
+
+    it('gathers every track of a record into one unbroken run', () => {
+        const out = shuffleKeepingAlbums(scattered(), seededRandom(3), whole);
+        const at = out.map((x, i) => (x.albumId === 'REC' ? i : null)).filter((i) => i !== null);
+        expect(at).toHaveLength(3);
+        expect(at[2] - at[0]).toBe(2);      // contiguous
+    });
+
+    it('plays the gathered record in album order', () => {
+        const out = shuffleKeepingAlbums(scattered(), seededRandom(4), whole);
+        expect(out.filter((x) => x.albumId === 'REC').map((x) => x.trackNumber))
+            .toEqual([1, 2, 3]);
+        expect(out.filter((x) => x.albumId === 'TWO').map((x) => x.trackNumber))
+            .toEqual([1, 2]);
+    });
+
+    it('loses nothing and duplicates nothing', () => {
+        const src = scattered();
+        const out = shuffleKeepingAlbums(src, seededRandom(5), whole);
+        expect(out.map((x) => x.uri).sort()).toEqual(src.map((x) => x.uri).sort());
+    });
+
+    it('moves the record around between draws', () => {
+        const first = shuffleKeepingAlbums(scattered(), seededRandom(6), whole)
+            .findIndex((x) => x.albumId === 'REC');
+        const other = shuffleKeepingAlbums(scattered(), seededRandom(40), whole)
+            .findIndex((x) => x.albumId === 'REC');
+        expect(first).not.toBe(other);
+    });
+
+    it('is the difference between the two modes', () => {
+        const src = scattered();
+        const spread = shuffleKeepingAlbums(src, seededRandom(7));
+        const grouped = shuffleKeepingAlbums(src, seededRandom(7), whole);
+        const runLength = (out) => {
+            const at = out.map((x, i) => (x.albumId === 'REC' ? i : null))
+                .filter((i) => i !== null);
+            return at[at.length - 1] - at[0];
+        };
+        expect(runLength(grouped)).toBe(2);            // together
+        expect(runLength(spread)).toBeGreaterThan(2);  // spread out
+    });
+
+    it('never gathers a record across a season divider', () => {
+        const divider = (name, season) => ({
+            ...t(name, 'D', `dv-${name}`, 1), name: season,
+        });
+        // The same album has tracks either side of the Fall divider.
+        const src = [
+            divider('d1', 'Casita'),
+            t('rec-1', 'A', 'REC', 1), t('p', 'P', 'p', 1),
+            divider('d2', 'doomsday'),
+            t('rec-2', 'A', 'REC', 2), t('q', 'Q', 'q', 1),
+        ];
+        const out = shuffleKeepingAlbums(src, seededRandom(8), {
+            ...whole, isDivider: isSeasonDivider,
+        });
+        const sections = seasonSectionsOf(out);
+        // One REC track stays in each season rather than being pulled together.
+        expect(sections[0].tracks.filter((x) => x.albumId === 'REC')).toHaveLength(1);
+        expect(sections[1].tracks.filter((x) => x.albumId === 'REC')).toHaveLength(1);
+    });
+
+    it('still spreads the artists between records', () => {
+        // Four artists, two albums each, two tracks per album.
+        const src = [];
+        ['A', 'B', 'C', 'D'].forEach((artist) => {
+            [1, 2].forEach((album) => {
+                [1, 2].forEach((num) =>
+                    src.push(t(`${artist}${album}-${num}`, artist, `${artist}${album}`, num)));
+            });
+        });
+        const out = shuffleKeepingAlbums(src, seededRandom(9), whole);
+        const blocks = albumBlocksOf(out);
+        const clash = blocks.filter((b, i) =>
+            i > 0 && artistKeyOf(blocks[i - 1]) === artistKeyOf(b));
+        expect(clash).toHaveLength(0);
     });
 });
 

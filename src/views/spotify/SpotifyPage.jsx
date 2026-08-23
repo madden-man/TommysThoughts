@@ -23,6 +23,9 @@ export const SpotifyPage = () => {
     const [playlist, setPlaylist] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [order, setOrder] = useState(null);
+    // Which of the two shuffles produced `order`, so the preview and the report
+    // can say what you are looking at rather than leaving you to guess.
+    const [mode, setMode] = useState(null);
 
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
@@ -40,6 +43,9 @@ export const SpotifyPage = () => {
         () => (playlist ? seasonSectionsOf(playlist.tracks) : []),
         [playlist],
     );
+
+    // Measured once per shuffle rather than per render — it walks all 2019.
+    const report = useMemo(() => (order ? describeOrder(order, {}) : null), [order]);
 
     const previewSections = useMemo(
         () => (order ? seasonSectionsOf(order) : []),
@@ -62,11 +68,13 @@ export const SpotifyPage = () => {
     const seasonsLookRight = seasonCheck.length > 0
         && seasonCheck.every((s) => s.found === 1);
 
-    const shuffle = () => {
+    const shuffle = (wholeAlbums) => {
         setWriteError(null);
         setWrote(null);
+        setMode(wholeAlbums ? 'albums' : 'tracks');
         setOrder(shuffleKeepingAlbums(playlist.tracks, Math.random, {
             isDivider: isSeasonDivider,
+            wholeAlbums,
         }));
     };
 
@@ -165,22 +173,39 @@ export const SpotifyPage = () => {
                                 )}
                             </div>
 
+                            {/* Two shuffles, differing only in what counts as
+                                one indivisible thing. */}
                             <div className="spotify__actions">
                                 <Button
-                                    variant="contained"
-                                    onClick={shuffle}
+                                    variant={mode === 'tracks' ? 'contained' : 'outlined'}
+                                    onClick={() => shuffle(false)}
                                     disabled={busy || !playlist.tracks.length}
                                 >
-                                    {order ? 'Shuffle again' : 'Shuffle'}
+                                    Shuffle tracks
+                                </Button>
+                                <Button
+                                    variant={mode === 'albums' ? 'contained' : 'outlined'}
+                                    onClick={() => shuffle(true)}
+                                    disabled={busy || !playlist.tracks.length}
+                                >
+                                    Shuffle whole albums
                                 </Button>
                                 <Button
                                     variant="outlined"
+                                    color="success"
                                     onClick={write}
                                     disabled={busy || !order}
                                 >
                                     Write to "pre approved shuffled"
                                 </Button>
                             </div>
+                            <p className="spotify__muted">
+                                <strong>Shuffle tracks</strong> spreads a record's songs
+                                across its season, in album order, keeping only the runs
+                                that were already together.{' '}
+                                <strong>Shuffle whole albums</strong> keeps each record
+                                intact and start-to-finish, and shuffles the records.
+                            </p>
 
                             {busy && (
                                 <p className="spotify__progress">
@@ -196,15 +221,17 @@ export const SpotifyPage = () => {
                                 </p>
                             )}
 
-                            {order && (
+                            {report && (
                                 <div className="spotify__report">
                                     <p className="spotify__report-line">
-                                        <strong>{describeOrder(order, {}).albumRuns}</strong>{' '}
-                                        album runs kept together
+                                        <strong>{report.albumRuns}</strong>{' '}
+                                        {mode === 'albums'
+                                            ? 'records playing start to finish'
+                                            : 'album runs kept together'}
+                                        {report.longestRun > 0
+                                            && ` (longest ${report.longestRun} tracks)`}
                                         {' · '}
-                                        <strong>
-                                            {describeOrder(order, {}).adjacentArtistRepeats}
-                                        </strong>{' '}
+                                        <strong>{report.adjacentArtistRepeats}</strong>{' '}
                                         back-to-back artist repeats
                                     </p>
                                     <p className="spotify__muted">

@@ -52,6 +52,11 @@ const trim = (entry) => {
         artistNames: (track.artists ?? []).map((a) => a.name),
         albumId: track.album?.id ?? null,
         albumName: track.album?.name ?? null,
+        // Where the track sits on its own album. The shuffle scatters an
+        // album's tracks across a season but plays them in this order, so a
+        // record still unfolds the way it was sequenced.
+        discNumber: track.disc_number ?? null,
+        trackNumber: track.track_number ?? null,
         addedAt: entry?.added_at ?? null,
     };
 };
@@ -61,7 +66,8 @@ const page = async (token, offset) => {
     // migration and now answers 403 for every playlist, including public ones.
     const url = `https://api.spotify.com/v1/playlists/${SOURCE_PLAYLIST_ID}/items`
         + `?offset=${offset}&limit=${PAGE}`
-        + '&fields=total,items(added_at,item(uri,name,artists(id,name),album(id,name)))';
+        + '&fields=total,items(added_at,item(uri,name,disc_number,track_number,'
+        + 'artists(id,name),album(id,name)))';
     const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
     if (!response.ok) throw new Error(`Spotify ${response.status}: ${await response.text()}`);
     return response.json();

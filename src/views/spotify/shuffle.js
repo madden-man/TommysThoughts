@@ -43,7 +43,9 @@ export const blocksOf = (tracks) => {
             && track.albumId
             && open.albumId === track.albumId;
         if (joins) open.tracks.push(track);
-        else blocks.push({ albumId: track.albumId ?? null, tracks: [track] });
+        // `seq` is where this block sat before anything moved — the fallback
+        // running order for an album whose tracks carry no track numbers.
+        else blocks.push({ albumId: track.albumId ?? null, seq: blocks.length, tracks: [track] });
     });
     return blocks;
 };
@@ -67,6 +69,100 @@ const shuffled = (list, random) => {
         [out[i], out[j]] = [out[j], out[i]];
     }
     return out;
+};
+
+// Where a track sits on its own record: disc first, then track. Null when it
+// carries no numbering, which is the case for a local file and for anything read
+// before get_playlist started asking for those fields.
+const trackRank = (track) => {
+    if (!Number.isFinite(track?.trackNumber)) return null;
+    const disc = Number.isFinite(track.discNumber) ? track.discNumber : 1;
+    return disc * 1000 + track.trackNumber;
+};
+
+const albumRank = (block) => trackRank(block.tracks[0]);
+
+// Sorting an album's own tracks. Returning 0 for anything unnumbered leans on
+// sort being stable, which keeps those in the order they already had rather
+// than inventing one.
+const byAlbumOrder = (a, b) => {
+    const left = trackRank(a);
+    const right = trackRank(b);
+    return left !== null && right !== null ? left - right : 0;
+};
+
+/**
+ * The playlist as whole albums: every track of a record in one block, in album
+ * order, however scattered they were to begin with.
+ *
+ * The alternative to `blocksOf`, which only welds tracks that were already
+ * adjacent. Here a record is the atomic thing and it plays start to finish.
+ *
+ * Grouping is per section by construction — this only ever sees one season at a
+ * time — so an album with tracks in two seasons stays as two groups, one in
+ * each. Gathering those into one would move tracks across a boundary, and a
+ * season outranks a record.
+ */
+export const albumBlocksOf = (tracks) => {
+    const open = new Map();
+    const blocks = [];
+    (Array.isArray(tracks) ? tracks : []).forEach((track) => {
+        const id = track.albumId;
+        // No album id means nothing to group on — it stands alone.
+        if (!id) {
+            blocks.push({ albumId: null, seq: blocks.length, tracks: [track] });
+            return;
+        }
+        if (!open.has(id)) {
+            const block = { albumId: id, seq: blocks.length, tracks: [] };
+            open.set(id, block);
+            blocks.push(block);
+        }
+        open.get(id).tracks.push(track);
+    });
+    blocks.forEach((block) => {
+        if (block.tracks.length > 1) block.tracks.sort(byAlbumOrder);
+    });
+    return blocks;
+};
+
+/**
+ * Put each album's scattered blocks back into album order.
+ *
+ * Welding only protects tracks that were already adjacent; the rest of a record
+ * gets broken up and spread across the season. This makes that break-up
+ * survivable: an album still unfolds in its own sequence as the season plays,
+ * you just hear other things in between.
+ *
+ * It permutes blocks ONLY among the slots that album already occupies, so the
+ * spacing decided above is untouched — every slot keeps a block by the same
+ * artist, so nothing it does can create a new adjacent repeat. That is also why
+ * it runs last: whatever `separateNeighbours` rearranged, this still gets the
+ * final say on the order within a record.
+ *
+ * "Where possible" is doing real work in the ordering: an album whose tracks
+ * carry no numbering falls back to the order the blocks were in to begin with.
+ */
+export const orderWithinAlbums = (list) => {
+    const slots = new Map();
+    list.forEach((block, i) => {
+        if (!block.albumId) return;
+        if (!slots.has(block.albumId)) slots.set(block.albumId, []);
+        slots.get(block.albumId).push(i);
+    });
+
+    slots.forEach((indices) => {
+        if (indices.length < 2) return;
+        const inOrder = indices.map((i) => list[i]).sort((a, b) => {
+            const left = albumRank(a);
+            const right = albumRank(b);
+            if (left !== null && right !== null) return left - right;
+            return (a.seq ?? 0) - (b.seq ?? 0);
+        });
+        // `indices` is ascending, so the earliest slot takes the earliest track.
+        indices.forEach((at, k) => { list[at] = inOrder[k]; });
+    });
+    return list;
 };
 
 // Once everything is placed, an artist can still land beside themselves where
@@ -145,7 +241,7 @@ export const antiClump = (blocks, random = Math.random) => {
     });
 
     wanted.sort((a, b) => a.at - b.at);
-    return separateNeighbours(wanted.map((w) => w.block));
+    return orderWithinAlbums(separateNeighbours(wanted.map((w) => w.block)));
 };
 
 /** Blocks back to a flat track list. */
@@ -278,9 +374,14 @@ export const seasonSectionsOf = (tracks, isDivider = isSeasonDivider) => {
 export const shuffleKeepingAlbums = (
     tracks,
     random = Math.random,
-    { isDivider = null, sectionStarts = [] } = {},
+    { isDivider = null, sectionStarts = [], wholeAlbums = false } = {},
 ) => {
-    const shuffle = (list) => flatten(antiClump(blocksOf(list), random));
+    // The two modes differ only in what counts as one indivisible thing: a run
+    // of tracks that were already adjacent, or an entire record. Everything
+    // after that — spacing the artists, pinning the dividers, sealing the
+    // seasons — is the same either way.
+    const toBlocks = wholeAlbums ? albumBlocksOf : blocksOf;
+    const shuffle = (list) => flatten(antiClump(toBlocks(list), random));
     if (isDivider) {
         return partsOf(tracks, isDivider)
             .flatMap((part) => (part.divider ? [part.divider] : shuffle(part.tracks)));
