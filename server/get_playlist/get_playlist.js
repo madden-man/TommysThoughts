@@ -8,6 +8,11 @@
 //
 // Needs SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REFRESH_TOKEN.
 
+const { MongoClient } = require('mongodb');
+
+const mongoClient = new MongoClient(process.env.MONGODB_URI);
+const clientPromise = mongoClient.connect();
+
 // The playlist ids are in their share URLs and are not secrets, so they sit here
 // with env overrides rather than becoming more things to configure.
 const SOURCE_PLAYLIST_ID =
@@ -63,8 +68,6 @@ const trim = (entry) => {
 
 // Genres live on the artist, not the track or the playlist item. Spotify returns
 // them sorted by relevance, so the first one is the most representative tag.
-// Failures are swallowed: genres improve the shuffle but the playlist fetch must
-// succeed either way.
 const fetchArtistGenres = async (token, artistIds) => {
     const batches = [];
     for (let i = 0; i < artistIds.length; i += 50)
@@ -82,6 +85,33 @@ const fetchArtistGenres = async (token, artistIds) => {
         if (artist?.id) map.set(artist.id, artist.genres?.[0] ?? '');
     });
     return map;
+};
+
+// Genre cache: one document in tommy-data.spotify_artist_genres keyed by
+// { _id: 'artist_genres', genres: { [artistId]: genre } }. Only artists missing
+// from the cache hit Spotify; new entries are merged in with $set so the document
+// grows incrementally rather than being replaced wholesale.
+const genreCollection = async () => {
+    const db = (await clientPromise).db('tommy-data');
+    return db.collection('spotify_artist_genres');
+};
+
+const readGenreCache = async () => {
+    const col = await genreCollection();
+    const doc = await col.findOne({ _id: 'artist_genres' });
+    return new Map(Object.entries(doc?.genres ?? {}));
+};
+
+const writeGenreCache = async (newGenres) => {
+    if (!newGenres.size) return;
+    const col = await genreCollection();
+    const update = {};
+    newGenres.forEach((genre, id) => { update[`genres.${id}`] = genre; });
+    await col.updateOne(
+        { _id: 'artist_genres' },
+        { $set: { ...update, updatedAt: new Date().toISOString() } },
+        { upsert: true },
+    );
 };
 
 const page = async (token, offset) => {
@@ -120,16 +150,28 @@ const handler = async () => {
             // say how many were skipped.
             .filter((t) => t.uri);
 
-        // Unique primary artist IDs across the whole playlist. The /artists
-        // endpoint returns up to 50 per request; they all go out in parallel
-        // alongside the playlist pages and cost no extra round trips.
+        // Genre enrichment is best-effort: a failure here means the shuffle runs
+        // without genre data for this request, but the playlist still loads.
         let genreMap = new Map();
         try {
             const artistIds = [...new Set(tracks.flatMap((t) => t.artistIds).filter(Boolean))];
-            if (artistIds.length) genreMap = await fetchArtistGenres(token, artistIds);
+            if (artistIds.length) {
+                // Read the cache first. Only the artists not already stored there
+                // need a Spotify call — typically zero on a normal page load.
+                const cached = await readGenreCache();
+                const missing = artistIds.filter((id) => !cached.has(id));
+
+                if (missing.length) {
+                    const fetched = await fetchArtistGenres(token, missing);
+                    fetched.forEach((genre, id) => cached.set(id, genre));
+                    // Fire-and-forget: a write failure must not delay the response.
+                    writeGenreCache(fetched).catch(() => {});
+                }
+
+                genreMap = cached;
+            }
         } catch (_) {
-            // Genre enrichment is best-effort: a failed fetch just means the
-            // shuffle will not have genre information for this run.
+            // Swallowed — see above.
         }
 
         const tracksWithGenres = tracks.map((t) => ({
