@@ -280,14 +280,17 @@ const antiClumpWithGenres = (blocks, random) => {
     const genreLists = shuffled([...byGenre.values()], random)
         .map((genreBlocks) => placeByArtist(genreBlocks, random));
 
-    // Round-robin: one block per genre per pass until every list is exhausted.
-    // Longer genre lists recur more often — a genre with twice the blocks gets
-    // twice as many sections, each the same length as any other genre's.
+    // Round-robin in chunks so genre sections are long enough to be audible.
+    // One block at a time switches genre every 1-3 tracks — indistinguishable
+    // from random. A chunk of ~10 blocks produces sections of roughly 20-30
+    // tracks, which is perceptible as a genre run.
+    const GENRE_CHUNK = 10;
     const result = [];
     const indices = genreLists.map(() => 0);
     while (genreLists.some((list, g) => indices[g] < list.length)) {
         for (let g = 0; g < genreLists.length; g++) {
-            if (indices[g] < genreLists[g].length) result.push(genreLists[g][indices[g]++]);
+            const end = Math.min(indices[g] + GENRE_CHUNK, genreLists[g].length);
+            while (indices[g] < end) result.push(genreLists[g][indices[g]++]);
         }
     }
 
