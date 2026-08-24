@@ -28,6 +28,11 @@
 export const artistKeyOf = (block) =>
     block.tracks[0]?.artistIds?.[0] ?? block.tracks[0]?.artistNames?.[0] ?? '';
 
+// Genre comes from the primary artist's most representative Spotify tag. Blocks
+// with no genre data get an empty string and all land in the same group, which
+// falls back to plain artist-spreading.
+export const genreKeyOf = (block) => block.tracks[0]?.genre ?? '';
+
 /**
  * The current order -> atomic blocks. A run of consecutive same-album tracks
  * becomes one block; everything else is a block of one.
@@ -197,31 +202,19 @@ const separateNeighbours = (list) => {
     return list;
 };
 
-/**
- * Spread the blocks so each artist recurs as rarely as the section allows.
- *
- * Every artist is dealt across the WHOLE section rather than picked one slot at
- * a time: an artist holding `k` of the `n` blocks wants one every `n / k`, so
- * their blocks ask for positions `(j + u) * n / k` under a single random phase
- * `u`, and everything is then sorted by the position it asked for.
- *
- * Placing by stride rather than by greed is the point. An earlier version scored
- * candidates by how many blocks they had left, which is a sort by artist
- * frequency wearing a shuffle\'s clothes: the two biggest artists ping-ponged
- * across the opening — Ed Sheeran, Quinn XCII, Ed Sheeran, Quinn XCII — while
- * every artist with a single block scored lowest and was stranded in the last
- * fifth of the season. Spacing is a property of the whole section, so it has to
- * be decided for the whole section at once rather than one slot at a time.
- *
- * The phase is per artist and random, so the same playlist comes out differently
- * every run while each artist stays evenly spread.
- *
- * When one artist holds more than half the blocks, some adjacency is arithmetic
- * rather than a bug: there are not enough other blocks to separate them.
- */
-export const antiClump = (blocks, random = Math.random) => {
-    if (blocks.length <= 1) return [...blocks];
-
+// The placement step of artist-spreading: assigns each block a fractional
+// position using the stride formula, sorts by it, and returns the ordered list.
+// Finishing passes (separateNeighbours, orderWithinAlbums) are the caller's job
+// so that genre interleaving can do a single pass over the full result.
+//
+// Placing by stride rather than by greed is the point. An earlier version scored
+// candidates by how many blocks they had left, which is a sort by artist
+// frequency wearing a shuffle's clothes: the two biggest artists ping-ponged
+// across the opening — Ed Sheeran, Quinn XCII, Ed Sheeran, Quinn XCII — while
+// every artist with a single block scored lowest and was stranded in the last
+// fifth of the season. Spacing is a property of the whole section, so it has to
+// be decided for the whole section at once rather than one slot at a time.
+const placeByArtist = (blocks, random) => {
     const byArtist = new Map();
     blocks.forEach((block) => {
         const key = artistKeyOf(block);
@@ -232,7 +225,7 @@ export const antiClump = (blocks, random = Math.random) => {
     const total = blocks.length;
     const wanted = [];
     byArtist.forEach((list) => {
-        // Which of an artist\'s blocks takes which slot is itself shuffled, so the
+        // Which of an artist's blocks takes which slot is itself shuffled, so the
         // spacing is stable but the running order inside it is not.
         const order = shuffled(list, random);
         const stride = total / order.length;
@@ -241,7 +234,64 @@ export const antiClump = (blocks, random = Math.random) => {
     });
 
     wanted.sort((a, b) => a.at - b.at);
-    return orderWithinAlbums(separateNeighbours(wanted.map((w) => w.block)));
+    return wanted.map((w) => w.block);
+};
+
+/**
+ * Spread the blocks so each artist recurs as rarely as the section allows.
+ *
+ * Every artist is dealt across the WHOLE section rather than picked one slot at
+ * a time: an artist holding `k` of the `n` blocks wants one every `n / k`, so
+ * their blocks ask for positions `(j + u) * n / k` under a single random phase
+ * `u`, and everything is then sorted by the position it asked for.
+ *
+ * The phase is per artist and random, so the same playlist comes out differently
+ * every run while each artist stays evenly spread.
+ *
+ * When one artist holds more than half the blocks, some adjacency is arithmetic
+ * rather than a bug: there are not enough other blocks to separate them.
+ */
+export const antiClump = (blocks, random = Math.random) => {
+    if (blocks.length <= 1) return [...blocks];
+    return orderWithinAlbums(separateNeighbours(placeByArtist(blocks, random)));
+};
+
+// Genre-aware version of antiClump. Groups blocks by genre, spreads artists
+// within each genre group independently, then interleaves the groups round-robin
+// so each genre recurs in multiple short runs across the section rather than
+// sitting in one lump. When all blocks share the same genre (or carry none),
+// this falls back to plain antiClump so the behaviour is unchanged.
+//
+// The finishing passes run once on the full interleaved result rather than per
+// group, so separateNeighbours can repair any genre-boundary collisions.
+const antiClumpWithGenres = (blocks, random) => {
+    if (blocks.length <= 1) return [...blocks];
+
+    const byGenre = new Map();
+    blocks.forEach((block) => {
+        const key = genreKeyOf(block);
+        if (!byGenre.has(key)) byGenre.set(key, []);
+        byGenre.get(key).push(block);
+    });
+
+    if (byGenre.size <= 1) return antiClump(blocks, random);
+
+    // Randomise the genre cycle so the leading genre changes each run.
+    const genreLists = shuffled([...byGenre.values()], random)
+        .map((genreBlocks) => placeByArtist(genreBlocks, random));
+
+    // Round-robin: one block per genre per pass until every list is exhausted.
+    // Longer genre lists recur more often — a genre with twice the blocks gets
+    // twice as many sections, each the same length as any other genre's.
+    const result = [];
+    const indices = genreLists.map(() => 0);
+    while (genreLists.some((list, g) => indices[g] < list.length)) {
+        for (let g = 0; g < genreLists.length; g++) {
+            if (indices[g] < genreLists[g].length) result.push(genreLists[g][indices[g]++]);
+        }
+    }
+
+    return orderWithinAlbums(separateNeighbours(result));
 };
 
 /** Blocks back to a flat track list. */
@@ -419,7 +469,7 @@ export const shuffleKeepingAlbums = (
     // after that — spacing the artists, pinning the dividers, sealing the
     // seasons — is the same either way.
     const toBlocks = wholeAlbums ? albumBlocksOf : blocksOf;
-    const shuffle = (list) => flatten(antiClump(toBlocks(list), random));
+    const shuffle = (list) => flatten(antiClumpWithGenres(toBlocks(list), random));
 
     if (isDivider && leadWith) {
         // Whole seasons move here, so the dividers do NOT stay on the indices

@@ -61,6 +61,29 @@ const trim = (entry) => {
     };
 };
 
+// Genres live on the artist, not the track or the playlist item. Spotify returns
+// them sorted by relevance, so the first one is the most representative tag.
+// Failures are swallowed: genres improve the shuffle but the playlist fetch must
+// succeed either way.
+const fetchArtistGenres = async (token, artistIds) => {
+    const batches = [];
+    for (let i = 0; i < artistIds.length; i += 50)
+        batches.push(artistIds.slice(i, i + 50));
+
+    const results = await Promise.all(batches.map(async (batch) => {
+        const url = `https://api.spotify.com/v1/artists?ids=${batch.join(',')}`;
+        const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+        if (!response.ok) return [];
+        return (await response.json()).artists ?? [];
+    }));
+
+    const map = new Map();
+    results.flat().forEach((artist) => {
+        if (artist?.id) map.set(artist.id, artist.genres?.[0] ?? '');
+    });
+    return map;
+};
+
 const page = async (token, offset) => {
     // /items, not /tracks: the older endpoint was removed in the March 2026
     // migration and now answers 403 for every playlist, including public ones.
@@ -97,10 +120,27 @@ const handler = async () => {
             // say how many were skipped.
             .filter((t) => t.uri);
 
+        // Unique primary artist IDs across the whole playlist. The /artists
+        // endpoint returns up to 50 per request; they all go out in parallel
+        // alongside the playlist pages and cost no extra round trips.
+        let genreMap = new Map();
+        try {
+            const artistIds = [...new Set(tracks.flatMap((t) => t.artistIds).filter(Boolean))];
+            if (artistIds.length) genreMap = await fetchArtistGenres(token, artistIds);
+        } catch (_) {
+            // Genre enrichment is best-effort: a failed fetch just means the
+            // shuffle will not have genre information for this run.
+        }
+
+        const tracksWithGenres = tracks.map((t) => ({
+            ...t,
+            genre: genreMap.get(t.artistIds[0]) ?? '',
+        }));
+
         return {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ playlistId: SOURCE_PLAYLIST_ID, total: first.total, tracks }),
+            body: JSON.stringify({ playlistId: SOURCE_PLAYLIST_ID, total: first.total, tracks: tracksWithGenres }),
         };
     } catch (error) {
         return { statusCode: 500, body: error.toString() };
