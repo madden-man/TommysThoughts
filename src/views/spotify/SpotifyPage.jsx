@@ -55,9 +55,11 @@ export const SpotifyPage = () => {
     // Measured once per shuffle rather than per render — it walks all 2019.
     const report = useMemo(() => (order ? describeOrder(order, {}) : null), [order]);
 
+    // Show sections from the shuffled order when one exists, otherwise from the
+    // original playlist — so per-season shuffle buttons are available immediately.
     const previewSections = useMemo(
-        () => (order ? seasonSectionsOf(order) : []),
-        [order],
+        () => (playlist ? seasonSectionsOf(order ?? playlist.tracks) : []),
+        [order, playlist],
     );
 
     // Each season should be opened by exactly one song. Naming a song rather
@@ -85,6 +87,36 @@ export const SpotifyPage = () => {
             wholeAlbums,
             leadWith,
         }));
+    };
+
+    const reshuffleSeason = (seasonName) => {
+        setWriteError(null);
+        setWrote(null);
+        const base = order ?? playlist.tracks;
+        const sections = seasonSectionsOf(base);
+        const newOrder = sections.flatMap((section) => [
+            ...(section.divider ? [section.divider] : []),
+            ...(section.season === seasonName
+                ? shuffleKeepingAlbums(section.tracks, Math.random, {
+                    wholeAlbums: mode === 'albums',
+                })
+                : section.tracks),
+        ]);
+        setOrder(newOrder);
+        if (!mode) setMode('tracks');
+    };
+
+    // Top genre tags by track count for a set of tracks — capped at four so the
+    // line stays readable. Empty strings (no genre data) are skipped.
+    const topGenresOf = (tracks) => {
+        const counts = new Map();
+        tracks.forEach((t) => {
+            if (t.genre) counts.set(t.genre, (counts.get(t.genre) ?? 0) + 1);
+        });
+        return [...counts.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4)
+            .map(([g]) => g);
     };
 
     const write = async () => {
@@ -254,36 +286,56 @@ export const SpotifyPage = () => {
                                 </div>
                             )}
 
-                            {previewSections.map((section, i) => (
-                                <div key={i} className="spotify__section">
-                                    <p className="spotify__section-title">
-                                        {section.season ?? 'Before the first season'}
-                                        <span className="spotify__muted">
-                                            {' '}· {section.tracks.length} tracks
-                                        </span>
-                                    </p>
-                                    {section.divider && (
-                                        <p className="spotify__opener">
-                                            opens with <strong>{section.divider.name}</strong>
-                                        </p>
-                                    )}
-                                    <ol className="spotify__tracks">
-                                        {section.tracks.slice(0, PREVIEW_PER_SECTION).map((t) => (
-                                            <li key={t.uri}>
-                                                {t.name}
+                            {previewSections.map((section, i) => {
+                                const genres = topGenresOf(section.tracks);
+                                return (
+                                    <div key={i} className="spotify__section">
+                                        <div className="spotify__section-header">
+                                            <p className="spotify__section-title">
+                                                {section.season ?? 'Before the first season'}
                                                 <span className="spotify__muted">
-                                                    {' — '}{t.artistNames.join(', ')}
+                                                    {' '}· {section.tracks.length} tracks
                                                 </span>
-                                            </li>
-                                        ))}
-                                        {section.tracks.length > PREVIEW_PER_SECTION && (
-                                            <li className="spotify__muted">
-                                                +{section.tracks.length - PREVIEW_PER_SECTION} more
-                                            </li>
+                                            </p>
+                                            {section.season && (
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    onClick={() => reshuffleSeason(section.season)}
+                                                    disabled={busy}
+                                                >
+                                                    Shuffle
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {genres.length > 0 && (
+                                            <p className="spotify__muted spotify__section-genres">
+                                                {genres.join(' · ')}
+                                            </p>
                                         )}
-                                    </ol>
-                                </div>
-                            ))}
+                                        {section.divider && (
+                                            <p className="spotify__opener">
+                                                opens with <strong>{section.divider.name}</strong>
+                                            </p>
+                                        )}
+                                        <ol className="spotify__tracks">
+                                            {section.tracks.slice(0, PREVIEW_PER_SECTION).map((t) => (
+                                                <li key={t.uri}>
+                                                    {t.name}
+                                                    <span className="spotify__muted">
+                                                        {' — '}{t.artistNames.join(', ')}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                            {section.tracks.length > PREVIEW_PER_SECTION && (
+                                                <li className="spotify__muted">
+                                                    +{section.tracks.length - PREVIEW_PER_SECTION} more
+                                                </li>
+                                            )}
+                                        </ol>
+                                    </div>
+                                );
+                            })}
                         </>
                     )}
                 </div>

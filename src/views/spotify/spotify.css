@@ -126,9 +126,21 @@
     padding-top: 8px;
 }
 
+.spotify__section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
 .spotify__section-title {
-    margin: 0 0 4px;
+    margin: 0;
     font-weight: 700;
+}
+
+.spotify__section-genres {
+    margin: 0 0 4px;
 }
 
 .spotify__tracks {
