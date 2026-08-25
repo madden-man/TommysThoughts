@@ -6,12 +6,11 @@
 // short-lived access token and caches that. Nothing here ever asks anyone to log
 // in.
 //
-// Large playlists (the "master" lists run to five figures) are the reason this
-// is not a single fetch: pulling 160 pages at once trips Spotify's rate limit
-// (429), and would not fit inside a function's ten seconds anyway. So a playlist
-// is BUILT — a bounded chunk of pages per call, progress saved to Mongo — and
-// CACHED by its snapshot id, so once built it is served without touching Spotify
-// again until the playlist itself changes.
+// Only the first MAX_TRACKS are read. A huge playlist (some run to five figures)
+// would take hundreds of page requests, which trips Spotify's rate limit and
+// doesn't fit a function's ten seconds — so the tool shuffles the first couple
+// of thousand and leaves the tail alone, keeping every playlist to the same
+// small, safe footprint.
 //
 // Needs SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN and
 // MONGODB_URI.
@@ -34,14 +33,14 @@ const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/
 
 // Spotify's maximum per request on /items is 50.
 const PAGE = 50;
-// Pages fetched per invocation. Kept low so the burst stays under the rate limit
-// and comfortably inside the function's budget; the client re-calls until the
-// build is complete, resuming from where the last call left off.
-const PAGES_PER_CALL = 20;
-// Requests in flight at once — small on purpose, for the same reason.
+// The most tracks read from any one playlist — 40 pages, the size pre-approved
+// has always been. Anything past this is left unshuffled.
+const MAX_TRACKS = 2000;
+// Requests in flight at once — kept small so the burst stays under the rate
+// limit and inside the function's budget.
 const CONCURRENCY = 3;
-// Missing-artist batches to resolve per served response. Genres fill in over a
-// few loads rather than in one burst that would rate-limit the build.
+// Missing-artist batches to resolve per load. Genres fill in over a few loads
+// rather than in one burst that would rate-limit the read.
 const MAX_GENRE_BATCHES = 4;
 // Leave the function a little room under its ten seconds for the response.
 const BUDGET_MS = 9000;
@@ -164,60 +163,16 @@ const writeGenreCache = async (newGenres) => {
     );
 };
 
-// Built playlists: one document per playlist in tommy-data.spotify_playlists,
-// keyed by its Spotify id. Holds the trimmed tracks, the snapshot id they were
-// built from, and how far the build has got.
-const playlistCollection = async () => {
-    const db = (await clientPromise).db('tommy-data');
-    return db.collection('spotify_playlists');
-};
-
 const page = async (token, playlistId, offset) => {
     // /items, not /tracks: the older endpoint was removed in the March 2026
     // migration and now answers 403 for every playlist, including public ones.
     const url = `https://api.spotify.com/v1/playlists/${playlistId}/items`
         + `?offset=${offset}&limit=${PAGE}`
-        + '&fields=items(added_at,item(uri,name,disc_number,track_number,'
+        + '&fields=total,items(added_at,item(uri,name,disc_number,track_number,'
         + 'artists(id,name),album(id,name)))';
     const response = await spotifyGet(url, token);
     if (!response.ok) throw new Error(`Spotify ${response.status}: ${await response.text()}`);
     return response.json();
-};
-
-const json = (body, statusCode = 200) => ({
-    statusCode,
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-});
-
-// A finished playlist, with genres applied from the cache. A bounded number of
-// still-missing artists are resolved on each serve, so genres fill in over a few
-// loads without ever bursting.
-const serve = async (col, token, playlistId, total) => {
-    const doc = await col.findOne({ _id: playlistId });
-    const tracks = doc?.tracks ?? [];
-
-    let genreMap = new Map();
-    try {
-        const artistIds = [...new Set(tracks.flatMap((t) => t.artistIds).filter(Boolean))];
-        if (artistIds.length) {
-            const cached = await readGenreCache();
-            const missing = artistIds
-                .filter((id) => !cached.has(id))
-                .slice(0, MAX_GENRE_BATCHES * 50);
-            if (missing.length) {
-                const fetched = await fetchArtistGenres(token, missing);
-                fetched.forEach((genre, id) => cached.set(id, genre));
-                writeGenreCache(fetched).catch(() => {});
-            }
-            genreMap = cached;
-        }
-    } catch (_) {
-        // Genres are best-effort; the playlist still serves without them.
-    }
-
-    const withGenres = tracks.map((t) => ({ ...t, genre: genreMap.get(t.artistIds[0]) ?? '' }));
-    return json({ complete: true, playlistId, total, tracks: withGenres });
 };
 
 const handler = async (event) => {
@@ -236,79 +191,74 @@ const handler = async (event) => {
 
         const token = await accessToken();
 
-        // One cheap call: the snapshot id (which changes only when the playlist
-        // does) and the track count. A cached build keyed to the same snapshot
-        // needs no page fetches at all.
-        const metaUrl = `https://api.spotify.com/v1/playlists/${playlistId}`
-            + '?fields=snapshot_id,tracks.total';
-        const metaRes = await spotifyGet(metaUrl, token);
-        if (!metaRes.ok) throw new Error(`Spotify ${metaRes.status}: ${await metaRes.text()}`);
-        const meta = await metaRes.json();
-        const snapshotId = meta.snapshot_id;
-        const total = meta.tracks?.total ?? 0;
-
-        const col = await playlistCollection();
-        const state = await col.findOne({ _id: playlistId }, { projection: { tracks: 0 } });
-
-        // A build that no longer matches the live snapshot (or is missing) starts
-        // over; the playlist changed under us, so its saved tracks are stale.
-        const stale = !state || state.snapshotId !== snapshotId || state.total !== total;
-        if (stale) {
-            await col.updateOne(
-                { _id: playlistId },
-                { $set: { snapshotId, total, nextOffset: 0, complete: false, tracks: [], updatedAt: new Date().toISOString() } },
-                { upsert: true },
-            );
-        }
-
-        if (!stale && state.complete) {
-            return await serve(col, token, playlistId, total);
-        }
-
-        // Fetch the next bounded run of pages and append them, saving how far the
-        // build has now reached so the next call resumes from here.
-        const baseOffset = stale ? 0 : (state.nextOffset ?? 0);
+        // The first page reports the total; the rest go out through the pool, a
+        // few at a time, and only up to the cap.
+        const first = await page(token, playlistId, 0);
+        const total = first.total ?? 0;
+        const wanted = Math.min(total, MAX_TRACKS);
         const offsets = [];
-        for (let o = baseOffset; o < total && offsets.length < PAGES_PER_CALL; o += PAGE) {
-            offsets.push(o);
-        }
+        for (let o = PAGE; o < wanted; o += PAGE) offsets.push(o);
+        const rest = await mapPool(offsets, (offset) => page(token, playlistId, offset));
 
-        const pages = await mapPool(offsets, (offset) => page(token, playlistId, offset));
-        const newTracks = pages
+        const tracks = [first, ...rest]
             .flatMap((p) => p.items ?? [])
             .map(trim)
             // A track pulled from Spotify's catalogue comes back null and cannot
             // be written anywhere, so it is dropped on the way in.
-            .filter((t) => t.uri);
+            .filter((t) => t.uri)
+            .slice(0, MAX_TRACKS);
 
-        const nextOffset = baseOffset + (offsets.length * PAGE);
-        const complete = nextOffset >= total;
+        // Genre enrichment is best-effort: a failure here means the shuffle runs
+        // without genre data for this request, but the playlist still loads.
+        let genreMap = new Map();
+        try {
+            const artistIds = [...new Set(tracks.flatMap((t) => t.artistIds).filter(Boolean))];
+            if (artistIds.length) {
+                // Read the cache first. Only the artists not already stored there
+                // need a Spotify call — and only a bounded batch per load, so a
+                // fresh playlist fills in over a few visits rather than bursting.
+                const cached = await readGenreCache();
+                const missing = artistIds
+                    .filter((id) => !cached.has(id))
+                    .slice(0, MAX_GENRE_BATCHES * 50);
 
-        // Guard on the offset this chunk was based on, so if a second build (a
-        // second window) already advanced past it, this append no-ops rather than
-        // duplicating pages.
-        const result = await col.updateOne(
-            { _id: playlistId, nextOffset: baseOffset },
-            {
-                $push: { tracks: { $each: newTracks } },
-                $set: { nextOffset, complete, updatedAt: new Date().toISOString() },
-            },
-        );
+                if (missing.length) {
+                    const fetched = await fetchArtistGenres(token, missing);
+                    fetched.forEach((genre, id) => cached.set(id, genre));
+                    // Fire-and-forget: a write failure must not delay the response.
+                    writeGenreCache(fetched).catch(() => {});
+                }
 
-        if (result.matchedCount === 0) {
-            // Someone else moved it on; report whatever the current state is.
-            const current = await col.findOne({ _id: playlistId }, { projection: { tracks: 0 } });
-            if (current?.complete) return await serve(col, token, playlistId, total);
-            return json({ complete: false, playlistId, total, loaded: Math.min(current?.nextOffset ?? 0, total) });
+                genreMap = cached;
+            }
+        } catch (_) {
+            // Swallowed — see above.
         }
 
-        if (!complete) {
-            return json({ complete: false, playlistId, total, loaded: Math.min(nextOffset, total) });
-        }
-        return await serve(col, token, playlistId, total);
+        const tracksWithGenres = tracks.map((t) => ({
+            ...t,
+            genre: genreMap.get(t.artistIds[0]) ?? '',
+        }));
+
+        return {
+            statusCode: 200,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                playlistId,
+                total,
+                tracks: tracksWithGenres,
+                // Whether the playlist runs past the cap, so the page can say the
+                // tail isn't being shuffled.
+                capped: total > MAX_TRACKS,
+            }),
+        };
     } catch (error) {
         if (error && error.rateLimited) {
-            return json({ error: 'rate_limited', retryAfter: error.retryAfter }, 429);
+            return {
+                statusCode: 429,
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ error: 'rate_limited', retryAfter: error.retryAfter }),
+            };
         }
         return { statusCode: 500, body: error.toString() };
     }

@@ -167,7 +167,12 @@ export const PreApprovedTab = () => {
                 <>
                     <p className="spotify__count">
                         <strong>{playlist.tracks.length}</strong> tracks
-                        {playlist.total !== playlist.tracks.length && (
+                        {playlist.capped ? (
+                            <span className="spotify__muted">
+                                {' '}(the first {playlist.tracks.length} of{' '}
+                                {playlist.total} — only these are shuffled)
+                            </span>
+                        ) : playlist.total !== playlist.tracks.length && (
                             <span className="spotify__muted">
                                 {' '}({playlist.total} in Spotify — the rest are
                                 no longer playable and were skipped)

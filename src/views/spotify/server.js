@@ -69,49 +69,22 @@ const post = async (name, body) => {
 // separate "… shuffled" destination), so caching it for the session is safe.
 const playlistCache = new Map();
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// A big playlist is built server-side a chunk of pages at a time, so this drives
-// the build to completion: each call advances it, and progress is saved on the
-// server, so a call that fails to a hiccup is simply retried and resumes from
-// where it left off rather than starting over. A rate-limit is NOT a hiccup —
-// it stops immediately, so we don't keep calling into a throttled app.
-const buildPlaylist = async (playlistId, onProgress) => {
-    const body = playlistId ? { playlistId } : undefined;
-    let failures = 0;
-    for (let step = 0; step < 400; step += 1) {
-        let res;
-        try {
-            res = await post('get_playlist', body);
-        } catch (error) {
-            if (error.rateLimited) throw error;
-            failures += 1;
-            if (failures > 6) throw error;
-            await sleep(2000);
-            continue;
-        }
-        if (res.complete) return { playlistId: res.playlistId, total: res.total, tracks: res.tracks };
-        onProgress?.(res.loaded ?? 0, res.total ?? 0);
-        // A brief pause between chunks keeps the overall request rate gentle.
-        await sleep(300);
-    }
-    throw new Error('The playlist did not finish loading.');
-};
-
 /**
- * The source playlist, in its current order. Never modified.
+ * The source playlist (its first couple of thousand tracks), in current order.
+ * Never modified. Resolves to `{ playlistId, total, tracks, capped }` — `total`
+ * is the playlist's real length and `capped` says whether it runs past what was
+ * read.
  *
  * `playlistId` names which playlist to read — omit it for the default
  * (pre-approved). The ids are in the playlists' share URLs and are not secrets,
- * so a tab can ask for one directly. `onProgress(loaded, total)` reports the
- * build of a large playlist on its first load.
+ * so a tab can ask for one directly.
  */
-export const getPlaylist = (playlistId, onProgress) => {
+export const getPlaylist = (playlistId) => {
     const key = playlistId ?? '__default__';
     if (!playlistCache.has(key)) {
         // Cache the promise, not just the result, so two tabs mounting at once
-        // share one build. A failure is evicted so the next open can retry.
-        const pending = buildPlaylist(playlistId, onProgress)
+        // share one request. A failure is evicted so the next open can retry.
+        const pending = post('get_playlist', playlistId ? { playlistId } : undefined)
             .catch((error) => { playlistCache.delete(key); throw error; });
         playlistCache.set(key, pending);
     }

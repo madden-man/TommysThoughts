@@ -32,7 +32,6 @@ const loadMarkers = (playlistId) => {
 export const PlaylistTab = ({ playlistId, name }) => {
     const [playlist, setPlaylist] = useState(null);
     const [loadError, setLoadError] = useState(null);
-    const [loadProgress, setLoadProgress] = useState(null);
     const [markers, setMarkers] = useState(() => loadMarkers(playlistId));
 
     // The shuffled order, which of the two shuffles produced it, and the state of
@@ -51,10 +50,9 @@ export const PlaylistTab = ({ playlistId, name }) => {
         let live = true;
         setPlaylist(null);
         setLoadError(null);
-        setLoadProgress(null);
         setOrder(null);
         setMode(null);
-        getPlaylist(playlistId, (loaded, total) => { if (live) setLoadProgress({ loaded, total }); })
+        getPlaylist(playlistId)
             .then((data) => { if (live) setPlaylist(data); })
             .catch((error) => { if (live) setLoadError(error.message); });
         return () => { live = false; };
@@ -189,18 +187,19 @@ export const PlaylistTab = ({ playlistId, name }) => {
             )}
 
             {!playlist && !loadError && (
-                <p className="spotify__muted">
-                    {loadProgress && loadProgress.total
-                        ? `Reading the playlist… ${loadProgress.loaded} of ${loadProgress.total}`
-                        : 'Reading the playlist…'}
-                </p>
+                <p className="spotify__muted">Reading the playlist…</p>
             )}
 
             {playlist && (
                 <>
                     <p className="spotify__count">
                         <strong>{playlist.tracks.length}</strong> tracks
-                        {playlist.total !== playlist.tracks.length && (
+                        {playlist.capped ? (
+                            <span className="spotify__muted">
+                                {' '}(the first {playlist.tracks.length} of{' '}
+                                {playlist.total} — only these are shuffled)
+                            </span>
+                        ) : playlist.total !== playlist.tracks.length && (
                             <span className="spotify__muted">
                                 {' '}({playlist.total} in Spotify — the rest are
                                 no longer playable and were skipped)
