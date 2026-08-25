@@ -15,41 +15,28 @@
 // makes the sequence order-preserving.
 
 const { MongoClient } = require('mongodb');
+const { accessToken } = require('../_shared/spotify');
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
 const clientPromise = mongoClient.connect();
 
 const TARGET_PLAYLIST_ID =
     process.env.SPOTIFY_TARGET_PLAYLIST_ID || '19jAYFUsXOKcUxxCk8slEX';
+
+// The page can name which playlist to write to — an added tab writes to its own
+// "… shuffled" destination — so the incoming id is checked against a Spotify
+// id's shape (22-char base62) rather than trusted, and anything else falls back
+// to the default pre-approved destination.
+const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/.test(value);
 // Writes go to /items too, and are capped at 50 to match the read side. The
 // documented write maximum is 100, but a chunk size that turns out to be too
 // large fails partway through and leaves the destination half-built, so this
 // takes the number both endpoints certainly accept.
 const MAX_URIS = 50;
 
-const accessToken = async () => {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            authorization: 'Basic ' + Buffer.from(
-                `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
-            ).toString('base64'),
-        },
-        body: new URLSearchParams({
-            grant_type: 'refresh_token',
-            refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
-        }).toString(),
-    });
-    if (!response.ok) {
-        throw new Error(`Spotify refused the refresh token: ${await response.text()}`);
-    }
-    return (await response.json()).access_token;
-};
-
 const handler = async (event) => {
     try {
-        const { uris, mode, order } = JSON.parse(event.body || '{}');
+        const { uris, mode, order, playlistId } = JSON.parse(event.body || '{}');
 
         if (!Array.isArray(uris) || !uris.length) {
             return { statusCode: 400, body: 'No tracks to write.' };
@@ -61,9 +48,11 @@ const handler = async (event) => {
             return { statusCode: 400, body: "mode must be 'replace' or 'append'." };
         }
 
+        const target = isPlaylistId(playlistId) ? playlistId : TARGET_PLAYLIST_ID;
+
         const token = await accessToken();
         const response = await fetch(
-            `https://api.spotify.com/v1/playlists/${TARGET_PLAYLIST_ID}/items`,
+            `https://api.spotify.com/v1/playlists/${target}/items`,
             {
                 // PUT replaces the destination with these URIs; POST adds them to
                 // the end. First chunk clears it out, the rest build it back up.
@@ -91,7 +80,7 @@ const handler = async (event) => {
                 await (await clientPromise).db('tommy-data')
                     .collection('spotify_orders')
                     .insertOne({
-                        playlistId: TARGET_PLAYLIST_ID,
+                        playlistId: target,
                         savedAt: new Date().toISOString(),
                         order,
                     });

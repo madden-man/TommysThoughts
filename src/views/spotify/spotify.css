@@ -18,6 +18,103 @@
     padding: 8px 16px 16px;
 }
 
+/* The tab bar sits at the top of the white box, above whichever playlist's
+   content is showing: the scrollable tabs and a "+" that adds another. A rule
+   under the row separates it from the content below. */
+.spotify__tabbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid #dbe3ee;
+    margin-bottom: 4px;
+}
+
+.spotify__tabs {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+}
+
+.spotify__tabs .MuiTab-root {
+    text-transform: none;
+    min-height: 40px;
+}
+
+.spotify__add {
+    flex: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--blue-70);
+}
+
+/* A tab's own label carries its close control, so it travels with the tab and
+   only added tabs get one — pre-approved is not closable. */
+.spotify__tab-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spotify__tab-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    line-height: 1;
+    color: #888;
+}
+
+.spotify__tab-close:hover {
+    background-color: #eee;
+    color: #a3195b;
+}
+
+.spotify__picker {
+    margin-bottom: 8px;
+}
+
+/* The marker editor: one row per section marker, each an editable label, the
+   track it opens at, and a remove control — then the picker that adds another. */
+.spotify__marker-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.spotify__marker {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.spotify__marker-label {
+    flex: none;
+    width: 180px;
+}
+
+.spotify__marker-track {
+    flex: 1;
+    min-width: 0;
+}
+
+.spotify__marker-remove {
+    flex: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.spotify__marker-remove:hover {
+    color: #a3195b;
+}
+
 .spotify__title {
     margin: 8px 0 0;
     font-size: 1.6rem;

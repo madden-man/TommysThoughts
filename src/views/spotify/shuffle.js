@@ -447,6 +447,32 @@ export const seasonSectionsOf = (tracks, isDivider = isSeasonDivider) => {
 };
 
 /**
+ * The generic form of `seasonSectionsOf`: split a playlist into labelled sections
+ * using markers the user set in the view rather than the four hard-coded seasons.
+ *
+ * A marker is `{ uri, label }` — the track that opens a section, and the name of
+ * the section it opens. Sections follow the order the marker tracks sit in the
+ * playlist, not the order they were added, because the split walks the playlist.
+ * Anything before the first marker becomes a section with no label, exactly as an
+ * unnamed pre-first-divider run does for the seasons.
+ */
+export const markerSectionsOf = (tracks, markers = []) => {
+    const labelByUri = new Map((markers ?? []).map((m) => [m.uri, m.label]));
+    const out = [];
+    let open = { label: null, divider: null, tracks: [] };
+    (Array.isArray(tracks) ? tracks : []).forEach((track) => {
+        if (labelByUri.has(track?.uri)) {
+            if (open.divider || open.tracks.length) out.push(open);
+            open = { label: labelByUri.get(track.uri) || track.name, divider: track, tracks: [] };
+            return;
+        }
+        open.tracks.push(track);
+    });
+    if (open.divider || open.tracks.length) out.push(open);
+    return out;
+};
+
+/**
  * The whole thing: current order in, new order out.
  * Same tracks, every album run intact, artists spread, sections untouched.
  *

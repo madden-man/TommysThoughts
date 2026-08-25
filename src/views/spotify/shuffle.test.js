@@ -7,6 +7,7 @@ import {
     dividerMatcher,
     flatten,
     isSeasonDivider,
+    markerSectionsOf,
     partsOf,
     sectionsOf,
     SEASON_CYCLE,
@@ -848,5 +849,41 @@ describe('antiClump', () => {
         const out = antiClump(blocks, seededRandom(4));
         expect(out).toHaveLength(blocks.length);
         expect(new Set(out).size).toBe(blocks.length);
+    });
+});
+
+describe('markerSectionsOf', () => {
+    // uri is `spotify:track:<index>`, so a marker is the track at that index.
+    const marker = (i, label) => ({ uri: `spotify:track:${i}`, label });
+
+    it('is one unlabelled section when there are no markers', () => {
+        const tracks = trackList(['a:X', 'b:Y', 'c:Z']);
+        const sections = markerSectionsOf(tracks, []);
+        expect(sections).toHaveLength(1);
+        expect(sections[0].label).toBeNull();
+        expect(sections[0].tracks).toHaveLength(3);
+    });
+
+    it('splits at each marker and labels the section it opens', () => {
+        const tracks = trackList(['a:X', 'b:Y', 'c:Z', 'd:W']);
+        const sections = markerSectionsOf(tracks, [marker(1, 'Side B'), marker(3, 'Encore')]);
+        expect(sections.map((s) => s.label)).toEqual([null, 'Side B', 'Encore']);
+        // The divider track is held separately, so `tracks` is what follows it:
+        // one before the first marker, one after 'Side B', none after 'Encore'.
+        expect(sections.map((s) => s.tracks.length)).toEqual([1, 1, 0]);
+        expect(sections.map((s) => s.divider?.uri)).toEqual([undefined, tracks[1].uri, tracks[3].uri]);
+    });
+
+    it('sections follow playlist order, not the order markers were given', () => {
+        const tracks = trackList(['a:X', 'b:Y', 'c:Z', 'd:W']);
+        const sections = markerSectionsOf(tracks, [marker(3, 'Late'), marker(1, 'Early')]);
+        expect(sections.map((s) => s.label)).toEqual([null, 'Early', 'Late']);
+    });
+
+    it('falls back to the track name when a marker has no label', () => {
+        const tracks = trackList(['a:X', 'b:Y']);
+        const [, opened] = markerSectionsOf(tracks, [marker(1, '')]);
+        expect(opened.label).toBe(tracks[1].name);
+        expect(opened.divider.uri).toBe(tracks[1].uri);
     });
 });

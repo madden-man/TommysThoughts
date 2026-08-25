@@ -9,6 +9,7 @@
 // Needs SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REFRESH_TOKEN.
 
 const { MongoClient } = require('mongodb');
+const { accessToken } = require('../_shared/spotify');
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
 const clientPromise = mongoClient.connect();
@@ -18,29 +19,14 @@ const clientPromise = mongoClient.connect();
 const SOURCE_PLAYLIST_ID =
     process.env.SPOTIFY_SOURCE_PLAYLIST_ID || '6WukX3ygx4jlDsOih5fQtI';
 
+// A Spotify id is base62 and 22 characters. The page can name which playlist to
+// read, so the incoming value is checked against that shape rather than trusted
+// — anything else falls back to the default source.
+const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/.test(value);
+
 // Spotify's maximum per request on /items is 50 — it was 100 on the /tracks
 // endpoint this replaced, so 2019 tracks is 41 pages rather than 21.
 const PAGE = 50;
-
-const accessToken = async () => {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            authorization: 'Basic ' + Buffer.from(
-                `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
-            ).toString('base64'),
-        },
-        body: new URLSearchParams({
-            grant_type: 'refresh_token',
-            refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
-        }).toString(),
-    });
-    if (!response.ok) {
-        throw new Error(`Spotify refused the refresh token: ${await response.text()}`);
-    }
-    return (await response.json()).access_token;
-};
 
 // Only the fields the shuffle reasons over, plus enough to show a track on the
 // page. A full playlist item is several KB and there are two thousand of them.
@@ -114,10 +100,10 @@ const writeGenreCache = async (newGenres) => {
     );
 };
 
-const page = async (token, offset) => {
+const page = async (token, playlistId, offset) => {
     // /items, not /tracks: the older endpoint was removed in the March 2026
     // migration and now answers 403 for every playlist, including public ones.
-    const url = `https://api.spotify.com/v1/playlists/${SOURCE_PLAYLIST_ID}/items`
+    const url = `https://api.spotify.com/v1/playlists/${playlistId}/items`
         + `?offset=${offset}&limit=${PAGE}`
         + '&fields=total,items(added_at,item(uri,name,disc_number,track_number,'
         + 'artists(id,name),album(id,name)))';
@@ -126,18 +112,28 @@ const page = async (token, offset) => {
     return response.json();
 };
 
-const handler = async () => {
+const handler = async (event) => {
     try {
+        // A tab can name which playlist to read; anything not shaped like a
+        // Spotify id falls back to the default source.
+        let requested;
+        try {
+            requested = JSON.parse(event?.body || '{}').playlistId;
+        } catch (_) {
+            requested = undefined;
+        }
+        const playlistId = isPlaylistId(requested) ? requested : SOURCE_PLAYLIST_ID;
+
         const token = await accessToken();
 
         // The first page reports the total, and the rest go out together —
         // twenty sequential round trips would not fit in a function's ten
         // seconds, twenty parallel ones comfortably do.
-        const first = await page(token, 0);
+        const first = await page(token, playlistId, 0);
         const rest = await Promise.all(
             Array.from(
                 { length: Math.ceil((first.total - PAGE) / PAGE) },
-                (_, i) => page(token, (i + 1) * PAGE),
+                (_, i) => page(token, playlistId, (i + 1) * PAGE),
             ),
         );
 
@@ -182,7 +178,7 @@ const handler = async () => {
         return {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ playlistId: SOURCE_PLAYLIST_ID, total: first.total, tracks: tracksWithGenres }),
+            body: JSON.stringify({ playlistId, total: first.total, tracks: tracksWithGenres }),
         };
     } catch (error) {
         return { statusCode: 500, body: error.toString() };
