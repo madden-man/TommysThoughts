@@ -52,6 +52,43 @@ const trim = (entry) => {
     };
 };
 
+// How many requests to keep in flight at once. Spotify rate-limits over a
+// rolling window, and firing every page and every artist batch in parallel
+// (fifty-plus at once for a large playlist) trips a 429 — which then locks out
+// the retries too. A small pool stays comfortably under the limit and is barely
+// slower, since each round of requests still overlaps.
+const CONCURRENCY = 5;
+// One 429 retry, waiting the Retry-After Spotify gives but never long enough to
+// blow the function's ten-second budget. The real defence is the pool above;
+// this just rides out an occasional collision.
+const RETRY_CAP_MS = 3000;
+
+// Run `fn` over `items` with at most `CONCURRENCY` in flight, preserving order.
+const mapPool = async (items, fn) => {
+    const out = new Array(items.length);
+    let next = 0;
+    const worker = async () => {
+        while (next < items.length) {
+            const i = next++;
+            out[i] = await fn(items[i], i);
+        }
+    };
+    await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, items.length) }, worker),
+    );
+    return out;
+};
+
+// A GET that retries once on 429, honouring Retry-After up to the cap.
+const spotifyGet = async (url, token) => {
+    for (let attempt = 0; ; attempt += 1) {
+        const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+        if (response.status !== 429 || attempt > 0) return response;
+        const after = Number(response.headers.get('retry-after')) || 1;
+        await new Promise((resolve) => setTimeout(resolve, Math.min(after * 1000, RETRY_CAP_MS)));
+    }
+};
+
 // Genres live on the artist, not the track or the playlist item. Spotify returns
 // them sorted by relevance, so the first one is the most representative tag.
 const fetchArtistGenres = async (token, artistIds) => {
@@ -59,12 +96,16 @@ const fetchArtistGenres = async (token, artistIds) => {
     for (let i = 0; i < artistIds.length; i += 50)
         batches.push(artistIds.slice(i, i + 50));
 
-    const results = await Promise.all(batches.map(async (batch) => {
+    const results = await mapPool(batches, async (batch) => {
         const url = `https://api.spotify.com/v1/artists?ids=${batch.join(',')}`;
-        const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
-        if (!response.ok) return [];
-        return (await response.json()).artists ?? [];
-    }));
+        try {
+            const response = await spotifyGet(url, token);
+            if (!response.ok) return [];
+            return (await response.json()).artists ?? [];
+        } catch (_) {
+            return [];
+        }
+    });
 
     const map = new Map();
     results.flat().forEach((artist) => {
@@ -107,7 +148,7 @@ const page = async (token, playlistId, offset) => {
         + `?offset=${offset}&limit=${PAGE}`
         + '&fields=total,items(added_at,item(uri,name,disc_number,track_number,'
         + 'artists(id,name),album(id,name)))';
-    const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+    const response = await spotifyGet(url, token);
     if (!response.ok) throw new Error(`Spotify ${response.status}: ${await response.text()}`);
     return response.json();
 };
@@ -126,16 +167,15 @@ const handler = async (event) => {
 
         const token = await accessToken();
 
-        // The first page reports the total, and the rest go out together —
-        // twenty sequential round trips would not fit in a function's ten
-        // seconds, twenty parallel ones comfortably do.
+        // The first page reports the total; the rest go out through the pool,
+        // a few at a time. All-at-once trips Spotify's rate limit on a large
+        // playlist, and a handful in flight is nearly as fast without the 429.
         const first = await page(token, playlistId, 0);
-        const rest = await Promise.all(
-            Array.from(
-                { length: Math.ceil((first.total - PAGE) / PAGE) },
-                (_, i) => page(token, playlistId, (i + 1) * PAGE),
-            ),
+        const offsets = Array.from(
+            { length: Math.ceil((first.total - PAGE) / PAGE) },
+            (_, i) => (i + 1) * PAGE,
         );
+        const rest = await mapPool(offsets, (offset) => page(token, playlistId, offset));
 
         const tracks = [first, ...rest]
             .flatMap((p) => p.items ?? [])
