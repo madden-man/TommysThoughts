@@ -64,16 +64,27 @@ const mapPool = async (items, fn) => {
     return out;
 };
 
+// Raised when Spotify keeps answering 429 — carries the Retry-After so the page
+// can stop calling for that long instead of hammering a throttled app.
+class RateLimited extends Error {
+    constructor(retryAfter) {
+        super('rate_limited');
+        this.rateLimited = true;
+        this.retryAfter = retryAfter;
+    }
+}
+
 // A GET that retries on 429, honouring Retry-After but never waiting past what
-// the function's budget allows.
+// the function's budget allows. If it still can't get through, it throws with
+// the Retry-After rather than returning the 429 for a caller to misread.
 const spotifyGet = async (url, token) => {
     for (let attempt = 0; ; attempt += 1) {
         const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
         if (response.status !== 429) return response;
-        const afterMs = (Number(response.headers.get('retry-after')) || 1) * 1000;
+        const retryAfter = Number(response.headers.get('retry-after')) || 1;
         const room = deadline - Date.now() - 1500;
-        if (attempt >= 2 || afterMs > room) return response;
-        await new Promise((resolve) => setTimeout(resolve, Math.min(afterMs, room)));
+        if (attempt >= 2 || retryAfter * 1000 > room) throw new RateLimited(retryAfter);
+        await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
     }
 };
 
@@ -173,8 +184,8 @@ const page = async (token, playlistId, offset) => {
     return response.json();
 };
 
-const json = (body) => ({
-    statusCode: 200,
+const json = (body, statusCode = 200) => ({
+    statusCode,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
 });
@@ -296,6 +307,9 @@ const handler = async (event) => {
         }
         return await serve(col, token, playlistId, total);
     } catch (error) {
+        if (error && error.rateLimited) {
+            return json({ error: 'rate_limited', retryAfter: error.retryAfter }, 429);
+        }
         return { statusCode: 500, body: error.toString() };
     }
 };

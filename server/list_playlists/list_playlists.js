@@ -12,9 +12,22 @@ const { accessToken } = require('../_shared/spotify');
 // Spotify caps /me/playlists at 50 per page.
 const PAGE = 50;
 
+// Raised on a 429 so the page can back off for Retry-After rather than retrying
+// into a throttled app.
+class RateLimited extends Error {
+    constructor(retryAfter) {
+        super('rate_limited');
+        this.rateLimited = true;
+        this.retryAfter = retryAfter;
+    }
+}
+
 const page = async (token, offset) => {
     const url = `https://api.spotify.com/v1/me/playlists?offset=${offset}&limit=${PAGE}`;
     const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+    if (response.status === 429) {
+        throw new RateLimited(Number(response.headers.get('retry-after')) || 1);
+    }
     if (!response.ok) throw new Error(`Spotify ${response.status}: ${await response.text()}`);
     return response.json();
 };
@@ -49,6 +62,13 @@ const handler = async () => {
             body: JSON.stringify({ playlists }),
         };
     } catch (error) {
+        if (error && error.rateLimited) {
+            return {
+                statusCode: 429,
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ error: 'rate_limited', retryAfter: error.retryAfter }),
+            };
+        }
         return { statusCode: 500, body: error.toString() };
     }
 };

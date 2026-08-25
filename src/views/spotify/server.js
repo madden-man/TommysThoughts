@@ -5,13 +5,59 @@
 // server/{get_playlist,write_shuffled}. The refresh token stays there; nothing
 // about Spotify auth reaches the browser.
 
+// A rate-limit circuit breaker. When Spotify throttles the app it answers 429
+// with a Retry-After that can run to hours, and — crucially — hammering it while
+// throttled can keep pushing that window back. So the first 429 records when the
+// app may call again, and every Spotify-backed call short-circuits until then
+// WITHOUT touching the network. That both surfaces a clear message and lets the
+// penalty actually count down to zero instead of being renewed.
+const BREAKER_KEY = 'spotify.rateLimitedUntil';
+// Never trust a retry-after longer than a day; a stuck breaker is worse than an
+// extra probe once a day.
+const MAX_BREAKER_MS = 24 * 60 * 60 * 1000;
+
+const breakerUntil = () => {
+    try { return Number(localStorage.getItem(BREAKER_KEY) || 0); } catch (_) { return 0; }
+};
+const tripBreaker = (retryAfterSec) => {
+    const ms = Math.min(Math.max(Number(retryAfterSec) || 0, 0) * 1000, MAX_BREAKER_MS);
+    try { localStorage.setItem(BREAKER_KEY, String(Date.now() + ms)); } catch (_) { /* ignore */ }
+};
+const rateLimitError = (until) => {
+    const when = new Date(until);
+    const error = new Error(
+        `Spotify is rate-limiting the app — try again after ${when.toLocaleString()}.`,
+    );
+    error.rateLimited = true;
+    error.until = until;
+    return error;
+};
+
+/** Whether the breaker is currently open (calls are being suppressed). */
+export const rateLimitedUntil = () => {
+    const until = breakerUntil();
+    return until > Date.now() ? until : 0;
+};
+
 const post = async (name, body) => {
+    const until = breakerUntil();
+    if (Date.now() < until) throw rateLimitError(until);
+
     const response = await fetch(`.netlify/functions/${name}`, {
         method: 'POST',
         body: JSON.stringify(body ?? {}),
     });
-    // The functions answer failures with a plain-text reason, so the page can
-    // say what actually went wrong instead of "something went wrong".
+
+    // A 429 trips the breaker: read the retry-after the function forwarded, stop
+    // calling until it passes, and report it rather than a raw error string.
+    if (response.status === 429) {
+        let retryAfter = 0;
+        try { retryAfter = (await response.json()).retryAfter || 0; } catch (_) { /* ignore */ }
+        tripBreaker(retryAfter);
+        throw rateLimitError(breakerUntil());
+    }
+    // Other failures answer with a plain-text reason, so the page can say what
+    // actually went wrong instead of "something went wrong".
     if (!response.ok) throw new Error(await response.text());
     return response.json();
 };
@@ -27,8 +73,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // A big playlist is built server-side a chunk of pages at a time, so this drives
 // the build to completion: each call advances it, and progress is saved on the
-// server, so a call that fails to rate limiting is simply retried and resumes
-// from where it left off rather than starting over.
+// server, so a call that fails to a hiccup is simply retried and resumes from
+// where it left off rather than starting over. A rate-limit is NOT a hiccup —
+// it stops immediately, so we don't keep calling into a throttled app.
 const buildPlaylist = async (playlistId, onProgress) => {
     const body = playlistId ? { playlistId } : undefined;
     let failures = 0;
@@ -37,8 +84,7 @@ const buildPlaylist = async (playlistId, onProgress) => {
         try {
             res = await post('get_playlist', body);
         } catch (error) {
-            // Resume through a transient failure (usually rate limiting) a few
-            // times, backing off, before giving up.
+            if (error.rateLimited) throw error;
             failures += 1;
             if (failures > 6) throw error;
             await sleep(2000);
