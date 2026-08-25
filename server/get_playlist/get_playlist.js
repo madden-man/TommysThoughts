@@ -33,9 +33,9 @@ const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/
 
 // Spotify's maximum per request on /items is 50.
 const PAGE = 50;
-// The most tracks read from any one playlist — 40 pages, the size pre-approved
-// has always been. Anything past this is left unshuffled.
-const MAX_TRACKS = 2000;
+// The most tracks read from any one playlist — 50 pages, comfortably above
+// pre-approved's ~2,000. Anything past this is left unshuffled.
+const MAX_TRACKS = 2500;
 // Requests in flight at once — kept small so the burst stays under the rate
 // limit and inside the function's budget.
 const CONCURRENCY = 3;
