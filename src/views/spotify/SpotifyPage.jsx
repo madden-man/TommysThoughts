@@ -11,7 +11,7 @@ import {
 import { Header } from '../../components/Header';
 import { PreApprovedTab } from './PreApprovedTab';
 import { PlaylistTab } from './PlaylistTab';
-import { listPlaylists } from './server';
+import { listPlaylists, partsFor } from './server';
 
 import './spotify.css';
 
@@ -72,13 +72,40 @@ export const SpotifyPage = () => {
         [options],
     );
 
+    // A playlist longer than one part becomes several tabs, one per slice, so
+    // nothing goes unread. The length comes from the playlist list, so the tabs
+    // exist before the playlist itself is fetched.
+    const countOf = (id) => (options ?? []).find((p) => p.id === id)?.trackCount ?? null;
+
+    const tabsFor = (id, name, keyPrefix, closable) => {
+        const parts = partsFor(countOf(id));
+        if (parts <= 1) {
+            return [{
+                key: `${keyPrefix}-${id}`, label: name, kind: 'playlist',
+                playlistId: id, name, part: 0, parts: 1, closable,
+            }];
+        }
+        return Array.from({ length: parts }, (_, part) => ({
+            key: `${keyPrefix}-${id}-${part}`,
+            label: `${name} (${part + 1}/${parts})`,
+            kind: 'playlist',
+            playlistId: id,
+            name,
+            part,
+            parts,
+            closable,
+        }));
+    };
+
     const tabs = useMemo(() => [
         { key: 'pre-approved', label: 'pre-approved', kind: 'preapproved' },
-        { key: 'master', label: master?.name ?? 'master (ii)', kind: 'master' },
-        ...added.map((a) => ({
-            key: `pl-${a.id}`, label: a.name, kind: 'playlist', playlistId: a.id, name: a.name, closable: true,
-        })),
-    ], [added, master]);
+        ...(master
+            ? tabsFor(master.id, master.name, 'master', false)
+            : [{ key: 'master', label: 'master (ii)', kind: 'master' }]),
+        ...added.flatMap((a) => tabsFor(a.id, a.name, 'pl', true)),
+        // tabsFor closes over `options`, which is the dependency that matters
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ], [added, master, options]);
 
     const active = tabs.find((t) => t.key === activeKey) ?? tabs[0];
 
@@ -91,10 +118,11 @@ export const SpotifyPage = () => {
         setActiveKey(`pl-${playlist.id}`);
     };
 
-    const removeTab = (key) => {
-        const id = key.replace(/^pl-/, '');
-        setAdded((prev) => prev.filter((a) => a.id !== id));
-        if (activeKey === key) setActiveKey('pre-approved');
+    // Closing any part of a playlist closes the playlist — the parts are one
+    // thing split for reading, not separate entries you added.
+    const removeTab = (tab) => {
+        setAdded((prev) => prev.filter((a) => a.id !== tab.playlistId));
+        if (activeKey === tab.key) setActiveKey('pre-approved');
     };
 
     // The pool the picker draws from: real source playlists only. Shuffled
@@ -108,7 +136,6 @@ export const SpotifyPage = () => {
     const renderActive = () => {
         if (active.kind === 'preapproved') return <PreApprovedTab />;
         if (active.kind === 'master') {
-            if (master) return <PlaylistTab playlistId={master.id} name={master.name} />;
             if (options === null) return <p className="spotify__muted">Finding master (ii)…</p>;
             return (
                 <p className="spotify__warn">
@@ -118,7 +145,14 @@ export const SpotifyPage = () => {
                 </p>
             );
         }
-        return <PlaylistTab playlistId={active.playlistId} name={active.name} />;
+        return (
+            <PlaylistTab
+                playlistId={active.playlistId}
+                name={active.name}
+                part={active.part ?? 0}
+                parts={active.parts ?? 1}
+            />
+        );
     };
 
     return (
@@ -146,7 +180,7 @@ export const SpotifyPage = () => {
                                                     role="button"
                                                     aria-label={`Close ${tab.label}`}
                                                     className="spotify__tab-close"
-                                                    onClick={(e) => { e.stopPropagation(); removeTab(tab.key); }}
+                                                    onClick={(e) => { e.stopPropagation(); removeTab(tab); }}
                                                 >
                                                     ×
                                                 </span>

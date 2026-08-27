@@ -17,6 +17,7 @@ import {
     seasonSectionsOf,
     seededRandom,
     shuffleKeepingAlbums,
+    singleBlocksOf,
 } from './shuffle';
 
 // A compact way to write a playlist: "artist:album" per track.
@@ -567,6 +568,82 @@ describe('leading with the current season', () => {
         });
         expect(seasonSectionsOf(out).map((s) => s.season))
             .toEqual(['Fall', 'Winter', 'Spring', 'Summer']);
+    });
+});
+
+// Welding already-adjacent tracks is right for a playlist curated song by song
+// and wrong for one built a record at a time — there, every album is adjacent
+// from the start, so welding turned "shuffle tracks" into "shuffle albums".
+describe('welding, and turning it off', () => {
+    const t = (name, artist, album, num) => ({
+        uri: `spotify:track:${name}`, name, artistIds: [artist], artistNames: [artist],
+        albumId: album, albumName: album, discNumber: 1, trackNumber: num,
+    });
+    // Four records, added one after the other, as a curated tab tends to be.
+    const byRecord = () => {
+        const out = [];
+        ['A', 'B', 'C', 'D'].forEach((album, i) => {
+            for (let n = 1; n <= 5; n++) out.push(t(`${album}${n}`, `art${i}`, album, n));
+        });
+        return out;
+    };
+
+    const contiguous = (out) => {
+        const at = new Map();
+        out.forEach((track, i) => {
+            if (!at.has(track.albumId)) at.set(track.albumId, []);
+            at.get(track.albumId).push(i);
+        });
+        return [...at.values()].filter((ix) => ix[ix.length - 1] - ix[0] === ix.length - 1).length;
+    };
+
+    it('welds by default, which is what pre-approved wants', () => {
+        const out = shuffleKeepingAlbums(byRecord(), seededRandom(2));
+        expect(contiguous(out)).toBe(4);
+    });
+
+    it('breaks the records apart when welding is off', () => {
+        const out = shuffleKeepingAlbums(byRecord(), seededRandom(2), { weldAdjacent: false });
+        expect(contiguous(out)).toBe(0);
+    });
+
+    it('is then genuinely different from whole-album mode', () => {
+        const src = byRecord();
+        const shape = (o) => o.map((x) => x.albumId).join('');
+        const tracks = shuffleKeepingAlbums(src, seededRandom(3), { weldAdjacent: false });
+        const albums = shuffleKeepingAlbums(src, seededRandom(3), { wholeAlbums: true });
+        expect(shape(tracks)).not.toBe(shape(albums));
+        // The old bug: welded tracks-mode had the same SHAPE as album mode,
+        // differing only in which record came first.
+        const welded = shuffleKeepingAlbums(src, seededRandom(3), { weldAdjacent: true });
+        expect(new Set(shape(welded).match(/(.)\1*/g)).size).toBe(4);
+    });
+
+    it('still plays each record in album order once broken apart', () => {
+        const out = shuffleKeepingAlbums(byRecord(), seededRandom(4), { weldAdjacent: false });
+        ['A', 'B', 'C', 'D'].forEach((album) => {
+            const numbers = out.filter((x) => x.albumId === album).map((x) => x.trackNumber);
+            expect(numbers).toEqual([1, 2, 3, 4, 5]);
+        });
+    });
+
+    it('loses nothing either way', () => {
+        const src = byRecord();
+        [true, false].forEach((weldAdjacent) => {
+            const out = shuffleKeepingAlbums(src, seededRandom(5), { weldAdjacent });
+            expect(out.map((x) => x.uri).sort()).toEqual(src.map((x) => x.uri).sort());
+        });
+    });
+
+    it('gives every track its own block', () => {
+        const blocks = singleBlocksOf(byRecord());
+        expect(blocks).toHaveLength(20);
+        expect(blocks.every((b) => b.tracks.length === 1)).toBe(true);
+    });
+
+    it('takes an empty or missing list', () => {
+        expect(singleBlocksOf([])).toEqual([]);
+        expect(singleBlocksOf(undefined)).toEqual([]);
     });
 });
 

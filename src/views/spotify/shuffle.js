@@ -97,6 +97,26 @@ const byAlbumOrder = (a, b) => {
 };
 
 /**
+ * Every track on its own, welded to nothing.
+ *
+ * `blocksOf` protects same-album tracks that are already adjacent, which is
+ * right for a playlist curated song by song — a run like that was sequenced on
+ * purpose. It is wrong for a playlist built by adding whole records at a time:
+ * there, every album is adjacent to begin with, so welding turns the whole
+ * playlist into one block per album and "shuffle tracks" quietly becomes
+ * "shuffle albums". This is the mode for those.
+ *
+ * An album still plays in album order across the section — orderWithinAlbums
+ * sees to that — it just is not held together while doing it.
+ */
+export const singleBlocksOf = (tracks) =>
+    (Array.isArray(tracks) ? tracks : []).map((track, i) => ({
+        albumId: track.albumId ?? null,
+        seq: i,
+        tracks: [track],
+    }));
+
+/**
  * The playlist as whole albums: every track of a record in one block, in album
  * order, however scattered they were to begin with.
  *
@@ -491,13 +511,20 @@ export const markerSectionsOf = (tracks, markers = []) => {
 export const shuffleKeepingAlbums = (
     tracks,
     random = Math.random,
-    { isDivider = null, sectionStarts = [], wholeAlbums = false, leadWith = null } = {},
+    {
+        isDivider = null, sectionStarts = [], wholeAlbums = false, leadWith = null,
+        weldAdjacent = true,
+    } = {},
 ) => {
     // The two modes differ only in what counts as one indivisible thing: a run
     // of tracks that were already adjacent, or an entire record. Everything
     // after that — spacing the artists, pinning the dividers, sealing the
     // seasons — is the same either way.
-    const toBlocks = wholeAlbums ? albumBlocksOf : blocksOf;
+    // Three ways to decide what cannot be split: a whole record, a run that was
+    // already adjacent, or nothing at all.
+    const toBlocks = wholeAlbums
+        ? albumBlocksOf
+        : (weldAdjacent ? blocksOf : singleBlocksOf);
     const shuffle = (list) => flatten(antiClumpWithGenres(toBlocks(list), random));
 
     if (isDivider && leadWith) {

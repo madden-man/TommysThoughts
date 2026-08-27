@@ -52,7 +52,10 @@ const handler = async () => {
             .map((p) => ({
                 id: p.id,
                 name: p.name,
-                trackCount: p.tracks?.total ?? null,
+                // The March 2026 migration renamed a playlist's track collection
+                // from `tracks` to `items` here as well, so this read null for
+                // every playlist and nothing could be sized before loading it.
+                trackCount: p.items?.total ?? p.tracks?.total ?? null,
                 owner: p.owner?.display_name ?? null,
             }));
 

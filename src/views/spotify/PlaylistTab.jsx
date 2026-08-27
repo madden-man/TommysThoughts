@@ -12,8 +12,10 @@ const PREVIEW_PER_SECTION = 8;
 
 // Markers and the write destination both live per playlist, keyed by its Spotify
 // id, so they follow the playlist rather than the tab and survive a reload.
-const markerKey = (playlistId) => `spotify.markers.${playlistId}`;
-const destKey = (playlistId) => `spotify.dest.${playlistId}`;
+// Keyed by part too: each slice of a long playlist has its own markers and its
+// own destination, because each is a separate tab writing a separate playlist.
+const markerKey = (playlistId, part) => `spotify.markers.${playlistId}#${part}`;
+const destKey = (playlistId, part) => `spotify.dest.${playlistId}#${part}`;
 
 const loadJson = (key, fallback) => {
     try {
@@ -24,15 +26,15 @@ const loadJson = (key, fallback) => {
     }
 };
 
-const loadMarkers = (playlistId) => {
-    const saved = loadJson(markerKey(playlistId), []);
+const loadMarkers = (playlistId, part) => {
+    const saved = loadJson(markerKey(playlistId, part), []);
     return Array.isArray(saved) ? saved.filter((m) => m && m.uri) : [];
 };
 
-export const PlaylistTab = ({ playlistId, name }) => {
+export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
     const [playlist, setPlaylist] = useState(null);
     const [loadError, setLoadError] = useState(null);
-    const [markers, setMarkers] = useState(() => loadMarkers(playlistId));
+    const [markers, setMarkers] = useState(() => loadMarkers(playlistId, part));
 
     // The shuffled order, which of the two shuffles produced it, and the state of
     // writing it out. Nothing here touches the source playlist.
@@ -41,9 +43,13 @@ export const PlaylistTab = ({ playlistId, name }) => {
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
     const [wrote, setWrote] = useState(null);
-    const [dest, setDest] = useState(() => loadJson(destKey(playlistId), null));
+    const [dest, setDest] = useState(() => loadJson(destKey(playlistId, part), null));
 
-    const destName = `${name} shuffled`;
+    // Each part writes its own destination — a 6,000-track playlist becomes
+    // three shuffled playlists rather than one that silently loses two thirds.
+    const destName = parts > 1
+        ? `${name} shuffled (${part + 1} of ${parts})`
+        : `${name} shuffled`;
 
     useEffect(() => {
         if (!playlistId) return undefined;
@@ -52,19 +58,19 @@ export const PlaylistTab = ({ playlistId, name }) => {
         setLoadError(null);
         setOrder(null);
         setMode(null);
-        getPlaylist(playlistId)
+        getPlaylist(playlistId, part)
             .then((data) => { if (live) setPlaylist(data); })
             .catch((error) => { if (live) setLoadError(error.message); });
         return () => { live = false; };
-    }, [playlistId]);
+    }, [playlistId, part]);
 
     useEffect(() => {
-        localStorage.setItem(markerKey(playlistId), JSON.stringify(markers));
-    }, [playlistId, markers]);
+        localStorage.setItem(markerKey(playlistId, part), JSON.stringify(markers));
+    }, [playlistId, part, markers]);
 
     useEffect(() => {
-        localStorage.setItem(destKey(playlistId), JSON.stringify(dest));
-    }, [playlistId, dest]);
+        localStorage.setItem(destKey(playlistId, part), JSON.stringify(dest));
+    }, [playlistId, part, dest]);
 
     // A track opens a section when it's one of the marker tracks.
     const isDivider = useMemo(
@@ -124,7 +130,12 @@ export const PlaylistTab = ({ playlistId, name }) => {
         setWriteError(null);
         setWrote(null);
         setMode(wholeAlbums ? 'albums' : 'tracks');
-        setOrder(shuffleKeepingAlbums(playlist.tracks, Math.random, { isDivider, wholeAlbums }));
+        // These playlists are often built a whole record at a time, so welding
+        // already-adjacent tracks would make this button do nothing but reorder
+        // albums. pre-approved is curated song by song and still welds.
+        setOrder(shuffleKeepingAlbums(playlist.tracks, Math.random, {
+            isDivider, wholeAlbums, weldAdjacent: false,
+        }));
     };
 
     const reshuffleSection = (section) => {
@@ -135,7 +146,9 @@ export const PlaylistTab = ({ playlistId, name }) => {
         const newOrder = markerSectionsOf(base, markers).flatMap((s) => [
             ...(s.divider ? [s.divider] : []),
             ...((s.divider?.uri ?? null) === dividerUri
-                ? shuffleKeepingAlbums(s.tracks, Math.random, { wholeAlbums: mode === 'albums' })
+                ? shuffleKeepingAlbums(s.tracks, Math.random, {
+                    wholeAlbums: mode === 'albums', weldAdjacent: false,
+                })
                 : s.tracks),
         ]);
         setOrder(newOrder);

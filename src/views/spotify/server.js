@@ -79,17 +79,26 @@ const playlistCache = new Map();
  * (pre-approved). The ids are in the playlists' share URLs and are not secrets,
  * so a tab can ask for one directly.
  */
-export const getPlaylist = (playlistId) => {
-    const key = playlistId ?? '__default__';
+export const getPlaylist = (playlistId, part = 0) => {
+    // Keyed by part as well as playlist: a long playlist is several tabs, each
+    // reading a different slice, and they must not share one cached response.
+    const key = `${playlistId ?? '__default__'}#${part}`;
     if (!playlistCache.has(key)) {
         // Cache the promise, not just the result, so two tabs mounting at once
         // share one request. A failure is evicted so the next open can retry.
-        const pending = post('get_playlist', playlistId ? { playlistId } : undefined)
+        const pending = post('get_playlist', { ...(playlistId ? { playlistId } : {}), part })
             .catch((error) => { playlistCache.delete(key); throw error; });
         playlistCache.set(key, pending);
     }
     return playlistCache.get(key);
 };
+
+// One tab's worth of playlist. Mirrors PART_SIZE in server/get_playlist.
+export const PART_SIZE = 2500;
+
+/** How many tabs a playlist of this length needs. */
+export const partsFor = (trackCount) =>
+    Math.max(1, Math.ceil((trackCount ?? 0) / PART_SIZE));
 
 /**
  * The account's playlists — `{ id, name, trackCount, owner }` each — for the

@@ -6,7 +6,7 @@
 // short-lived access token and caches that. Nothing here ever asks anyone to log
 // in.
 //
-// Only the first MAX_TRACKS are read. A huge playlist (some run to five figures)
+// One PART_SIZE slice is read per request. A huge playlist (some run to five figures)
 // would take hundreds of page requests, which trips Spotify's rate limit and
 // doesn't fit a function's ten seconds — so the tool shuffles the first couple
 // of thousand and leaves the tail alone, keeping every playlist to the same
@@ -35,7 +35,10 @@ const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/
 const PAGE = 50;
 // The most tracks read from any one playlist — 50 pages, comfortably above
 // pre-approved's ~2,000. Anything past this is left unshuffled.
-const MAX_TRACKS = 2500;
+// How many tracks one tab covers. A playlist longer than this is split across
+// several tabs rather than truncated — reading it whole would blow the
+// function's budget and hit Spotify's rate limit, but no track goes unread.
+const PART_SIZE = 2500;
 // Requests in flight at once — kept small so the burst stays under the rate
 // limit and inside the function's budget.
 const CONCURRENCY = 3;
@@ -182,8 +185,11 @@ const handler = async (event) => {
         // A tab can name which playlist to read; anything not shaped like a
         // Spotify id falls back to the default source.
         let requested;
+        let requestedPart;
         try {
-            requested = JSON.parse(event?.body || '{}').playlistId;
+            const body = JSON.parse(event?.body || '{}');
+            requested = body.playlistId;
+            requestedPart = body.part;
         } catch (_) {
             requested = undefined;
         }
@@ -191,22 +197,36 @@ const handler = async (event) => {
 
         const token = await accessToken();
 
-        // The first page reports the total; the rest go out through the pool, a
-        // few at a time, and only up to the cap.
+        // The first page is read whichever part was asked for, because it is
+        // what reports the playlist's real length.
         const first = await page(token, playlistId, 0);
         const total = first.total ?? 0;
-        const wanted = Math.min(total, MAX_TRACKS);
-        const offsets = [];
-        for (let o = PAGE; o < wanted; o += PAGE) offsets.push(o);
-        const rest = await mapPool(offsets, (offset) => page(token, playlistId, offset));
+        const parts = Math.max(1, Math.ceil(total / PART_SIZE));
+        const part = Number.isInteger(requestedPart)
+            ? Math.min(Math.max(requestedPart, 0), parts - 1)
+            : 0;
 
-        const tracks = [first, ...rest]
+        // The window this part covers. PART_SIZE is a whole number of pages, so
+        // `from` always lands on a page boundary and nothing has to be trimmed.
+        const from = part * PART_SIZE;
+        const to = Math.min(total, from + PART_SIZE);
+        const offsets = [];
+        for (let o = from; o < to; o += PAGE) offsets.push(o);
+
+        const rest = await mapPool(
+            offsets.filter((o) => o !== 0),
+            (offset) => page(token, playlistId, offset),
+        );
+        // Page zero is already in hand; it only belongs to the first part.
+        const pages = from === 0 ? [first, ...rest] : rest;
+
+        const tracks = pages
             .flatMap((p) => p.items ?? [])
             .map(trim)
             // A track pulled from Spotify's catalogue comes back null and cannot
             // be written anywhere, so it is dropped on the way in.
             .filter((t) => t.uri)
-            .slice(0, MAX_TRACKS);
+            .slice(0, PART_SIZE);
 
         // Genre enrichment is best-effort: a failure here means the shuffle runs
         // without genre data for this request, but the playlist still loads.
@@ -247,9 +267,12 @@ const handler = async (event) => {
                 playlistId,
                 total,
                 tracks: tracksWithGenres,
-                // Whether the playlist runs past the cap, so the page can say the
-                // tail isn't being shuffled.
-                capped: total > MAX_TRACKS,
+                // Which slice of the playlist this is, and how many there are —
+                // the page turns these into one tab each.
+                part,
+                parts,
+                offset: from,
+                partSize: PART_SIZE,
             }),
         };
     } catch (error) {
