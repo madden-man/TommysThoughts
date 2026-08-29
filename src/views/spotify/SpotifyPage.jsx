@@ -11,6 +11,7 @@ import {
 import { Header } from '../../components/Header';
 import { PreApprovedTab } from './PreApprovedTab';
 import { PlaylistTab } from './PlaylistTab';
+import { InOrderTab } from './InOrderTab';
 import { listPlaylists, partsFor } from './server';
 
 import './spotify.css';
@@ -21,15 +22,33 @@ import './spotify.css';
 // playlists, so the tab appears on its own without anything to paste in.
 const norm = (value) => (value ?? '').trim().toLowerCase();
 
-// A tab writes into a "<name> shuffled" playlist, so those outputs also live in
-// the account. They are destinations, not sources — never a tab, and never an
-// option in the add picker.
-const isShuffledOutput = (playlist) => norm(playlist?.name).endsWith(' shuffled');
+// A tab writes into a "<name> shuffled" or "<name> in order" playlist, so those
+// outputs also live in the account. They are destinations, not sources — never a
+// tab of their own, and never an option in the add picker.
+const OUTPUT_SUFFIXES = [' shuffled', ' in order'];
+const isOutput = (playlist) =>
+    OUTPUT_SUFFIXES.some((suffix) => norm(playlist?.name).endsWith(suffix));
 
-// master (ii), but NOT "master (ii) shuffled" — the output contains the same
-// words, so it has to be excluded or it could win the lookup.
-const matchesMaster = (playlist) =>
-    norm(playlist?.name).includes('master (ii)') && !isShuffledOutput(playlist);
+const MASTER_NAME = 'master (ii)';
+
+// The master playlist, and not one of the playlists derived from it.
+//
+// Every derived playlist spells the master's name in full and then adds to it —
+// "master (ii) shuffled", "master (ii) in order" — so a lookup that merely
+// contains the name matches all of them and takes whichever the account happens
+// to list first. Excluding only the " shuffled" ones was not enough: the tab
+// could land on a derived playlist and report its length as the master's, which
+// reads as a master with no tracks when that playlist is empty.
+//
+// So: an exact name wins outright, and failing that the shortest name containing
+// it, since adding to a name only ever makes it longer.
+const masterIn = (playlists) => {
+    const named = playlists.filter((p) => norm(p?.name).includes(MASTER_NAME));
+    return named.find((p) => norm(p.name) === MASTER_NAME)
+        ?? named.filter((p) => !isOutput(p))
+            .sort((a, b) => a.name.length - b.name.length)[0]
+        ?? null;
+};
 
 // Every other tab is one the user added from the picker, kept here so they
 // survive a reload.
@@ -67,10 +86,7 @@ export const SpotifyPage = () => {
     }, [added]);
 
     // The account's own "… (ii)" master playlist, once the list has loaded.
-    const master = useMemo(
-        () => (options ?? []).find(matchesMaster) ?? null,
-        [options],
-    );
+    const master = useMemo(() => masterIn(options ?? []), [options]);
 
     // A playlist longer than one part becomes several tabs, one per slice, so
     // nothing goes unread. The length comes from the playlist list, so the tabs
@@ -100,7 +116,19 @@ export const SpotifyPage = () => {
     const tabs = useMemo(() => [
         { key: 'pre-approved', label: 'pre-approved', kind: 'preapproved' },
         ...(master
-            ? tabsFor(master.id, master.name, 'master', false)
+            ? [
+                ...tabsFor(master.id, master.name, 'master', false),
+                // Beside master's shuffle tabs, not among them: it reads the
+                // same playlist whole rather than a part at a time.
+                {
+                    key: 'master-in-order',
+                    label: `${master.name} in order`,
+                    kind: 'inorder',
+                    playlistId: master.id,
+                    name: master.name,
+                    parts: partsFor(countOf(master.id)),
+                },
+            ]
             : [{ key: 'master', label: 'master (ii)', kind: 'master' }]),
         ...added.flatMap((a) => tabsFor(a.id, a.name, 'pl', true)),
         // tabsFor closes over `options`, which is the dependency that matters
@@ -128,13 +156,22 @@ export const SpotifyPage = () => {
     // The pool the picker draws from: real source playlists only. Shuffled
     // outputs, master, and anything already a tab are left out.
     const pickable = (options ?? []).filter(
-        (p) => !isShuffledOutput(p)
+        (p) => !isOutput(p)
             && p.id !== master?.id
             && !added.some((a) => a.id === p.id),
     );
 
     const renderActive = () => {
         if (active.kind === 'preapproved') return <PreApprovedTab />;
+        if (active.kind === 'inorder') {
+            return (
+                <InOrderTab
+                    playlistId={active.playlistId}
+                    name={active.name}
+                    parts={active.parts ?? 1}
+                />
+            );
+        }
         if (active.kind === 'master') {
             if (options === null) return <p className="spotify__muted">Finding master (ii)…</p>;
             return (
