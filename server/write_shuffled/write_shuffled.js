@@ -38,14 +38,20 @@ const handler = async (event) => {
     try {
         const { uris, mode, order, playlistId } = JSON.parse(event.body || '{}');
 
-        if (!Array.isArray(uris) || !uris.length) {
-            return { statusCode: 400, body: 'No tracks to write.' };
-        }
-        if (uris.length > MAX_URIS) {
-            return { statusCode: 400, body: `At most ${MAX_URIS} tracks per call.` };
-        }
-        if (mode !== 'replace' && mode !== 'append') {
-            return { statusCode: 400, body: "mode must be 'replace' or 'append'." };
+        // `clear` empties the destination and carries no tracks. It exists so a
+        // playlist assembled from several parts can be started over — every part
+        // appends, so without it a second run would stack duplicates.
+        const clearing = mode === 'clear';
+        if (!clearing) {
+            if (!Array.isArray(uris) || !uris.length) {
+                return { statusCode: 400, body: 'No tracks to write.' };
+            }
+            if (uris.length > MAX_URIS) {
+                return { statusCode: 400, body: `At most ${MAX_URIS} tracks per call.` };
+            }
+            if (mode !== 'replace' && mode !== 'append') {
+                return { statusCode: 400, body: "mode must be 'replace', 'append' or 'clear'." };
+            }
         }
 
         const target = isPlaylistId(playlistId) ? playlistId : TARGET_PLAYLIST_ID;
@@ -54,14 +60,14 @@ const handler = async (event) => {
         const response = await fetch(
             `https://api.spotify.com/v1/playlists/${target}/items`,
             {
-                // PUT replaces the destination with these URIs; POST adds them to
-                // the end. First chunk clears it out, the rest build it back up.
-                method: mode === 'replace' ? 'PUT' : 'POST',
+                // PUT replaces the destination with these URIs — an empty list
+                // therefore empties it; POST adds them to the end.
+                method: (mode === 'replace' || clearing) ? 'PUT' : 'POST',
                 headers: {
                     authorization: `Bearer ${token}`,
                     'content-type': 'application/json',
                 },
-                body: JSON.stringify({ uris }),
+                body: JSON.stringify({ uris: clearing ? [] : uris }),
             },
         );
         if (!response.ok) {
@@ -75,7 +81,11 @@ const handler = async (event) => {
         // starts it. This used to be a safety net for overwriting the original;
         // now that the original is never written to, it is just a record of the
         // orders this has generated. Failing to write it must not fail the run.
-        if (mode === 'replace' && Array.isArray(order) && order.length) {
+        //
+        // Keyed off `order` being present rather than off the mode: only the
+        // first chunk of a run carries it, and a run that appends throughout —
+        // one part of a long playlist — has no 'replace' chunk to hang it on.
+        if (Array.isArray(order) && order.length) {
             try {
                 await (await clientPromise).db('tommy-data')
                     .collection('spotify_orders')
@@ -92,7 +102,7 @@ const handler = async (event) => {
         return {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ written: uris.length, ...(await response.json()) }),
+            body: JSON.stringify({ written: clearing ? 0 : uris.length, ...(await response.json()) }),
         };
     } catch (error) {
         return { statusCode: 500, body: error.toString() };

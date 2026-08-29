@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button } from '@mui/material';
+import { Button, Checkbox, FormControlLabel } from '@mui/material';
 import {
     SEASONS,
     describeOrder,
@@ -11,12 +11,15 @@ import {
     shuffleKeepingAlbums,
 } from './shuffle';
 import { getPlaylist, writeOrder } from './server';
+import { TrackCount } from './TrackCount';
 
 // The shuffle runs here rather than on the server: two thousand tracks reorder
 // in well under a second, and doing it in the browser means you see the result
 // before anything is written to Spotify.
 
 const PREVIEW_PER_SECTION = 8;
+
+const WELD_KEY = 'spotify.weld.pre-approved';
 
 // The pre-approved playlist, shuffled by season. This is the original /spotify
 // view; it now lives inside a tab so other playlists can sit beside it.
@@ -37,6 +40,22 @@ export const PreApprovedTab = () => {
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
     const [wrote, setWrote] = useState(null);
+
+    // pre-approved is curated song by song, so a pair sitting together was put
+    // together on purpose — welding is on here by default. Untick it to break the
+    // records up and let every track move on its own. Kept in localStorage so the
+    // choice survives switching tabs, which remounts this.
+    const [weld, setWeld] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem(WELD_KEY) || 'true') !== false;
+        } catch (_) {
+            return true;
+        }
+    });
+
+    useEffect(() => {
+        localStorage.setItem(WELD_KEY, JSON.stringify(weld));
+    }, [weld]);
 
     useEffect(() => {
         let live = true;
@@ -85,6 +104,7 @@ export const PreApprovedTab = () => {
             isDivider: isSeasonDivider,
             wholeAlbums,
             leadWith,
+            weldAdjacent: weld,
         }));
     };
 
@@ -98,6 +118,7 @@ export const PreApprovedTab = () => {
             ...(section.season === seasonName
                 ? shuffleKeepingAlbums(section.tracks, Math.random, {
                     wholeAlbums: mode === 'albums',
+                    weldAdjacent: weld,
                 })
                 : section.tracks),
         ]);
@@ -165,20 +186,7 @@ export const PreApprovedTab = () => {
 
             {playlist && (
                 <>
-                    <p className="spotify__count">
-                        <strong>{playlist.tracks.length}</strong> tracks
-                        {playlist.capped ? (
-                            <span className="spotify__muted">
-                                {' '}(the first {playlist.tracks.length} of{' '}
-                                {playlist.total} — only these are shuffled)
-                            </span>
-                        ) : playlist.total !== playlist.tracks.length && (
-                            <span className="spotify__muted">
-                                {' '}({playlist.total} in Spotify — the rest are
-                                no longer playable and were skipped)
-                            </span>
-                        )}
-                    </p>
+                    <TrackCount playlist={playlist} />
 
                     {/* Each season is opened by a named song, so the thing
                         worth checking is that each name caught exactly one. */}
@@ -219,6 +227,20 @@ export const PreApprovedTab = () => {
                         )}
                     </div>
 
+                    <div className="spotify__options">
+                        <FormControlLabel
+                            control={(
+                                <Checkbox
+                                    size="small"
+                                    checked={weld}
+                                    onChange={(e) => setWeld(e.target.checked)}
+                                    disabled={busy}
+                                />
+                            )}
+                            label="Keep songs that are already next to each other together"
+                        />
+                    </div>
+
                     {/* Two shuffles, differing only in what counts as
                         one indivisible thing. */}
                     <div className="spotify__actions">
@@ -247,10 +269,18 @@ export const PreApprovedTab = () => {
                     </div>
                     <p className="spotify__muted">
                         <strong>Shuffle tracks</strong> spreads a record's songs
-                        across its season, in album order, keeping only the runs
-                        that were already together.{' '}
+                        across its season, in album order.{' '}
                         <strong>Shuffle whole albums</strong> keeps each record
                         intact and start-to-finish, and shuffles the records.
+                    </p>
+                    <p className="spotify__muted">
+                        The checkbox decides what <strong>Shuffle tracks</strong>{' '}
+                        treats as one indivisible thing. Ticked, a run of same-album
+                        tracks that already sit side by side travels together and is
+                        never split. Unticked, every track moves on its own, so those
+                        runs get broken up too.{' '}
+                        <strong>Shuffle whole albums</strong> ignores it: there a
+                        record is always the unit.
                     </p>
 
                     {busy && (

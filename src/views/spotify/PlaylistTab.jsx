@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Autocomplete, Button, TextField } from '@mui/material';
-import { ensurePlaylist, getPlaylist, writeOrder } from './server';
+import { Autocomplete, Button, Checkbox, FormControlLabel, TextField } from '@mui/material';
+import { clearPlaylist, ensurePlaylist, getPlaylist, writeOrder } from './server';
+import { TrackCount } from './TrackCount';
 import { describeOrder, dividerMatcher, markerSectionsOf, shuffleKeepingAlbums } from './shuffle';
 
 // A generic playlist tab: reads whichever playlist it's given, splits it into
@@ -12,10 +13,20 @@ const PREVIEW_PER_SECTION = 8;
 
 // Markers and the write destination both live per playlist, keyed by its Spotify
 // id, so they follow the playlist rather than the tab and survive a reload.
-// Keyed by part too: each slice of a long playlist has its own markers and its
-// own destination, because each is a separate tab writing a separate playlist.
+// Markers are per part — each slice holds different tracks, so it needs its own
+// section boundaries. The destination is NOT: every part of a playlist writes
+// into the same "<name> shuffled", appending, so the parts amalgamate there.
 const markerKey = (playlistId, part) => `spotify.markers.${playlistId}#${part}`;
-const destKey = (playlistId, part) => `spotify.dest.${playlistId}#${part}`;
+const destKey = (playlistId) => `spotify.dest.${playlistId}`;
+// Whether an already-adjacent run travels as one unit. A property of how the
+// playlist was built rather than of the tab, so it is per playlist and not per
+// part, and it survives a reload like the markers do.
+const weldKey = (playlistId) => `spotify.weld.${playlistId}`;
+// Which parts are currently sitting in the destination. The parts append, so
+// getting the whole playlist across takes several writes in order and writing one
+// twice silently doubles it — this is what lets the tab say where you are up to
+// rather than leaving you to remember. Emptying the destination clears it.
+const writtenKey = (playlistId) => `spotify.written.${playlistId}`;
 
 const loadJson = (key, fallback) => {
     try {
@@ -43,13 +54,21 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
     const [wrote, setWrote] = useState(null);
-    const [dest, setDest] = useState(() => loadJson(destKey(playlistId, part), null));
+    const [cleared, setCleared] = useState(false);
+    const [dest, setDest] = useState(() => loadJson(destKey(playlistId), null));
+    // Off by default: these playlists are usually built a whole record at a
+    // time, so welding would leave "Shuffle tracks" doing nothing but reorder
+    // albums. Tick it for a playlist sequenced song by song, where a pair sitting
+    // together was put together on purpose.
+    const [weld, setWeld] = useState(() => loadJson(weldKey(playlistId), false) === true);
+    const [written, setWritten] = useState(() => {
+        const saved = loadJson(writtenKey(playlistId), []);
+        return Array.isArray(saved) ? saved.filter(Number.isInteger) : [];
+    });
 
-    // Each part writes its own destination — a 6,000-track playlist becomes
-    // three shuffled playlists rather than one that silently loses two thirds.
-    const destName = parts > 1
-        ? `${name} shuffled (${part + 1} of ${parts})`
-        : `${name} shuffled`;
+    // One destination for the whole playlist, however many parts it is read in.
+    const destName = `${name} shuffled`;
+    const multi = parts > 1;
 
     useEffect(() => {
         if (!playlistId) return undefined;
@@ -69,8 +88,16 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
     }, [playlistId, part, markers]);
 
     useEffect(() => {
-        localStorage.setItem(destKey(playlistId, part), JSON.stringify(dest));
-    }, [playlistId, part, dest]);
+        localStorage.setItem(destKey(playlistId), JSON.stringify(dest));
+    }, [playlistId, dest]);
+
+    useEffect(() => {
+        localStorage.setItem(weldKey(playlistId), JSON.stringify(weld));
+    }, [playlistId, weld]);
+
+    useEffect(() => {
+        localStorage.setItem(writtenKey(playlistId), JSON.stringify(written));
+    }, [playlistId, written]);
 
     // A track opens a section when it's one of the marker tracks.
     const isDivider = useMemo(
@@ -130,11 +157,8 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
         setWriteError(null);
         setWrote(null);
         setMode(wholeAlbums ? 'albums' : 'tracks');
-        // These playlists are often built a whole record at a time, so welding
-        // already-adjacent tracks would make this button do nothing but reorder
-        // albums. pre-approved is curated song by song and still welds.
         setOrder(shuffleKeepingAlbums(playlist.tracks, Math.random, {
-            isDivider, wholeAlbums, weldAdjacent: false,
+            isDivider, wholeAlbums, weldAdjacent: weld,
         }));
     };
 
@@ -147,7 +171,7 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
             ...(s.divider ? [s.divider] : []),
             ...((s.divider?.uri ?? null) === dividerUri
                 ? shuffleKeepingAlbums(s.tracks, Math.random, {
-                    wholeAlbums: mode === 'albums', weldAdjacent: false,
+                    wholeAlbums: mode === 'albums', weldAdjacent: weld,
                 })
                 : s.tracks),
         ]);
@@ -158,6 +182,7 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
     const write = async () => {
         setWriteError(null);
         setWrote(null);
+        setCleared(false);
         try {
             // First write for this playlist? Get (or create) its destination and
             // remember it, so later writes go straight to the same place.
@@ -171,8 +196,38 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
                 order.map((t) => t.uri),
                 (done, total) => setProgress({ done, total }),
                 target.id,
+                // Every part of a long playlist lands on the end, so writing
+                // part 1, then 2, then 3 assembles the whole thing in order.
+                // A single-part playlist replaces instead, so re-running it
+                // rebuilds rather than stacking another copy.
+                { append: multi },
             );
             setWrote(order.length);
+            // Only the appending case is worth recording: a single-part write
+            // replaces, so it is always the whole story and never stacks.
+            if (multi) setWritten((prev) => [...new Set([...prev, part])].sort((a, b) => a - b));
+        } catch (error) {
+            setWriteError(error.message);
+        } finally {
+            setProgress(null);
+        }
+    };
+
+    // Emptying the destination, so a rebuild starts from nothing. Only worth
+    // offering when the parts append — a single-part write replaces anyway.
+    const startOver = async () => {
+        setWriteError(null);
+        setWrote(null);
+        try {
+            let target = dest;
+            if (!target) {
+                target = await ensurePlaylist(destName);
+                setDest(target);
+            }
+            setProgress({ done: 0, total: 0 });
+            await clearPlaylist(target.id);
+            setWritten([]);
+            setCleared(true);
         } catch (error) {
             setWriteError(error.message);
         } finally {
@@ -181,6 +236,10 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
     };
 
     const busy = progress !== null;
+    // Writing a part that is already in the destination appends a second copy of
+    // it, which is never what you want — so it is called out rather than blocked,
+    // since emptying the destination from Spotify itself is also allowed.
+    const alreadyIn = multi && written.includes(part);
 
     return (
         <>
@@ -205,20 +264,7 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
 
             {playlist && (
                 <>
-                    <p className="spotify__count">
-                        <strong>{playlist.tracks.length}</strong> tracks
-                        {playlist.capped ? (
-                            <span className="spotify__muted">
-                                {' '}(the first {playlist.tracks.length} of{' '}
-                                {playlist.total} — only these are shuffled)
-                            </span>
-                        ) : playlist.total !== playlist.tracks.length && (
-                            <span className="spotify__muted">
-                                {' '}({playlist.total} in Spotify — the rest are
-                                no longer playable and were skipped)
-                            </span>
-                        )}
-                    </p>
+                    <TrackCount playlist={playlist} />
 
                     <div className="spotify__dividers">
                         <p className="spotify__muted">
@@ -279,6 +325,20 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
                         />
                     </div>
 
+                    <div className="spotify__options">
+                        <FormControlLabel
+                            control={(
+                                <Checkbox
+                                    size="small"
+                                    checked={weld}
+                                    onChange={(e) => setWeld(e.target.checked)}
+                                    disabled={busy}
+                                />
+                            )}
+                            label="Keep songs that are already next to each other together"
+                        />
+                    </div>
+
                     <div className="spotify__actions">
                         <Button
                             variant={mode === 'tracks' ? 'contained' : 'outlined'}
@@ -302,18 +362,64 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
                         >
                             Write to "{destName}"
                         </Button>
+                        {multi && (
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={startOver}
+                                disabled={busy}
+                            >
+                                Empty "{destName}"
+                            </Button>
+                        )}
                     </div>
                     <p className="spotify__muted">
                         <strong>Shuffle tracks</strong> spreads a record's songs
-                        across its section, in album order, keeping only the runs
-                        that were already together.{' '}
+                        across its section, in album order.{' '}
                         <strong>Shuffle whole albums</strong> keeps each record
                         intact and start-to-finish, and shuffles the records.
                     </p>
+                    <p className="spotify__muted">
+                        The checkbox decides what <strong>Shuffle tracks</strong>{' '}
+                        treats as one indivisible thing. Ticked, a run of same-album
+                        tracks that already sit side by side travels together and is
+                        never split — right for a playlist sequenced song by song.
+                        Unticked, every track moves on its own, so albums added a
+                        record at a time get broken up.{' '}
+                        <strong>Shuffle whole albums</strong> ignores it: there a
+                        record is always the unit.
+                    </p>
+
+                    {multi && (
+                        <p className="spotify__muted">
+                            This is part {part + 1} of {parts}. All {parts} parts write
+                            into the one <strong>{destName}</strong>, each landing on the
+                            end — so empty it first, then write part 1, then 2, and so on,
+                            and the whole playlist arrives in order.
+                        </p>
+                    )}
+
+                    {multi && (
+                        <p className={alreadyIn ? 'spotify__warn' : 'spotify__muted'}>
+                            {written.length
+                                ? `In "${destName}" so far: ${written.length === parts
+                                    ? 'every part'
+                                    : `part ${written.map((n) => n + 1).join(', ')} of ${parts}`}.`
+                                : `Nothing written into "${destName}" yet — part 1 is next.`}
+                            {alreadyIn && ' This part is already in there; writing it again '
+                                + 'would add a second copy. Empty it and start over instead.'}
+                        </p>
+                    )}
+
+                    {cleared && (
+                        <p className="spotify__done">
+                            "{destName}" is empty — write part 1 next.
+                        </p>
+                    )}
 
                     {busy && (
                         <p className="spotify__progress">
-                            Writing {progress.done} of {progress.total}…
+                            {progress.total ? `Writing ${progress.done} of ${progress.total}…` : 'Emptying…'}
                         </p>
                     )}
 
@@ -321,7 +427,8 @@ export const PlaylistTab = ({ playlistId, name, part = 0, parts = 1 }) => {
 
                     {wrote !== null && (
                         <p className="spotify__done">
-                            Written — {wrote} tracks now in "{destName}"
+                            Written — {wrote} tracks
+                            {multi ? ` added to the end of "${destName}"` : ` now in "${destName}"`}
                             {dest?.created && ' (created just now)'}.
                         </p>
                     )}

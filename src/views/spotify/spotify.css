@@ -166,6 +166,17 @@
     margin-top: 4px;
 }
 
+/* The shuffle settings, sitting directly above the buttons they change. Pulled
+   in tight because the checkbox reads as a caption on those buttons. */
+.spotify__options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 -4px;
+    font-size: 0.9rem;
+}
+
 /* A half-written playlist is the one failure that matters here, so the states
    that mean "something is happening to Spotify right now" are the loud ones. */
 .spotify__progress {

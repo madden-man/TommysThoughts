@@ -70,10 +70,10 @@ const post = async (name, body) => {
 const playlistCache = new Map();
 
 /**
- * The source playlist (its first couple of thousand tracks), in current order.
- * Never modified. Resolves to `{ playlistId, total, tracks, capped }` — `total`
- * is the playlist's real length and `capped` says whether it runs past what was
- * read.
+ * One part of the source playlist, in current order. Never modified. Resolves to
+ * `{ playlistId, total, tracks, part, parts, offset, partSize }` — `total` is the
+ * playlist's real length and the rest say which slice of it `tracks` is, so the
+ * tab can report that rather than looking truncated.
  *
  * `playlistId` names which playlist to read — omit it for the default
  * (pre-approved). The ids are in the playlists' share URLs and are not secrets,
@@ -128,17 +128,30 @@ export const writeChunk = (uris, mode, order, playlistId) =>
     post('write_shuffled', { uris, mode, order, playlistId });
 
 /**
+ * Empty the destination playlist, so a rebuild starts from nothing.
+ *
+ * Every part of a long playlist appends, so without this a second run would
+ * stack a duplicate on the end rather than replacing what is there.
+ */
+export const clearPlaylist = (playlistId) =>
+    post('write_shuffled', { mode: 'clear', playlistId });
+
+/**
  * Write a whole order to the destination, chunk by chunk, reporting progress.
  *
  * The first chunk replaces and carries the full order for the log; every chunk
  * after it appends. They have to go in sequence — each append lands at the end —
  * so this is deliberately serial rather than parallel.
  *
+ * With `append`, nothing replaces: the whole order goes on the end of whatever
+ * is already there. That is what lets the several parts of a long playlist be
+ * written one after another into a single destination.
+ *
  * If a chunk throws, the destination is left holding however much was written.
  * The source is untouched either way, so the fix is simply to run it again; the
  * error says where it stopped so the page can say so too.
  */
-export const writeOrder = async (uris, onProgress, playlistId) => {
+export const writeOrder = async (uris, onProgress, playlistId, { append = false } = {}) => {
     const chunks = [];
     for (let i = 0; i < uris.length; i += CHUNK) chunks.push(uris.slice(i, i + CHUNK));
 
@@ -146,7 +159,12 @@ export const writeOrder = async (uris, onProgress, playlistId) => {
         try {
             await writeChunk(
                 chunks[i],
-                i === 0 ? 'replace' : 'append',
+                // Appending throughout is how the parts of a long playlist
+                // amalgamate: each one lands after the last, so writing part 1
+                // then 2 then 3 builds the whole thing in order. A single-part
+                // playlist still replaces, so re-running it rebuilds rather
+                // than stacking a second copy on the end.
+                (!append && i === 0) ? 'replace' : 'append',
                 i === 0 ? uris : undefined,
                 playlistId,
             );
