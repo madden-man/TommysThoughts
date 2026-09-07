@@ -627,6 +627,27 @@ describe('revolving by the share of the season left', () => {
         expect(tail.every((u) => summerUris().includes(u))).toBe(true);
     });
 
+    it('wraps up the albums up top and starts them over at the end', () => {
+        // One album in track order, read as single blocks so the section plays
+        // 1..10 start to finish.
+        const summer = Array.from({ length: 10 }, (_, i) =>
+            song(`s${i + 1}`, 'SU', 'summeralbum', i + 1));
+        const src = [
+            divider('Casita', 'goth'), ...summer,
+            divider('doomsday', 'lizzy'), song('f1', 'F1', 'af1', 1),
+        ];
+        const out = shuffleKeepingAlbums(src, seededRandom(1), {
+            isDivider: isSeasonDivider, leadWith: 'Summer',
+            seasonRemaining: 0.3, weldAdjacent: false,
+        });
+        const nums = (list) => list.map((t) => t.trackNumber);
+        // 30% left → the last three tracks, the wrap-up, stay up top behind Casita.
+        expect(out[0].name).toBe('Casita');
+        expect(nums(out.slice(1, 4))).toEqual([8, 9, 10]);
+        // The seven already played roll to the end and start over from track one.
+        expect(nums(out.slice(-7))).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    });
+
     it('loses no tracks and moves none out of the lead season', () => {
         const src = seasonal();
         const out = shuffleKeepingAlbums(src, seededRandom(3), {

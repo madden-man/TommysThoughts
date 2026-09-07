@@ -226,9 +226,10 @@ export const PreApprovedTab = () => {
                         <p className="spotify__muted">
                             It's <strong>{leadWith}</strong>, so the shuffle runs{' '}
                             {running.join(' → ')}. About <strong>{remainingPct}%</strong>{' '}
-                            of {leadWith} is still to come, so only that share of its
-                            songs stays up top — the rest roll round to the end, where{' '}
-                            {leadWith} starts coming back around.
+                            of {leadWith} is still to come, so the top holds its
+                            wrap-up — that last share, in album order — while the rest,
+                            already played this year, roll round to the end and start{' '}
+                            {leadWith} over from the beginning as it comes back around.
                         </p>
                         {!seasonsLookRight && (
                             <p className="spotify__warn">

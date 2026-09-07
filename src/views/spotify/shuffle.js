@@ -571,15 +571,17 @@ export const shuffleKeepingAlbums = (
             .sort((a, b) => rank(a) - rank(b));
 
         // The playlist revolves by more than the season: only the fraction of
-        // the lead season still to come is held at the top. The rest have
-        // "already played" this year, so they roll round to the very end —
-        // where, sitting after the last season, they are this season starting to
-        // come round again. With `seasonRemaining` unset nothing rolls off and
-        // the lead season stays whole, exactly as before.
+        // the lead season still to come is held at the top, and it is the TAIL of
+        // that season — the wrap-up. The part already played this year is the
+        // HEAD, so it rolls round to the very end, where, sitting after the last
+        // season, it is this season starting over from the beginning as it comes
+        // round again. With `seasonRemaining` unset nothing rolls off and the
+        // lead season stays whole, exactly as before.
         //
-        // This cut is taken after each season is shuffled and lands wherever the
-        // fraction falls, splitting an album run if one straddles it: the season
-        // turning outranks keeping a record's tracks together.
+        // The cut is taken after each season is shuffled — so its records still
+        // play in their own order — and lands wherever the fraction falls,
+        // splitting an album run if one straddles it: the season turning outranks
+        // keeping a record's tracks together.
         const keepFraction = seasonRemaining === null ? 1 : seasonRemaining;
         const rolledOff = [];
         const body = ordered.flatMap((section) => {
@@ -587,8 +589,9 @@ export const shuffleKeepingAlbums = (
             const opener = section.divider ? [section.divider] : [];
             if (section.season === leadWith && keepFraction < 1) {
                 const keep = Math.round(keepFraction * inSeason.length);
-                rolledOff.push(...inSeason.slice(keep));
-                return [...opener, ...inSeason.slice(0, keep)];
+                const played = inSeason.length - keep;
+                rolledOff.push(...inSeason.slice(0, played));
+                return [...opener, ...inSeason.slice(played)];
             }
             return [...opener, ...inSeason];
         });
