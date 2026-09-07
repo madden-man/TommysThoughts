@@ -6,11 +6,11 @@
 // short-lived access token and caches that. Nothing here ever asks anyone to log
 // in.
 //
-// One PART_SIZE slice is read per request. A huge playlist (some run to five figures)
-// would take hundreds of page requests, which trips Spotify's rate limit and
-// doesn't fit a function's ten seconds — so the tool shuffles the first couple
-// of thousand and leaves the tail alone, keeping every playlist to the same
-// small, safe footprint.
+// One tab's slice is read per request. A huge playlist (some run to five figures)
+// would take hundreds of page requests in one go, which trips Spotify's rate
+// limit and doesn't fit a function's ten seconds — so a long playlist is split
+// into tabs and each request reads one, keeping every request to the same small,
+// safe footprint while no track goes unread. See partSizeFor for how wide a tab is.
 //
 // Needs SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN and
 // MONGODB_URI.
@@ -33,12 +33,14 @@ const isPlaylistId = (value) => typeof value === 'string' && /^[A-Za-z0-9]{22}$/
 
 // Spotify's maximum per request on /items is 50.
 const PAGE = 50;
-// The most tracks read from any one playlist — 50 pages, comfortably above
-// pre-approved's ~2,000. Anything past this is left unshuffled.
-// How many tracks one tab covers. A playlist longer than this is split across
-// several tabs rather than truncated — reading it whole would blow the
-// function's budget and hit Spotify's rate limit, but no track goes unread.
-const PART_SIZE = 2500;
+// How tabs are sized. A playlist of SPLIT_THRESHOLD tracks or fewer is read
+// whole in one tab; a longer one splits into TAB_SIZE-track tabs throughout, the
+// first 2,500 included — reading it whole would blow the function's budget and
+// hit Spotify's rate limit, but no track goes unread. Mirrors server.js, which
+// lays out the tabs the client asks for; the two must agree on the slice.
+const SPLIT_THRESHOLD = 2500;
+const TAB_SIZE = 1000;
+const partSizeFor = (total) => (total > SPLIT_THRESHOLD ? TAB_SIZE : SPLIT_THRESHOLD);
 // Requests in flight at once — kept small so the burst stays under the rate
 // limit and inside the function's budget.
 const CONCURRENCY = 3;
@@ -201,15 +203,18 @@ const handler = async (event) => {
         // what reports the playlist's real length.
         const first = await page(token, playlistId, 0);
         const total = first.total ?? 0;
-        const parts = Math.max(1, Math.ceil(total / PART_SIZE));
+        // Tab width depends on the whole length: one wide tab under the
+        // threshold, 1,000-track tabs once past it.
+        const partSize = partSizeFor(total);
+        const parts = Math.max(1, Math.ceil(total / partSize));
         const part = Number.isInteger(requestedPart)
             ? Math.min(Math.max(requestedPart, 0), parts - 1)
             : 0;
 
-        // The window this part covers. PART_SIZE is a whole number of pages, so
-        // `from` always lands on a page boundary and nothing has to be trimmed.
-        const from = part * PART_SIZE;
-        const to = Math.min(total, from + PART_SIZE);
+        // The window this part covers. Both tab widths are whole numbers of
+        // pages, so `from` always lands on a page boundary and nothing is trimmed.
+        const from = part * partSize;
+        const to = Math.min(total, from + partSize);
         const offsets = [];
         for (let o = from; o < to; o += PAGE) offsets.push(o);
 
@@ -226,7 +231,7 @@ const handler = async (event) => {
             // A track pulled from Spotify's catalogue comes back null and cannot
             // be written anywhere, so it is dropped on the way in.
             .filter((t) => t.uri)
-            .slice(0, PART_SIZE);
+            .slice(0, partSize);
 
         // Genre enrichment is best-effort: a failure here means the shuffle runs
         // without genre data for this request, but the playlist still loads.
@@ -272,7 +277,7 @@ const handler = async (event) => {
                 part,
                 parts,
                 offset: from,
-                partSize: PART_SIZE,
+                partSize,
             }),
         };
     } catch (error) {

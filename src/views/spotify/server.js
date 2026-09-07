@@ -93,12 +93,26 @@ export const getPlaylist = (playlistId, part = 0) => {
     return playlistCache.get(key);
 };
 
-// One tab's worth of playlist. Mirrors PART_SIZE in server/get_playlist.
-export const PART_SIZE = 2500;
+// A playlist of this many tracks or fewer is left whole in a single tab. A
+// longer one is split — see partSizeFor. Mirrors get_playlist.js.
+export const SPLIT_THRESHOLD = 2500;
+// How wide each tab is once a playlist is long enough to split: every tab holds
+// this many, the first 2,500 included. So a 2,600-track playlist is three tabs
+// of 1,000/1,000/600 rather than one 2,500 tab and a 100 tab after it.
+export const TAB_SIZE = 1000;
+
+/**
+ * One tab's worth of playlist, decided by the playlist's whole length. Up to
+ * SPLIT_THRESHOLD stays as one tab spanning all of it; past that it breaks into
+ * TAB_SIZE-track tabs throughout. Mirrors get_playlist.js — the two must agree
+ * or a tab would read a different slice than the page laid out for it.
+ */
+export const partSizeFor = (total) =>
+    ((total ?? 0) > SPLIT_THRESHOLD ? TAB_SIZE : SPLIT_THRESHOLD);
 
 /** How many tabs a playlist of this length needs. */
 export const partsFor = (trackCount) =>
-    Math.max(1, Math.ceil((trackCount ?? 0) / PART_SIZE));
+    Math.max(1, Math.ceil((trackCount ?? 0) / partSizeFor(trackCount)));
 
 /**
  * The account's playlists — `{ id, name, trackCount, owner }` each — for the

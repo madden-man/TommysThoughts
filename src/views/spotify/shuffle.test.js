@@ -13,6 +13,7 @@ import {
     SEASON_CYCLE,
     seasonOf,
     seasonOn,
+    seasonProgressOn,
     seasonsFrom,
     seasonSectionsOf,
     seededRandom,
@@ -568,6 +569,92 @@ describe('leading with the current season', () => {
         });
         expect(seasonSectionsOf(out).map((s) => s.season))
             .toEqual(['Fall', 'Winter', 'Spring', 'Summer']);
+    });
+});
+
+describe('how far through the season a date sits', () => {
+    const at = (iso) => seasonProgressOn(new Date(`${iso}T12:00:00`));
+
+    it('reads ~0 on the first day of a season and climbs toward 1', () => {
+        expect(at('2026-06-21')).toBeLessThan(0.02);
+        // Early September is deep into summer (June 21 → September 22).
+        expect(at('2026-09-07')).toBeGreaterThan(0.8);
+        expect(at('2026-09-07')).toBeLessThan(0.9);
+    });
+
+    it('handles the winter that opens in December', () => {
+        // Winter runs Dec 21 → Mar 20; February is well into it, and its start
+        // is the previous calendar year.
+        expect(at('2026-12-21')).toBeLessThan(0.02);
+        expect(at('2027-02-01')).toBeGreaterThan(0.4);
+        expect(at('2027-02-01')).toBeLessThan(0.6);
+    });
+
+    it('never escapes [0, 1]', () => {
+        expect(at('2026-03-20')).toBeGreaterThanOrEqual(0);
+        expect(at('2026-06-20')).toBeLessThanOrEqual(1);
+    });
+});
+
+describe('revolving by the share of the season left', () => {
+    const song = (name, artist, album, num) => ({
+        uri: `spotify:track:${name}`, name, artistIds: [artist], artistNames: [artist],
+        albumId: album, albumName: album, discNumber: 1, trackNumber: num,
+    });
+    const divider = (title, artist) => song(title, artist, `dv-${title}`, 1);
+
+    // Ten summer tracks so a fraction lands on a clean count, then a short fall.
+    const seasonal = () => [
+        divider('Casita', 'goth'),
+        ...Array.from({ length: 10 }, (_, i) => song(`s${i}`, `S${i}`, `as${i}`, 1)),
+        divider('doomsday', 'lizzy'), song('f1', 'F1', 'af1', 1), song('f2', 'F2', 'af2', 1),
+    ];
+
+    const summerUris = () => seasonal()
+        .filter((t) => t.name.startsWith('s'))
+        .map((t) => t.uri);
+
+    it('keeps only the remaining share of the lead season up top', () => {
+        // 30% of summer left → 3 of its 10 tracks stay behind the divider.
+        const out = shuffleKeepingAlbums(seasonal(), seededRandom(2), {
+            isDivider: isSeasonDivider, leadWith: 'Summer', seasonRemaining: 0.3,
+        });
+        expect(out[0].name).toBe('Casita');
+        const top = out.slice(1, 4).map((t) => t.uri);
+        expect(top.every((u) => summerUris().includes(u))).toBe(true);
+        // The other seven summer tracks have rolled round to the very end.
+        const tail = out.slice(-7).map((t) => t.uri);
+        expect(tail.every((u) => summerUris().includes(u))).toBe(true);
+    });
+
+    it('loses no tracks and moves none out of the lead season', () => {
+        const src = seasonal();
+        const out = shuffleKeepingAlbums(src, seededRandom(3), {
+            isDivider: isSeasonDivider, leadWith: 'Summer', seasonRemaining: 0.4,
+        });
+        expect(out.map((t) => t.uri).sort()).toEqual(src.map((t) => t.uri).sort());
+        // Every summer track is still a summer track, wherever it now sits.
+        const summer = new Set(summerUris());
+        const rolled = out.filter((t) => summer.has(t.uri));
+        expect(rolled).toHaveLength(10);
+    });
+
+    it('leaves the season whole when nothing has been spent', () => {
+        const out = shuffleKeepingAlbums(seasonal(), seededRandom(4), {
+            isDivider: isSeasonDivider, leadWith: 'Summer', seasonRemaining: 1,
+        });
+        // Fall closes the playlist; no summer has rolled past it.
+        expect(out.slice(-2).map((t) => t.name).sort()).toEqual(['f1', 'f2']);
+    });
+
+    it('is unchanged from before when no share is given', () => {
+        const withOut = shuffleKeepingAlbums(seasonal(), seededRandom(5), {
+            isDivider: isSeasonDivider, leadWith: 'Summer',
+        });
+        const withNull = shuffleKeepingAlbums(seasonal(), seededRandom(5), {
+            isDivider: isSeasonDivider, leadWith: 'Summer', seasonRemaining: null,
+        });
+        expect(withNull.map((t) => t.uri)).toEqual(withOut.map((t) => t.uri));
     });
 });
 

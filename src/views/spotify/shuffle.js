@@ -444,6 +444,37 @@ export const seasonsFrom = (season) => {
         : [...SEASON_CYCLE.slice(at), ...SEASON_CYCLE.slice(0, at)];
 };
 
+// The moment a season begins, as a date in a given calendar year.
+const seasonStartDate = (season, year) => {
+    const start = SEASON_STARTS.find((entry) => entry.season === season);
+    return new Date(year, start.month - 1, start.day);
+};
+
+/**
+ * How far through the current season a date sits: 0 on its first day, climbing
+ * toward 1 as the next season's start approaches. Summer runs from the June
+ * solstice to the September equinox, so early September comes back near 0.85 —
+ * most of summer already spent.
+ *
+ * This is what lets the playlist revolve by more than the season alone: the
+ * shuffle keeps only the fraction of a season's songs that is still to come at
+ * the top, and rolls the rest round to the end — see `shuffleKeepingAlbums`.
+ */
+export const seasonProgressOn = (date = new Date()) => {
+    const season = seasonOn(date);
+    const next = seasonsFrom(season)[1];
+    // The current season's start is the most recent one on or before the date.
+    // Winter opens in December, so from January to March its start is last year.
+    let start = seasonStartDate(season, date.getFullYear());
+    if (start > date) start = seasonStartDate(season, date.getFullYear() - 1);
+    // The next season's start is the first one strictly after this season's.
+    let end = seasonStartDate(next, start.getFullYear());
+    if (end <= start) end = seasonStartDate(next, start.getFullYear() + 1);
+    const elapsed = (date - start) / (end - start);
+    // A date on a boundary, or a clock a shade off, shouldn't escape [0, 1].
+    return Math.min(Math.max(elapsed, 0), 1);
+};
+
 /**
  * The playlist as labelled seasons: each one led by the song that names it, with
  * the tracks that follow it up to the next divider.
@@ -513,7 +544,7 @@ export const shuffleKeepingAlbums = (
     random = Math.random,
     {
         isDivider = null, sectionStarts = [], wholeAlbums = false, leadWith = null,
-        weldAdjacent = true,
+        weldAdjacent = true, seasonRemaining = null,
     } = {},
 ) => {
     // The two modes differ only in what counts as one indivisible thing: a run
@@ -533,15 +564,35 @@ export const shuffleKeepingAlbums = (
         // and each still opens its own season wherever that season now sits.
         const wanted = seasonsFrom(leadWith);
         const rank = (section) => wanted.indexOf(section.season);
-        return [...seasonSectionsOf(tracks, isDivider)]
+        const ordered = [...seasonSectionsOf(tracks, isDivider)]
             // A stretch before the first divider belongs to no season and leads,
             // rather than being shuffled in among ones that do. Sort is stable,
             // so several of them keep their order relative to each other.
-            .sort((a, b) => rank(a) - rank(b))
-            .flatMap((section) => [
-                ...(section.divider ? [section.divider] : []),
-                ...shuffle(section.tracks),
-            ]);
+            .sort((a, b) => rank(a) - rank(b));
+
+        // The playlist revolves by more than the season: only the fraction of
+        // the lead season still to come is held at the top. The rest have
+        // "already played" this year, so they roll round to the very end —
+        // where, sitting after the last season, they are this season starting to
+        // come round again. With `seasonRemaining` unset nothing rolls off and
+        // the lead season stays whole, exactly as before.
+        //
+        // This cut is taken after each season is shuffled and lands wherever the
+        // fraction falls, splitting an album run if one straddles it: the season
+        // turning outranks keeping a record's tracks together.
+        const keepFraction = seasonRemaining === null ? 1 : seasonRemaining;
+        const rolledOff = [];
+        const body = ordered.flatMap((section) => {
+            const inSeason = shuffle(section.tracks);
+            const opener = section.divider ? [section.divider] : [];
+            if (section.season === leadWith && keepFraction < 1) {
+                const keep = Math.round(keepFraction * inSeason.length);
+                rolledOff.push(...inSeason.slice(keep));
+                return [...opener, ...inSeason.slice(0, keep)];
+            }
+            return [...opener, ...inSeason];
+        });
+        return [...body, ...rolledOff];
     }
 
     if (isDivider) {

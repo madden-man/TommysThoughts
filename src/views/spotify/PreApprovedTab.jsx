@@ -6,6 +6,7 @@ import {
     isSeasonDivider,
     seasonOf,
     seasonOn,
+    seasonProgressOn,
     seasonSectionsOf,
     seasonsFrom,
     shuffleKeepingAlbums,
@@ -36,6 +37,13 @@ export const PreApprovedTab = () => {
     // rather than always starting in Summer because that is how it is filed.
     const leadWith = useMemo(() => seasonOn(new Date()), []);
     const running = useMemo(() => seasonsFrom(leadWith), [leadWith]);
+
+    // How much of the current season is still to come. The shuffle keeps only
+    // this share of its songs at the top and rolls the rest round to the end, so
+    // the playlist revolves smoothly through the season rather than jumping the
+    // moment it turns.
+    const seasonRemaining = useMemo(() => 1 - seasonProgressOn(new Date()), []);
+    const remainingPct = Math.round(seasonRemaining * 100);
 
     const [progress, setProgress] = useState(null);
     const [writeError, setWriteError] = useState(null);
@@ -105,6 +113,7 @@ export const PreApprovedTab = () => {
             wholeAlbums,
             leadWith,
             weldAdjacent: weld,
+            seasonRemaining,
         }));
     };
 
@@ -216,7 +225,10 @@ export const PreApprovedTab = () => {
                         </p>
                         <p className="spotify__muted">
                             It's <strong>{leadWith}</strong>, so the shuffle runs{' '}
-                            {running.join(' → ')}.
+                            {running.join(' → ')}. About <strong>{remainingPct}%</strong>{' '}
+                            of {leadWith} is still to come, so only that share of its
+                            songs stays up top — the rest roll round to the end, where{' '}
+                            {leadWith} starts coming back around.
                         </p>
                         {!seasonsLookRight && (
                             <p className="spotify__warn">
