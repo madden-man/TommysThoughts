@@ -4,6 +4,7 @@ import { Header } from '../../components/Header';
 import { getBumpHeader, getBumpSymbol } from './constants';
 import { sendBumpNotification } from './server';
 import { BumpActivities } from './BumpActivities';
+import { BumpEvents } from './BumpEvents';
 
 import './bump.css';
 
@@ -24,6 +25,7 @@ export const BumpPage = () => {
             <Header />
             <div className="bump">
                 {header && <p>You're up for a <strong>{header}</strong>.</p>}
+                <BumpEvents initialFilter={initialFilter} />
                 <BumpActivities initialFilter={initialFilter} />
             </div>
         </div>

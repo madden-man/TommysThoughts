@@ -453,9 +453,12 @@ export const CalendarPage = () => {
     useEffect(() => {
         const handoff = location.state?.scheduleActivity;
         if (!handoff) return;
-        openActivity(null, {
+        // An event from /bump also knows its day, time and place.
+        openActivity(handoff.date ?? null, {
             title: handoff.header ?? '',
             kind: kindForSymbol(handoff.symbol) ?? emptyActivityDraft.kind,
+            ...(handoff.time ? { time: handoff.time } : {}),
+            ...(handoff.notes ? { notes: handoff.notes } : {}),
         });
         navigate(location.pathname, { replace: true });
         // openActivity is recreated every render; the handoff is what matters.

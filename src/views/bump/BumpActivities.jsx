@@ -15,6 +15,8 @@ import {
     deleteActivity,
     sendActivityQuestion,
 } from './server';
+import { LOCAL_EVENTS } from './localEventsData';
+import { formatDay, formatTime, todayIso, upcomingForCard } from './localEvents';
 
 const IconSelect = ({ value, onChange, labelId }) => (
     <FormControl size="small" className="bump-activity__symbol-input">
@@ -43,7 +45,26 @@ const IconButton = ({ label, onClick, className = '', children }) => (
 
 const emptyDraft = { symbol: '', header: '' };
 
-export const BumpActivities = ({ initialFilter = null }) => {
+// Under a card's name: the next couple of real places to do it, from the
+// events box above. "Thu 15 · Cactus Jack's, 8p", or the hours for anytime spots.
+const NextDates = ({ header, today }) => {
+    const upcoming = upcomingForCard(LOCAL_EVENTS, header, today);
+    if (upcoming.length === 0) return null;
+    return (
+        <ul className="bump-activity__next">
+            {upcoming.map(({ event, date }) => (
+                <li key={`${event.id}-${date ?? 'any'}`}>
+                    <strong>{date ? formatDay(date) : 'Anytime'}</strong>
+                    {' '}{event.venue}
+                    {date && event.time ? `, ${formatTime(event.time)}` : ''}
+                    {!date && event.hours ? `, ${event.hours}` : ''}
+                </li>
+            ))}
+        </ul>
+    );
+};
+
+export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => {
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -263,6 +284,7 @@ export const BumpActivities = ({ initialFilter = null }) => {
                                                 <CrossIcon />
                                             </IconButton>
                                         </span>
+                                        <NextDates header={activity.header} today={today} />
                                     </>
                                 )}
                             </li>
