@@ -45,6 +45,10 @@ const IconButton = ({ label, onClick, className = '', children }) => (
 
 const emptyDraft = { symbol: '', header: '' };
 
+// Eighty cards is a long way to thumb down to the add row; the rest of the
+// list waits behind a button.
+const LIST_LIMIT = 12;
+
 // Under a card's name: the next couple of real places to do it, from the
 // events box above. "Thu 15 · Cactus Jack's, 8p", or the hours for anytime spots.
 const NextDates = ({ header, today }) => {
@@ -72,6 +76,7 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
     const [draft, setDraft] = useState(emptyDraft);
     const [newActivity, setNewActivity] = useState(emptyDraft);
     const [filter, setFilter] = useState(initialFilter);
+    const [showAll, setShowAll] = useState(false);
     // The card that was just bumped, so the click has something to show for
     // itself — the notification goes out silently otherwise.
     const [bumpedId, setBumpedId] = useState(null);
@@ -140,6 +145,8 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
         if (!newActivity.header.trim()) return;
         const payload = { symbol: newActivity.symbol.trim(), header: newActivity.header.trim() };
         setNewActivity(emptyDraft);
+        // New cards land at the end of the list, so show it all.
+        setShowAll(true);
         try {
             const created = await addActivity(payload);
             setActivities((prev) => [...prev, created?._id ? created : { ...payload, _id: `tmp-${Date.now()}` }]);
@@ -162,8 +169,14 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
     const visibleActivities = filter
         ? activities.filter((a) => a.symbol === filter)
         : activities;
+    const shownActivities = showAll ? visibleActivities : visibleActivities.slice(0, LIST_LIMIT);
 
     const countFor = (symbol) => activities.filter((a) => a.symbol === symbol).length;
+
+    const pickFilter = (symbol) => {
+        setFilter(symbol);
+        setShowAll(false);
+    };
 
     return (
         <div className="bump-activities">
@@ -176,7 +189,7 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
                 <button
                     type="button"
                     className={'bump-filter' + (filter === null ? ' bump-filter--on' : '')}
-                    onClick={() => setFilter(null)}
+                    onClick={() => pickFilter(null)}
                 >
                     <span className="bump-filter__label">Everything</span>
                     <span className="bump-filter__count">{activities.length}</span>
@@ -187,7 +200,7 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
                         type="button"
                         className={`bump-filter bump-filter--${key}`
                             + (filter === symbol ? ' bump-filter--on' : '')}
-                        onClick={() => setFilter(filter === symbol ? null : symbol)}
+                        onClick={() => pickFilter(filter === symbol ? null : symbol)}
                     >
                         <span className="bump-filter__symbol">{symbol}</span>
                         <span className="bump-filter__label">{header}</span>
@@ -207,7 +220,7 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
                                 : 'Nothing under this one. Try another, or add it below.'}
                         </li>
                     )}
-                    {visibleActivities.map((activity) => {
+                    {shownActivities.map((activity) => {
                         const kind = getBumpKeyForSymbol(activity.symbol);
                         const editing = editingId === activity._id;
                         return (
@@ -291,6 +304,11 @@ export const BumpActivities = ({ initialFilter = null, today = todayIso() }) => 
                         );
                     })}
                 </ul>
+            )}
+            {!loading && visibleActivities.length > LIST_LIMIT && (
+                <button type="button" className="bump-list-more" onClick={() => setShowAll(!showAll)}>
+                    {showAll ? 'Show fewer' : `Show all ${visibleActivities.length}`}
+                </button>
             )}
 
             <div className="bump-activity bump-activity--new">
