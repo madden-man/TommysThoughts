@@ -780,4 +780,13 @@
     .bump-event__title { font-size: 1rem; }
 
     .bump-activity__next { padding-left: 0.25rem; }
+
+    /* With touch-sized icons beside it, a name would be cut to "Vegetable C…";
+       let it wrap to a second line instead. */
+    .bump-activity__name {
+        white-space: normal;
+        overflow: visible;
+    }
+
+    .bump-activity__header--button { border-radius: 18px; }
 }
