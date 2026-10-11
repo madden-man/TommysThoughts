@@ -43,3 +43,11 @@ export const CheckIcon = () => (
         <path d="M4 12.5 9.5 18 20 6.5" />
     </svg>
 );
+
+// An event's own page, opening elsewhere.
+export const LinkOutIcon = () => (
+    <svg {...base}>
+        <path d="M14 4h6v6M20 4l-9 9" />
+        <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </svg>
+);

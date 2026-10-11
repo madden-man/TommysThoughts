@@ -459,3 +459,225 @@
         min-width: 4.5rem;
     }
 }
+
+/* --- Around Evergreen: the events box above the activities --- */
+
+.bump-events {
+    width: 100%;
+    min-width: 0;
+    max-width: 32rem;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+    padding: 8px 16px 16px;
+}
+
+/* Three ways to go to something, as one segmented control. */
+.bump-events__tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 3px;
+    margin-bottom: 0.6rem;
+    background: #f1f3f6;
+    border-radius: 10px;
+}
+
+.bump-events__tab {
+    padding: 6px 2px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+}
+
+.bump-events__tab small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: #888;
+}
+
+.bump-events__tab--on {
+    background: white;
+    color: var(--blue-70);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.bump-events__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+    margin-bottom: 0.6rem;
+}
+
+.bump-events__day {
+    padding: 3px 0;
+    border: 1.5px solid #e2e2e2;
+    border-radius: 8px;
+    background: white;
+    font: inherit;
+    min-width: 0;
+    font-size: 0.66rem;
+    line-height: 1.25;
+    color: #777;
+    cursor: pointer;
+}
+
+.bump-events__day strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.bump-events__day--on {
+    border-color: var(--blue-70);
+    background: var(--blue-70);
+    color: #dbe8ff;
+}
+
+.bump-events__day--on strong { color: white; }
+
+/* An event is an activity card with a time on the left: same tints, same
+   left stripe, so it reads as one of the three kinds at a glance. */
+.bump-event {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: start;
+    padding: 0.45rem 0.5rem;
+    border: 1.5px solid #e6e6e6;
+    border-left: 5px solid #ccc;
+    border-radius: 10px;
+    background: #fcfcfc;
+    transition: box-shadow 0.12s ease;
+}
+
+.bump-event--paddle { border-left-color: #0f7a52; background: #f4fbf8; }
+.bump-event--hammer { border-left-color: #96631a; background: #fdfaf3; }
+.bump-event--house { border-left-color: #6b3fa0; background: #f9f6fd; }
+.bump-event--sent { box-shadow: 0 0 0 2px #0f7a52 inset; }
+
+.bump-event__when {
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #333;
+    font-variant-numeric: tabular-nums;
+}
+
+.bump-event__when small {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: #777;
+}
+
+.bump-event__when--hours {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.bump-event__what { min-width: 0; }
+
+/* The title is the button, like an activity's name: tap it to ask. */
+.bump-event__title {
+    display: inline;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    color: #1b1b1b;
+    cursor: pointer;
+    text-decoration: underline dotted rgba(0, 0, 0, 0.25);
+    text-underline-offset: 3px;
+}
+
+.bump-event__title:hover { color: var(--blue-70); }
+
+.bump-event__title:focus-visible {
+    outline: 2px solid var(--blue-70);
+    outline-offset: 2px;
+}
+
+.bump-event--sent .bump-activity__sent { opacity: 1; transform: translateY(0); }
+
+.bump-event__where {
+    font-size: 0.78rem;
+    color: #666;
+}
+
+.bump-event__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.bump-event__chip {
+    padding: 1px 7px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: white;
+    font-size: 0.68rem;
+    color: #555;
+}
+
+.bump-event__chip--card { border-color: currentColor; }
+.bump-event--paddle .bump-event__chip--card { color: #0f7a52; }
+.bump-event--hammer .bump-event__chip--card { color: #7d5215; }
+.bump-event--house .bump-event__chip--card { color: #6b3fa0; }
+
+.bump-event__chip--due {
+    border-color: #f0c27a;
+    background: #fff4e5;
+    color: #8a5a00;
+    font-weight: 700;
+}
+
+.bump-event__chip--check {
+    border-style: dashed;
+    background: #f4f4f4;
+    color: #777;
+}
+
+.bump-event__actions { align-self: center; }
+
+.bump-event:hover .bump-icon-button,
+.bump-event .bump-icon-button:focus-visible { opacity: 1; }
+
+/* The activity cards list their next dates on a line of their own. */
+.bump-activity { flex-wrap: wrap; }
+
+.bump-activity__next {
+    flex: 1 1 100%;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 2.6rem;
+    font-size: 0.75rem;
+    color: #555;
+}
+
+.bump-activity__next strong { color: #222; }
+
+@media (max-width: 600px) {
+    .bump-events { padding: 8px 10px 12px; }
+
+    .bump-event { grid-template-columns: 3.2rem minmax(0, 1fr) auto; gap: 0.4rem; }
+
+    .bump-event__actions .bump-icon-button { width: 1.8rem; height: 1.8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bump-event { transition: none; }
+}
