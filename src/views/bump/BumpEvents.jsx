@@ -14,6 +14,10 @@ import {
     weekFrom,
 } from './localEvents';
 
+// A phone screen holds about this many rows; the rest wait behind a button
+// rather than turning the box into a scroll you have to get past.
+const LIST_LIMIT = 6;
+
 const EMPTY = {
     today: 'Nothing to just show up to that day. Try another day, or Anytime.',
     signup: 'Nothing to sign up for right now.',
@@ -45,9 +49,12 @@ export const BumpEvents = ({ initialFilter = null, events = LOCAL_EVENTS, today 
     const [day, setDay] = useState(today);
     const [filter, setFilter] = useState(initialFilter);
     const [sentId, setSentId] = useState(null);
+    const [showAll, setShowAll] = useState(false);
     const sentTimer = useRef(null);
 
     useEffect(() => () => clearTimeout(sentTimer.current), []);
+    // A new list starts folded again.
+    useEffect(() => setShowAll(false), [bucket, day, filter]);
 
     const week = useMemo(() => weekFrom(today), [today]);
     const all = useMemo(
@@ -58,6 +65,7 @@ export const BumpEvents = ({ initialFilter = null, events = LOCAL_EVENTS, today 
         BUCKETS.map(({ key }) => [key, eventsForBucket(key, events, { today, day }).length]),
     ), [events, today, day]);
     const visible = filter ? all.filter(({ event }) => event.symbol === filter) : all;
+    const shown = showAll ? visible : visible.slice(0, LIST_LIMIT);
     const countFor = (symbol) => all.filter(({ event }) => event.symbol === symbol).length;
 
     const rowKey = ({ event, date }) => `${event.id}-${date ?? 'any'}`;
@@ -149,7 +157,7 @@ export const BumpEvents = ({ initialFilter = null, events = LOCAL_EVENTS, today 
 
             <ul className="bump-activities__list">
                 {visible.length === 0 && <li className="bump-activities__empty">{EMPTY[bucket]}</li>}
-                {visible.map((item) => {
+                {shown.map((item) => {
                     const { event, date } = item;
                     const kind = getBumpKeyForSymbol(event.symbol);
                     const key = rowKey(item);
@@ -222,6 +230,11 @@ export const BumpEvents = ({ initialFilter = null, events = LOCAL_EVENTS, today 
                     );
                 })}
             </ul>
+            {visible.length > LIST_LIMIT && (
+                <button type="button" className="bump-list-more" onClick={() => setShowAll(!showAll)}>
+                    {showAll ? 'Show fewer' : `Show all ${visible.length}`}
+                </button>
+            )}
         </section>
     );
 };

@@ -73,4 +73,17 @@ describe('BumpEvents', () => {
         expect(rows()).toHaveLength(1);
         expect(within(rows()[0]).getByRole('button', { name: /on a day/ })).toBeInTheDocument();
     });
+
+    it('folds a long list behind Show all', () => {
+        const many = Array.from({ length: 8 }, (_, n) => ({
+            id: `e${n}`, title: `Event ${n}`, symbol: '🏓', venue: 'Somewhere',
+            date: '2026-10-11', time: `1${n}:00`, confirmed: true,
+        }));
+        renderBox({ events: many });
+        expect(rows()).toHaveLength(6);
+        fireEvent.click(screen.getByRole('button', { name: 'Show all 8' }));
+        expect(rows()).toHaveLength(8);
+        fireEvent.click(screen.getByRole('button', { name: 'Show fewer' }));
+        expect(rows()).toHaveLength(6);
+    });
 });

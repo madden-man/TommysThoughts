@@ -681,3 +681,112 @@
 @media (prefers-reduced-motion: reduce) {
     .bump-event { transition: none; }
 }
+
+/* --- Phones ---
+   The boxes are width: 100% plus padding and a border; without border-box
+   that's wider than the screen, and a phone zooms the whole page out to fit. */
+
+.bump-activities,
+.bump-events {
+    box-sizing: border-box;
+}
+
+/* .bump is a centred flex item, so without a width it grows to fit its widest
+   child (the 32rem boxes) instead of the screen. */
+.bump {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Taps shouldn't wait to see if they're a double-tap zoom, or flash grey. */
+.bump button,
+.bump a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bump-list-more {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 10px;
+    border: 1.5px dashed #c9d4e3;
+    border-radius: 10px;
+    background: #f7f9fc;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--blue-70);
+    cursor: pointer;
+}
+
+.bump-list-more:hover { background: #eef4ff; }
+
+.bump-list-more:focus-visible {
+    outline: 2px solid var(--blue-70);
+    outline-offset: 2px;
+}
+
+/* Fingers, not cursors: every icon button is a proper target on touch. */
+@media (hover: none) {
+    .bump-icon-button {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .bump { gap: 0.6rem; }
+
+    .bump-activities__title {
+        margin: 0.35rem 0 0.1rem;
+        font-size: 1.3rem;
+    }
+
+    /* One row of chips you swipe along, rather than two rows of wrapping. */
+    .bump-activities__filters {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin-inline: -10px;
+        padding-inline: 10px;
+        scroll-padding-inline: 10px;
+    }
+
+    .bump-activities__filters::-webkit-scrollbar { display: none; }
+
+    .bump-filter {
+        flex: none;
+        padding: 6px 12px;
+    }
+
+    .bump-events__tab { padding: 8px 2px; }
+
+    .bump-events__day { padding: 6px 0; }
+
+    /* The two actions stack in a narrow column so the title keeps the width. */
+    .bump-event {
+        grid-template-columns: 3.1rem minmax(0, 1fr) auto;
+        padding: 0.5rem 0.4rem 0.5rem 0.5rem;
+    }
+
+    .bump-event__actions {
+        flex-direction: column;
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .bump-event__title { font-size: 1rem; }
+
+    .bump-activity__next { padding-left: 0.25rem; }
+
+    /* With touch-sized icons beside it, a name would be cut to "Vegetable C…";
+       let it wrap to a second line instead. */
+    .bump-activity__name {
+        white-space: normal;
+        overflow: visible;
+    }
+
+    .bump-activity__header--button { border-radius: 18px; }
+}
