@@ -5,20 +5,35 @@
 // you like inside that window. There is deliberately no per-night assignment:
 // the plan says what is in rotation and when it changes, not what to watch tonight.
 //
+// From WEEKLY_FROM on, every show gets one week on its track — seven days,
+// Sunday to Saturday, however long it runs. Length no longer decides how long a
+// show stays; `nights` and `hours` are kept only as a guide to how much there is.
+// Runs that had already finished before the switch keep the dates they were
+// watched on, and whatever was on when it was decided runs to the day before.
+//
 // Tracks come from each show's `enneagram` value grouped into the enneagram's
 // three Centers, so nothing here is hand-classified by genre. Adding a new track
 // (movies, dinners, outings) means adding a key to TRACKS and TRACK_RUNS —
 // no changes to CalendarPage.
 //
 // Shows that fall off are cut to their good seasons (`cut`). Lower-star long
-// shows are broken into season blocks (`series`/`part`/`parts`) and spread out.
-// A few are pinned to a holiday for resonance (`holiday`).
+// shows are broken into season blocks (`series`/`part`/`parts`), and each block
+// is its own week. A holiday pick (`holiday`) keeps its label only when its week
+// still contains the holiday.
 //
 // Generated from the live get_darts "Shows" board. Runtimes are estimates —
 // the darts records store no episode count or runtime.
 
 export const PLAN_START = '2026-08-02';
+// The food tracks still run to here; the show tracks end where their queues do.
 export const PLAN_END = '2029-05-21';
+
+// The first Sunday of the one-week-per-show rotation, and the day it was
+// decided: a show already on by then plays out to that Sunday, anything due
+// to start after it waits for its week.
+export const WEEKLY_FROM = '2026-10-18';
+export const WEEKLY_DECIDED = '2026-10-14';
+export const WEEK_DAYS = 7;
 
 // `family` groups tracks for colour; `icon` distinguishes tracks within a family.
 //
@@ -61,7 +76,9 @@ export const TRACKS = {
          gridSilent: true },
 };
 
-export const TRACK_RUNS = {
+// The queue, in watch order. `start`/`end` here are the original length-based
+// dates; only the ones before WEEKLY_FROM survive into TRACK_RUNS.
+const QUEUE = {
     g: [
         { title: 'Designated Survivor', start: '2026-08-02', end: '2026-10-22', nights: 19, hours: 38.0, enneagram: 1, rating: 4.5, heartlighted: 4 },
         { title: 'Jack Ryan', start: '2026-10-23', end: '2026-11-07', nights: 4, hours: 6.7, enneagram: 1, rating: 4, heartlighted: 3, cut: 'S1–1 of 4' },
@@ -188,3 +205,39 @@ export const TRACK_RUNS = {
         { title: 'Haikyuu! (S4)', start: '2029-05-04', end: '2029-05-21', nights: 5, hours: 8.5, enneagram: 7, rating: 4.0, heartlighted: 5.5, series: 'Haikyuu!', part: 4, parts: 4 },
     ],
 };
+
+const toIso = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+export const addDays = (iso, n) => {
+    const d = new Date(`${iso}T00:00:00`);
+    d.setDate(d.getDate() + n);
+    return toIso(d);
+};
+
+/** One track's queue re-dated so every show from `from` on holds exactly one week. */
+export const weeklyRuns = (queue, from = WEEKLY_FROM, decided = WEEKLY_DECIDED) => {
+    let cursor = from;
+    const started = queue.filter((run) => run.start <= decided);
+    const last = started[started.length - 1];
+    return queue.flatMap((run) => {
+        if (run === last) return [{ ...run, end: addDays(from, -1) }];   // on when it changed
+        if (run.start <= decided) return [run];                          // already watched
+        const start = cursor;
+        const end = addDays(start, WEEK_DAYS - 1);
+        cursor = addDays(end, 1);
+        const week = { ...run, start, end };
+        if (run.holidayDate && !(start <= run.holidayDate && run.holidayDate <= end)) {
+            delete week.holiday;
+            delete week.holidayDate;
+        }
+        return [week];
+    });
+};
+
+export const TRACK_RUNS = Object.fromEntries(
+    Object.entries(QUEUE).map(([code, queue]) => [code, weeklyRuns(queue)]));
+
+/** The last day each show track has something on. */
+export const TRACK_ENDS = Object.fromEntries(
+    Object.entries(TRACK_RUNS).map(([code, runs]) => [code, runs[runs.length - 1].end]));

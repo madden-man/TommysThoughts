@@ -6,11 +6,12 @@
 // none of that is re-run here. A new dart just joins the queue at the end of its
 // enneagram Center's track, in the order the board returns it.
 //
-// Runtime is the one thing the darts records never carry, so a new show gets a
-// placeholder length and is flagged `estimated` — the calendar says so rather
-// than pretending it knows.
+// Like every show in the plan, a new one gets one week on its track. Runtime is
+// the one thing the darts records never carry, so its night count is a
+// placeholder flagged `estimated` — the calendar says so rather than pretending
+// it knows.
 
-import { TRACK_RUNS } from './watchPlan';
+import { TRACK_ENDS, TRACK_RUNS, WEEK_DAYS, addDays } from './watchPlan';
 
 const TRIAD = { 8: 'g', 9: 'g', 1: 'g', 2: 'h', 3: 'h', 4: 'h', 5: 'd', 6: 'd', 7: 'd' };
 
@@ -49,15 +50,6 @@ const nearlyKnown = (key, known) => {
     return false;
 };
 
-const toIso = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-const addDays = (iso, n) => {
-    const d = new Date(`${iso}T00:00:00`);
-    d.setDate(d.getDate() + n);
-    return toIso(d);
-};
-
 /** Every show title already somewhere in the generated plan. */
 export const scheduledTitles = () => {
     const set = new Set();
@@ -69,10 +61,10 @@ export const scheduledTitles = () => {
 };
 
 /**
- * Runs for shows on the board that the plan has never heard of, queued after
- * planEnd on whichever Center track their enneagram puts them.
+ * Runs for shows on the board that the plan has never heard of, a week each,
+ * queued after the end of whichever Center track their enneagram puts them on.
  */
-export const buildNewShowRuns = (shows, planEnd) => {
+export const buildNewShowRuns = (shows, trackEnds = TRACK_ENDS) => {
     if (!Array.isArray(shows) || !shows.length) return [];
     const known = scheduledTitles();
 
@@ -86,15 +78,15 @@ export const buildNewShowRuns = (shows, planEnd) => {
     });
     if (!fresh.length) return [];
 
-    // each track picks up the day after the plan finishes
+    // each track picks up the day after its queue finishes
     const cursor = {};
     const runs = [];
     fresh.forEach((s, i) => {
         const code = TRIAD[s.enneagram];
         if (!code) return;
-        const start = cursor[code] ?? addDays(planEnd, 1);
+        const start = cursor[code] ?? addDays(trackEnds[code], 1);
         const nights = DEFAULT_NIGHTS;
-        const end = addDays(start, nights - 1);
+        const end = addDays(start, WEEK_DAYS - 1);
         cursor[code] = addDays(end, 1);
         runs.push({
             id: `newshow-${code}-${i}`,

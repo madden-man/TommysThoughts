@@ -77,8 +77,8 @@ const formatTime = (time) =>
 
 // Every track runs in parallel, so no day belongs to one track — on any date each
 // track is simply partway through a show. That makes the only things worth
-// drawing on a month grid the moments something *changes*: 119 switches across
-// nearly three years, roughly three a month, versus a mark on all 1,024 days.
+// drawing on a month grid the moments something *changes*: with every show on
+// for one week, that is three switches each Sunday, versus a mark on every day.
 const SHOW_RUNS = Object.entries(TRACK_RUNS).flatMap(([code, runs]) =>
     runs.map((show, i) => ({ id: `run-${code}-${i}`, code, show, index: i })));
 
@@ -258,7 +258,7 @@ export const CalendarPage = () => {
     }, []);
 
     // darts added since the plan was generated, queued after it ends
-    const newShowRuns = useMemo(() => buildNewShowRuns(shows, PLAN_END), [shows]);
+    const newShowRuns = useMemo(() => buildNewShowRuns(shows), [shows]);
 
     // built first: the movie track pairs itself to whatever dinner is on
     const dinnerRuns = useMemo(
