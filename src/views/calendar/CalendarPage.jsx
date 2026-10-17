@@ -766,7 +766,7 @@ export const CalendarPage = () => {
                                                     ? <>{run.show.poolSize}&nbsp;films</>
                                                     : run.code === 'nm'
                                                         ? <>{run.show.poolSize}&nbsp;meals</>
-                                                        : <>{run.show.nights}&nbsp;nights</>}
+                                                        : <>day&nbsp;{day}&nbsp;of&nbsp;{total}</>}
                                         </span>
                                     </button>
                                 );
