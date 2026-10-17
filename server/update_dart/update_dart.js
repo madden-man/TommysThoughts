@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
 
@@ -10,7 +10,9 @@ const handler = async (event) => {
         const collection = database.collection(process.env.MONGODB_COLLECTION);
         // Function logic here ...
         const item = JSON.parse(event.body);
-        let theId = item?._id;
+        // The page sends _id back as a string; matching on the string never finds
+        // the ObjectId record, so the upsert used to save the edit as a second copy.
+        let theId = ObjectId.isValid(item?._id) ? new ObjectId(item._id) : item?._id;
         if (item._id) { delete item._id; }
 
         const results = await collection.replaceOne({ _id: theId }, item, { upsert: true });
