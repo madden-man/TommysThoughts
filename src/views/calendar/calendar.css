@@ -177,13 +177,18 @@
 }
 
 /* ---- The week's shows ---------------------------------------------------- */
-/* Under each week row: the head, heart and body show on that week, one third
+/* Over each week row: the head, heart and body show on that week, one third
    each. Soft tints with dark ink rather than saturated fills, so a month of
    bands stays calm. Every ink/fill pair clears 7:1. */
 .calendar__week-shows {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
+    margin-top: 10px;
+}
+
+/* Tucked up under its band, so the band reads as the week's heading. */
+.calendar__week-shows + .calendar__week {
     margin-top: 2px;
 }
 
@@ -714,6 +719,7 @@
 
     .calendar__week-shows {
         gap: 2px;
+        margin-top: 6px;
     }
 
     .calendar__week-show {

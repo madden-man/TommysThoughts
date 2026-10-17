@@ -591,6 +591,30 @@ export const CalendarPage = () => {
                         const weekShows = weekShowsFor(week, planRuns);
                         return (
                             <React.Fragment key={w}>
+                            {weekShows.length > 0 && (
+                                <div className="calendar__week-shows">
+                                    {weekShows.map(({ code, run, first }) => {
+                                        const { name, part } = splitTitle(run.show);
+                                        return (
+                                            <button
+                                                key={code}
+                                                type="button"
+                                                className={`calendar__week-show calendar__week-show--${TRACKS[code].key}`
+                                                    + (focusedTrack && focusedTrack !== code ? ' calendar__week-show--off' : '')}
+                                                title={`${TRACKS[code].label}: ${run.show.title}`}
+                                                onClick={() => setSelectedDay(
+                                                    run.show.start > first ? run.show.start : first)}
+                                            >
+                                                <span className="calendar__track-icon" aria-hidden="true">
+                                                    {TRACKS[code].icon}
+                                                </span>
+                                                <span className="calendar__week-show-name">{name}</span>
+                                                {part && <span className="calendar__week-show-part">{part}</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
                             <div className={'calendar__week' + (focusedTrack ? ' calendar__week--focused' : '')}>
                                 {week.map((cell, c) => {
                                     if (!cell) {
@@ -696,30 +720,6 @@ export const CalendarPage = () => {
                                     );
                                 })}
                             </div>
-                            {weekShows.length > 0 && (
-                                <div className="calendar__week-shows">
-                                    {weekShows.map(({ code, run, first }) => {
-                                        const { name, part } = splitTitle(run.show);
-                                        return (
-                                            <button
-                                                key={code}
-                                                type="button"
-                                                className={`calendar__week-show calendar__week-show--${TRACKS[code].key}`
-                                                    + (focusedTrack && focusedTrack !== code ? ' calendar__week-show--off' : '')}
-                                                title={`${TRACKS[code].label}: ${run.show.title}`}
-                                                onClick={() => setSelectedDay(
-                                                    run.show.start > first ? run.show.start : first)}
-                                            >
-                                                <span className="calendar__track-icon" aria-hidden="true">
-                                                    {TRACKS[code].icon}
-                                                </span>
-                                                <span className="calendar__week-show-name">{name}</span>
-                                                {part && <span className="calendar__week-show-part">{part}</span>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
                             </React.Fragment>
                         );
                     })}
