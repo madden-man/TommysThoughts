@@ -1,15 +1,14 @@
-import { TRACK_ENDS, TRACK_RUNS, WEEKLY_FROM, weeklyRuns } from './watchPlan';
+import { PLAN_START, TRACK_ENDS, TRACK_RUNS, weeklyRuns } from './watchPlan';
 import { buildNewShowRuns } from './newShowRotation';
 
 const days = (r) => Math.round((new Date(`${r.end}T00:00:00`) - new Date(`${r.start}T00:00:00`)) / 86400000) + 1;
 const weekday = (iso) => new Date(`${iso}T00:00:00`).getDay();
 
 describe('one week per show', () => {
-    it.each(['g', 'h', 'd'])('track %s gives every show from WEEKLY_FROM a Sunday-to-Saturday week', (code) => {
-        const weekly = TRACK_RUNS[code].filter((r) => r.start >= WEEKLY_FROM);
-        expect(weekly.length).toBeGreaterThan(0);
-        expect(weekly[0].start).toBe(WEEKLY_FROM);
-        weekly.forEach((r) => {
+    it.each(['g', 'h', 'd'])('track %s gives every show a Sunday-to-Saturday week from the start', (code) => {
+        const runs = TRACK_RUNS[code];
+        expect(runs[0].start).toBe(PLAN_START);
+        runs.forEach((r) => {
             expect(days(r)).toBe(7);
             expect(weekday(r.start)).toBe(0);
         });
@@ -24,27 +23,28 @@ describe('one week per show', () => {
         }
     });
 
-    it('keeps finished runs and closes the one on that week', () => {
-        const queue = [
-            { title: 'Done', start: '2026-09-01', end: '2026-09-30' },
-            { title: 'Mid', start: '2026-10-01', end: '2026-10-30' },
-            { title: 'Next', start: '2026-10-31', end: '2026-12-30', holiday: 'Halloween', holidayDate: '2026-10-31' },
-        ];
-        const [done, mid, next] = weeklyRuns(queue, '2026-10-18', '2026-10-14');
-        expect(done).toMatchObject({ start: '2026-09-01', end: '2026-09-30' });
-        expect(mid).toMatchObject({ start: '2026-10-01', end: '2026-10-17' });
-        expect(next).toMatchObject({ start: '2026-10-18', end: '2026-10-24' });
-        expect(next.holiday).toBeUndefined();
+    it('keeps a holiday label only on the week that holds the holiday', () => {
+        Object.values(TRACK_RUNS).flat().filter((r) => r.holiday).forEach((r) => {
+            expect(r.start <= r.holidayDate && r.holidayDate <= r.end).toBe(true);
+        });
     });
 
-    it('sends a show that had not started by the switch to the weekly queue', () => {
+    it('holds a holiday pick for its week and fills the weeks before it in order', () => {
         const queue = [
-            { title: 'On', start: '2026-08-02', end: '2026-10-16' },
-            { title: 'Due Saturday', start: '2026-10-17', end: '2026-11-17' },
+            { title: 'Spooky', holiday: 'Halloween' },
+            { title: 'A' }, { title: 'B' }, { title: 'C' },
         ];
-        const [on, due] = weeklyRuns(queue, '2026-10-18', '2026-10-14');
-        expect(on).toMatchObject({ start: '2026-08-02', end: '2026-10-17' });
-        expect(due).toMatchObject({ start: '2026-10-18', end: '2026-10-24' });
+        const runs = weeklyRuns(queue, '2026-10-11');
+        expect(runs.map((r) => [r.title, r.start])).toEqual([
+            ['A', '2026-10-11'], ['B', '2026-10-18'], ['Spooky', '2026-10-25'], ['C', '2026-11-01'],
+        ]);
+        expect(runs[2].holidayDate).toBe('2026-10-31');
+    });
+
+    it('plays a waiting holiday pick, unlabelled, once nothing else is left', () => {
+        const runs = weeklyRuns([{ title: 'Xmas', holiday: 'Christmas' }, { title: 'A' }], '2026-08-02');
+        expect(runs.map((r) => r.title)).toEqual(['A', 'Xmas']);
+        expect(runs[1].holiday).toBeUndefined();
     });
 
     it('queues a new dart for one week after its track ends', () => {
