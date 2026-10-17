@@ -154,21 +154,12 @@
     text-overflow: ellipsis;
 }
 
-/* Marks the night a show was deliberately placed on a holiday. */
+/* The symbol leading a tradition or an activity. */
 .calendar__event-anchor {
     flex: none;
     font-size: 0.8em;
     line-height: 1;
     opacity: 0.95;
-}
-
-/* The season marker is pinned, so you can always tell S1 from S5. */
-.calendar__event-part {
-    flex: none;
-    margin-left: auto;
-    font-weight: 700;
-    font-size: 0.92em;
-    opacity: 0.9;
 }
 
 /* Bars clipped by the week boundary keep a square edge on the side where
@@ -185,20 +176,69 @@
     margin-right: 0;
 }
 
-/* One colour per watch-plan track, used on the chip marking the day that track
-   switches shows. Soft tints with dark ink rather than saturated fills, so a
-   month of switch-overs stays calm. Every ink/fill pair clears 7:1. */
-.calendar__event--gut {
+/* ---- The week's shows ---------------------------------------------------- */
+/* Over each week row: the head, heart and body show on that week, one third
+   each. Soft tints with dark ink rather than saturated fills, so a month of
+   bands stays calm. Every ink/fill pair clears 7:1. */
+.calendar__week-shows {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 10px;
+}
+
+/* Tucked up under its band, so the band reads as the week's heading. */
+.calendar__week-shows + .calendar__week {
+    margin-top: 2px;
+}
+
+.calendar__week-show {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 0;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    transition: opacity 160ms ease;
+}
+
+/* Only the show name is allowed to truncate. */
+.calendar__week-show-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The season marker is pinned, so you can always tell S1 from S5. */
+.calendar__week-show-part {
+    flex: none;
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 0.92em;
+    opacity: 0.9;
+}
+
+.calendar__week-show--off { opacity: 0.3; }
+
+.calendar__week-show--gut {
     background-color: #d3e5fa;
     color: #12406f;
 }
 
-.calendar__event--heart {
+.calendar__week-show--heart {
     background-color: #fbdccc;
     color: #7a2c08;
 }
 
-.calendar__event--head {
+.calendar__week-show--head {
     background-color: #cfe9dd;
     color: #0b5238;
 }
@@ -675,6 +715,17 @@
 
     .calendar__event--holiday {
         padding: 0 2px;
+    }
+
+    .calendar__week-shows {
+        gap: 2px;
+        margin-top: 6px;
+    }
+
+    .calendar__week-show {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+        gap: 2px;
     }
 
     .calendar__toolbar--secondary {

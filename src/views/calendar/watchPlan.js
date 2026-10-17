@@ -69,9 +69,10 @@ export const TRACKS = {
           icon: '🥘', gridSilent: true },
     m: { key: 'movie', label: 'Movies', types: '4★ and up', family: 'watch', icon: '🎬',
          gridSilent: true },
-    g: { key: 'gut', label: 'Gut / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
-    h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
+    // Head, heart, body: the three Centers, each with a new show every week.
     d: { key: 'head', label: 'Head / Thinking', types: 'types 5, 6, 7', family: 'watch', icon: '🧠' },
+    h: { key: 'heart', label: 'Heart / Feeling', types: 'types 2, 3, 4', family: 'watch', icon: '💗' },
+    g: { key: 'gut', label: 'Body / Instinct', types: 'types 8, 9, 1', family: 'watch', icon: '🔥' },
     n: { key: 'dinner', label: 'Dinners', types: 'a 52-week menu', family: 'eat', icon: '🍽️',
          gridSilent: true },
 };

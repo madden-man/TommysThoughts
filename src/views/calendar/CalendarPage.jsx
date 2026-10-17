@@ -76,25 +76,31 @@ const formatTime = (time) =>
     });
 
 // Every track runs in parallel, so no day belongs to one track — on any date each
-// track is simply partway through a show. That makes the only things worth
-// drawing on a month grid the moments something *changes*: with every show on
-// for one week, that is three switches each Sunday, versus a mark on every day.
+// track is simply partway through a show. With every show on for one Sunday-to-
+// Saturday week, a show belongs to a week row rather than a day, so the grid
+// gives each week a band naming its head, heart and body shows and leaves the
+// day lanes to traditions and things you scheduled.
 const SHOW_RUNS = Object.entries(TRACK_RUNS).flatMap(([code, runs]) =>
     runs.map((show, i) => ({ id: `run-${code}-${i}`, code, show, index: i })));
 
-// One event per switch-over, on the day that item takes over its track. Tracks
-// flagged gridSilent never reach the grid — a daily-changing track would drown
-// out the few marks worth noticing.
-const changeEventsFor = (runs) => runs
-    .filter((run) => !TRACKS[run.code]?.gridSilent)
-    .filter((run) => run.show.start > PLAN_START)   // day-one runs aren't "changes"
-    .map((run) => ({
-        id: `change-${run.id}`,
-        title: run.show.title,
-        start: run.show.start,
-        end: run.show.start,
-        run,
-    }));
+// The show tracks, in TRACKS order: everything the grid isn't silent about.
+const SHOW_TRACKS = Object.keys(TRACKS).filter((code) => !TRACKS[code].gridSilent);
+
+// What each show track has on for a week row. A row can straddle a switch (the
+// long runs before the weekly rotation, or a month's padded edges), so the show
+// on the row's last real day is the one it's named for.
+const weekShowsFor = (week, runs) => {
+    const days = week.filter(Boolean);
+    if (!days.length) return [];
+    const last = days[days.length - 1].iso;
+    return SHOW_TRACKS
+        .map((code) => {
+            const run = runs.find(
+                (r) => r.code === code && r.show.start <= last && last <= r.show.end);
+            return run ? { code, run, first: days[0].iso } : null;
+        })
+        .filter(Boolean);
+};
 
 // What every track is on for a given date. Track order follows TRACKS, so a new
 // track shows up simply by being declared there and supplying runs.
@@ -109,10 +115,9 @@ const slateFor = (iso, runs) => Object.keys(TRACKS)
 // A split show's title carries its season range, e.g. "Friends (S3–4)". In a day
 // cell that suffix is the first thing ellipsis eats, so the grid shows the name
 // and the season marker as separate pieces and only truncates the name.
-const splitTitle = (event) => {
-    const show = event.run?.show;
-    const match = show?.series && show.title.match(/^(.*) \(([^)]+)\)$/);
-    return match ? { name: match[1], part: match[2] } : { name: event.title, part: null };
+const splitTitle = (show) => {
+    const match = show.series && show.title.match(/^(.*) \(([^)]+)\)$/);
+    return match ? { name: match[1], part: match[2] } : { name: show.title, part: null };
 };
 
 // Weeks of the month: arrays of 7 cells, each { day, iso } or null padding
@@ -136,11 +141,10 @@ const LANE_COUNT = 3;
 // above an activity because it comes round once a year and the activity comes
 // round every week — losing Christmas to keep the gym would be the wrong trade.
 const rank = (event) =>
-    (event.run ? 3 : event.tradition ? 2 : event.activity ? 1 : 0);
+    (event.tradition ? 2 : event.activity ? 1 : 0);
 
-// Only switch-overs and holidays reach the grid, so a day carries one or two
-// marks at most and simple packing is enough — reserving a lane per track would
-// leave rows that are empty nearly every day, and would grow with track count.
+// Only holidays, traditions and what you scheduled reach the day lanes, so a day
+// carries one or two marks at most and simple packing is enough.
 const layoutWeek = (week, events) => {
     const isos = week.map((cell) => cell?.iso ?? null);
     const candidates = events
@@ -148,8 +152,8 @@ const layoutWeek = (week, events) => {
         .sort((a, b) =>
             a.start.localeCompare(b.start) ||
             b.end.localeCompare(a.end) ||
-            // a show taking over its track, then a tradition, then something you
-            // scheduled, then whatever holiday they happen to land on
+            // a tradition, then something you scheduled, then whatever holiday
+            // they happen to land on
             rank(b) - rank(a) ||
             a.title.localeCompare(b.title));
 
@@ -297,9 +301,8 @@ export const CalendarPage = () => {
         [gridRange]);
 
     const allEvents = useMemo(
-        () => [...changeEventsFor(planRuns), ...events, ...traditionEvents,
-            ...activityEvents],
-        [planRuns, events, traditionEvents, activityEvents]);
+        () => [...events, ...traditionEvents, ...activityEvents],
+        [events, traditionEvents, activityEvents]);
 
     // Only the events touching the visible grid reach layoutWeek — otherwise
     // every week re-scans all ~1,100 plan nights.
@@ -480,9 +483,8 @@ export const CalendarPage = () => {
             traditions: allEvents.filter(
                 (e) => e.tradition && e.start <= selectedDay && selectedDay <= e.end),
             others: allEvents.filter(
-                (e) => !e.run && !e.activity && !e.tradition
+                (e) => !e.activity && !e.tradition
                     && e.start <= selectedDay && selectedDay <= e.end),
-            changes: allEvents.filter((e) => e.run && e.start === selectedDay),
         };
     }, [selectedDay, allEvents, planRuns]);
 
@@ -586,8 +588,34 @@ export const CalendarPage = () => {
                                 })
                                 .filter(Boolean)
                             : [];
+                        const weekShows = weekShowsFor(week, planRuns);
                         return (
-                            <div key={w} className={'calendar__week' + (focusedTrack ? ' calendar__week--focused' : '')}>
+                            <React.Fragment key={w}>
+                            {weekShows.length > 0 && (
+                                <div className="calendar__week-shows">
+                                    {weekShows.map(({ code, run, first }) => {
+                                        const { name, part } = splitTitle(run.show);
+                                        return (
+                                            <button
+                                                key={code}
+                                                type="button"
+                                                className={`calendar__week-show calendar__week-show--${TRACKS[code].key}`
+                                                    + (focusedTrack && focusedTrack !== code ? ' calendar__week-show--off' : '')}
+                                                title={`${TRACKS[code].label}: ${run.show.title}`}
+                                                onClick={() => setSelectedDay(
+                                                    run.show.start > first ? run.show.start : first)}
+                                            >
+                                                <span className="calendar__track-icon" aria-hidden="true">
+                                                    {TRACKS[code].icon}
+                                                </span>
+                                                <span className="calendar__week-show-name">{name}</span>
+                                                {part && <span className="calendar__week-show-part">{part}</span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                            <div className={'calendar__week' + (focusedTrack ? ' calendar__week--focused' : '')}>
                                 {week.map((cell, c) => {
                                     if (!cell) {
                                         return (
@@ -643,24 +671,20 @@ export const CalendarPage = () => {
                                     </span>
                                 ))}
                                 {segments.map(({ event, startCol, endCol, lane, continuesLeft, continuesRight }) => {
-                                    const { name, part } = splitTitle(event);
                                     return (
                                     <button
                                         key={event.id}
                                         className={
                                             'calendar__event' +
-                                            // plan nights carry their track's colour; holidays go
-                                            // recessive so colour stays meaningful; events you add
-                                            // yourself keep the original blue
-                                            (event.run
-                                                ? ` calendar__event--${TRACKS[event.run.code].key}`
-                                                : event.tradition
-                                                    ? ' calendar__event--tradition'
-                                                    : event.activity
-                                                        ? ' calendar__event--activity'
-                                                        : event.id.startsWith('custom-')
-                                                            ? ''
-                                                            : ' calendar__event--holiday') +
+                                            // holidays go recessive so colour stays meaningful;
+                                            // events you add yourself keep the original blue
+                                            (event.tradition
+                                                ? ' calendar__event--tradition'
+                                                : event.activity
+                                                    ? ' calendar__event--activity'
+                                                    : event.id.startsWith('custom-')
+                                                        ? ''
+                                                        : ' calendar__event--holiday') +
                                             (continuesLeft ? ' calendar__event--cont-left' : '') +
                                             (continuesRight ? ' calendar__event--cont-right' : '')
                                         }
@@ -668,23 +692,13 @@ export const CalendarPage = () => {
                                             gridColumn: `${startCol + 1} / ${endCol + 2}`,
                                             gridRow: lane + 2,
                                         }}
-                                        title={event.run
-                                            ? `${event.title} takes over`
-                                            : event.tradition
-                                                ? `${event.title} — ${event.tradition.note}`
-                                                : event.activity
-                                                    ? `${event.activity.label}: ${event.title}`
-                                                    : event.title}
+                                        title={event.tradition
+                                            ? `${event.title} — ${event.tradition.note}`
+                                            : event.activity
+                                                ? `${event.activity.label}: ${event.title}`
+                                                : event.title}
                                         onClick={() => setSelectedDay(event.start)}
                                     >
-                                        {event.run && (
-                                            <span
-                                                className="calendar__event-anchor"
-                                                aria-hidden="true"
-                                            >
-                                                ▶
-                                            </span>
-                                        )}
                                         {event.activity && (
                                             <span
                                                 className="calendar__event-anchor"
@@ -701,12 +715,12 @@ export const CalendarPage = () => {
                                                 {event.tradition.icon}
                                             </span>
                                         )}
-                                        <span className="calendar__event-name">{name}</span>
-                                        {part && <span className="calendar__event-part">{part}</span>}
+                                        <span className="calendar__event-name">{event.title}</span>
                                     </button>
                                     );
                                 })}
                             </div>
+                            </React.Fragment>
                         );
                     })}
 
