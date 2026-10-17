@@ -15,7 +15,7 @@
   --marquee: #9c6400;
   --screen: #121118; --screen-2: #1c1a24; --screen-3: #262330; --screen-ink: #f3efe6; --screen-muted: #a7a1b4; --screen-line: #33303d;
   --bulb: #f4c04e; --hot: #ff6b5a; --warn: #f4c04e; --info: #8fb8ff;
-  --nf: #e5484d; --pv: #3aa7ff; --pp: #4c7dff; --dp: #6ec1d6; --at: #d7d3cc; --hu: #3ddc84; --cr: #ff9a3d;
+  --nf: #e5484d; --pv: #3aa7ff; --pp: #4c7dff; --dp: #6ec1d6; --at: #d7d3cc; --hu: #3ddc84; --cr: #ff9a3d; --mu: #e8e8e8; --hb: #9b7bff;
   --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
   --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "DM Mono", ui-monospace, Menlo, monospace;
@@ -105,7 +105,7 @@ button:focus-visible, a:focus-visible, input:focus-visible + label { outline: 2p
 .watched { font: 500 13px var(--f-mono); color: var(--screen-muted); }
 .watched span { color: var(--bulb); font: 800 22px var(--f-display); }
 
-.svc.cr { color: var(--cr); }
+.svc.cr { color: var(--cr); } .svc.mu { color: var(--mu); } .svc.hb { color: var(--hb); }
 
 /* Step 1: poster wall */
 .wall { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 12px; }
@@ -191,7 +191,7 @@ nav.navl a:hover { border-color: var(--marquee); color: var(--marquee); }
     <h1 class="brand">The <span>Yes</span> Pile</h1>
     <div class="progress">13 films · 11 shows · 1 weekend</div>
   </header>
-  <nav class="navl" aria-label="Sections"><a href="#pile">The whole pile</a><a href="#yesathon">Weekend calendar</a><a href="#films">Films</a><a href="#shows">Shows</a></nav>
+  <nav class="navl" aria-label="Sections"><a href="#pile">The whole pile</a><a href="#yesathon">Weekend calendar</a><a href="#films">Films</a><a href="#shows">Shows</a><a href="#extras">Supplemental</a></nav>
   <section class="step" id="pile">
   <h2>Everything you said yes to, best reviewed first</h2>
   <p class="line">13 films and 11 shows, ranked by Rotten Tomatoes and IMDb together.</p>
@@ -716,6 +716,40 @@ nav.navl a:hover { border-color: var(--marquee); color: var(--marquee); }
     <p class="hook">A future Tokyo where scanners measure your criminal potential before you act, and a rookie cop starts doubting the system.</p>
     <p class="sell">Death Note&#x27;s moral games in a cyberpunk cop show. Prime has Season 3 only; Seasons 1-2 are on Crunchyroll.</p>
     <div class="scores"><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article></div></div>
+</section><section class="step" id="extras">
+  <h2>Supplemental options</h2>
+  <p class="line">For after the weekend: modern China, and a nature break.</p>
+  <div class="screen"><div class="screen-bar"><span></span><span></span><span></span><em>Supplemental</em></div><div class="screen-in extras"><article class="card" id="t-ascension">
+  <div class="rank">+</div>
+  <img class="poster" src="/fornow/posters/1037533.jpg" alt="Ascension poster" loading="lazy">
+  <div class="body">
+    <h3>Ascension <span class="yr">2021</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">1h 37m</span></div>
+    <p class="hook">A documentary that climbs China’s class ladder, from factory hiring lines and bodyguard schools to the newly rich.</p>
+    <p class="sell">Oscar-nominated, and the closest thing to a field trip through modern China.</p>
+    <div class="scores"><span class="sc"><b>98%</b> Rotten Tomatoes</span><span class="sc"><b>7.0</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-so-long-my-son">
+  <div class="rank">+</div>
+  <img class="poster" src="/fornow/posters/453895.jpg" alt="So Long, My Son poster" loading="lazy">
+  <div class="body">
+    <h3>So Long, My Son <span class="yr">2019</span></h3>
+    <div class="meta"><span class="svc mu">MUBI</span><span class="len">3h 05m</span><span class="flag warn">Not on your five</span></div>
+    <p class="hook">Two families across three decades of the one-child policy and the boom that followed, told out of order.</p>
+    <p class="sell">Boyhood’s sweep with I’m Still Here’s grief. Both leads won Best Actor and Actress at Berlin.</p>
+    <div class="scores"><span class="sc"><b>100%</b> Rotten Tomatoes</span><span class="sc"><b>7.7</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-planet-earth">
+  <div class="rank">+</div>
+  <img class="poster" src="/fornow/posters/20504.jpg" alt="Planet Earth poster" loading="lazy">
+  <div class="body">
+    <h3>Planet Earth <span class="yr">2006</span></h3>
+    <div class="meta"><span class="svc hb">HBO Max</span><span class="len">1 season · 49m eps</span><span class="flag warn">Not on your five</span></div>
+    <p class="hook">David Attenborough and the BBC Natural History Unit, eleven episodes of the planet at its most spectacular.</p>
+    <p class="sell">The perfect palate cleanser between heavy films. Planet Earth II and III are on HBO Max too.</p>
+    <div class="scores"><span class="sc"><b>100%</b> Rotten Tomatoes</span><span class="sc"><b>9.4</b> IMDb</span></div>
   </div>
 </article></div></div>
 </section>
