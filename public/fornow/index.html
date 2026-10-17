@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Yes Pile</title>
+<meta name="description" content="Tommy's 24 yes picks, ranked by reviews, with a one-weekend Yes-a-thon calendar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a living-room wall (page, follows theme) holding one lit TV screen per step (always dark, like a real screen). */
+:root {
+  --wall: #e7e9ef; --wall-ink: #1a1822; --wall-muted: #5b5868; --wall-line: #cfd2dc;
+  --marquee: #9c6400;
+  --screen: #121118; --screen-2: #1c1a24; --screen-3: #262330; --screen-ink: #f3efe6; --screen-muted: #a7a1b4; --screen-line: #33303d;
+  --bulb: #f4c04e; --hot: #ff6b5a; --warn: #f4c04e; --info: #8fb8ff;
+  --nf: #e5484d; --pv: #3aa7ff; --pp: #4c7dff; --dp: #6ec1d6; --at: #d7d3cc; --hu: #3ddc84; --cr: #ff9a3d;
+  --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --wall: #0b0a0f; --wall-ink: #ece8f2; --wall-muted: #9a95a8; --wall-line: #24222c; --marquee: #f4c04e; color-scheme: dark;
+} }
+:root[data-theme="dark"] { --wall: #0b0a0f; --wall-ink: #ece8f2; --wall-muted: #9a95a8; --wall-line: #24222c; --marquee: #f4c04e; color-scheme: dark; }
+
+body { background: var(--wall); color: var(--wall-ink); font: 15px/1.5 var(--f-body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.brand { font: 800 clamp(40px, 8vw, 72px)/0.9 var(--f-display); letter-spacing: 0.01em; text-transform: uppercase; margin: 0; }
+.brand span { color: var(--marquee); }
+.progress { font: 500 12px var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--wall-muted); }
+button:focus-visible, a:focus-visible, input:focus-visible + label { outline: 2px solid var(--marquee); outline-offset: 2px; }
+
+.step { display: grid; gap: 6px; }
+.step[hidden] { display: none; }
+.step h2 { font: 800 clamp(28px, 5vw, 44px)/1 var(--f-display); text-transform: uppercase; margin: 0; text-wrap: balance; }
+.line { margin: 0 0 10px; color: var(--wall-muted); }
+
+.screen { background: var(--screen); color: var(--screen-ink); border-radius: 14px; border: 10px solid var(--screen-2); box-shadow: 0 18px 50px -20px rgba(0,0,0,.55); overflow: hidden; }
+.screen-bar { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--screen-2); border-bottom: 1px solid var(--screen-line); }
+.screen-bar span { width: 6px; height: 6px; border-radius: 50%; background: var(--bulb); box-shadow: 0 0 6px var(--bulb); }
+.screen-bar em { margin-left: 8px; font: 500 11px var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--screen-muted); font-style: normal; }
+.screen-in { padding: 18px; display: grid; gap: 14px; }
+
+.svc { display: inline-block; font: 500 11px var(--f-mono); letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px; background: var(--screen-3); border-left: 3px solid currentColor; }
+.svc.nf { color: var(--nf); } .svc.pv { color: var(--pv); } .svc.pp { color: var(--pp); } .svc.dp { color: var(--dp); } .svc.at { color: var(--at); } .svc.hu { color: var(--hu); }
+.flag { font: 500 11px var(--f-mono); padding: 3px 8px; border-radius: 4px; border: 1px solid currentColor; }
+.flag.hot { color: var(--hot); } .flag.warn { color: var(--warn); } .flag.info { color: var(--info); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.len { font: 400 12px var(--f-mono); color: var(--screen-muted); }
+.scores { display: flex; flex-wrap: wrap; gap: 14px; }
+.sc { font: 400 12px var(--f-mono); color: var(--screen-muted); }
+.sc b { font: 800 22px/1 var(--f-display); color: var(--bulb); margin-right: 4px; }
+
+.hero { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.hero-poster { width: 100%; border-radius: 8px; box-shadow: 0 0 0 1px var(--screen-line), 0 12px 30px -10px #000; }
+.hero-body { display: grid; gap: 10px; min-width: 0; }
+.kicker { font: 500 12px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--bulb); }
+.hero-title { font: 800 clamp(40px, 7vw, 68px)/0.9 var(--f-display); text-transform: uppercase; margin: 0; }
+.hook { margin: 0; max-width: 62ch; }
+.hook.big { font-size: 17px; }
+.sell { margin: 0; color: var(--screen-muted); max-width: 62ch; }
+.row4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--screen-line); padding-top: 14px; }
+.mini { display: grid; gap: 4px; text-decoration: none; color: inherit; }
+.mini img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; transition: transform .2s; }
+.mini:hover img { transform: translateY(-3px); }
+.mini-rank { font: 500 11px var(--f-mono); color: var(--bulb); }
+.mini-t { font: 600 14px/1.2 var(--f-body); }
+.mini-s, .mini-v { font: 400 11px var(--f-mono); color: var(--screen-muted); }
+
+.card { display: grid; grid-template-columns: 34px 96px minmax(0, 1fr); gap: 14px; align-items: start; padding-bottom: 14px; border-bottom: 1px solid var(--screen-line); }
+.card:last-child { border-bottom: 0; padding-bottom: 0; }
+.rank { font: 800 32px/1 var(--f-display); color: var(--bulb); text-align: right; }
+.poster { width: 96px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; }
+.body { display: grid; gap: 7px; min-width: 0; }
+.body h3 { margin: 0; font: 800 26px/1 var(--f-display); text-transform: uppercase; text-wrap: balance; }
+.yr { font: 400 13px var(--f-mono); color: var(--screen-muted); text-transform: none; }
+
+.guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.day { background: var(--screen-2); border-radius: 8px; padding: 12px; display: grid; gap: 10px; align-content: start; }
+.dayhead { display: flex; align-items: baseline; gap: 8px; border-bottom: 1px solid var(--screen-line); padding-bottom: 8px; }
+.dayhead b { font: 800 30px/1 var(--f-display); text-transform: uppercase; color: var(--bulb); }
+.dayhead span { font: 400 12px var(--f-mono); color: var(--screen-muted); }
+.slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; }
+.slot img { width: 52px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; }
+.slot-t { font: 600 14px/1.2 var(--f-body); }
+.slot-m { font: 400 11px var(--f-mono); color: var(--screen-muted); }
+.slot-n { font-size: 13px; color: var(--screen-ink); }
+.nextup { font-size: 14px; color: var(--screen-muted); }
+.nextup b { color: var(--screen-ink); } .nextup em { color: var(--bulb); font-style: normal; }
+
+.svcgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.svcbox { background: var(--screen-2); border-radius: 8px; padding: 12px; }
+.svcbox h4 { margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+.cnt { font: 400 12px var(--f-mono); color: var(--screen-muted); }
+.svcbox ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.svcbox li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: start; }
+.svcbox input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--bulb); }
+.svcbox label { display: grid; gap: 2px; cursor: pointer; justify-items: start; }
+.ck-t { font: 600 14px/1.25 var(--f-body); }
+.ck-m { font: 400 11px var(--f-mono); color: var(--screen-muted); }
+.svcbox input:checked + label .ck-t { text-decoration: line-through; color: var(--screen-muted); }
+.watched { font: 500 13px var(--f-mono); color: var(--screen-muted); }
+.watched span { color: var(--bulb); font: 800 22px var(--f-display); }
+
+.svc.cr { color: var(--cr); }
+
+/* Step 1: poster wall */
+.wall { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 12px; }
+.tile { position: relative; display: grid; gap: 3px; align-content: start; text-decoration: none; color: inherit; }
+.tile img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; transition: transform .2s, box-shadow .2s; }
+.tile:hover img { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 10px 24px -8px var(--bulb); }
+.t-rank { position: absolute; top: 6px; left: 6px; z-index: 1; font: 800 20px/1 var(--f-display); color: var(--bulb); text-shadow: 0 1px 6px #000, 0 0 2px #000; }
+.t-kind { position: absolute; top: 6px; right: 6px; z-index: 1; font: 500 10px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; padding: 2px 6px; border-radius: 3px; background: var(--screen); color: var(--screen-ink); }
+.t-kind.show { color: var(--bulb); }
+.t-name { font: 600 13px/1.2 var(--f-body); margin-top: 3px; }
+.t-sc { font: 400 11px var(--f-mono); color: var(--screen-muted); }
+.tile .svc { justify-self: start; font-size: 10px; }
+
+/* Step 2: the Yes-a-thon */
+.stats { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--screen-line); }
+.stats > div { display: grid; }
+.stats b { font: 800 34px/1 var(--f-display); color: var(--bulb); }
+.stats span { font: 400 11px var(--f-mono); color: var(--screen-muted); text-transform: uppercase; letter-spacing: .06em; }
+.meter { flex: 1 1 220px; gap: 4px; }
+.bar { height: 10px; border-radius: 99px; background: var(--screen-3); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--bulb) 0 10px, var(--hot) 10px 20px); transition: width .4s; }
+.cal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.cal .day { background: var(--screen-2); border-radius: 10px; padding: 12px; display: grid; gap: 10px; }
+.cal .dayhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; border-bottom: 1px dashed var(--screen-line); padding-bottom: 8px; }
+.cal .dayhead em { flex-basis: 100%; font: 500 11px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--hot); font-style: normal; }
+.cal ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.blk { display: grid; grid-template-columns: 44px 38px minmax(0, 1fr) 20px; gap: 8px; align-items: start; padding: 7px 8px 7px 6px; border-radius: 6px; background: var(--screen); border-left: 3px solid currentColor; color: var(--screen-muted); }
+.blk.nf { color: var(--nf); } .blk.pv { color: var(--pv); } .blk.pp { color: var(--pp); } .blk.dp { color: var(--dp); } .blk.at { color: var(--at); } .blk.hu { color: var(--hu); } .blk.cr { color: var(--cr); }
+.blk .when { font: 500 12px/1.4 var(--f-mono); color: var(--screen-ink); }
+.blk img { width: 38px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 3px; }
+.blk .what { display: grid; gap: 2px; min-width: 0; }
+.blk .what b { font: 600 14px/1.2 var(--f-body); color: var(--screen-ink); }
+.blk .sub { font: 400 11px var(--f-mono); color: var(--screen-muted); }
+.blk .sub .svc { padding: 0 4px; font-size: 10px; border-left-width: 2px; }
+.blk .quip { font-size: 12.5px; color: var(--screen-muted); font-style: italic; }
+.blk input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--bulb); cursor: pointer; }
+.blk.brk, .blk.sleep, .blk.done { grid-template-columns: 44px minmax(0, 1fr); background: transparent; border-left: 3px dotted var(--screen-line); }
+.blk.sleep { background: repeating-linear-gradient(135deg, transparent 0 8px, var(--screen-3) 8px 9px); }
+.blk.sleep b::before { content: "z z z  "; color: var(--info); font: 500 11px var(--f-mono); }
+.blk.done { border-left-color: var(--bulb); }
+.blk.done b { color: var(--bulb); }
+.blk.seen { opacity: .45; }
+.blk.seen .what b { text-decoration: line-through; }
+.blk.now { box-shadow: 0 0 0 2px var(--bulb), 0 0 18px -2px var(--bulb); opacity: 1; }
+.blk.now .when::after { content: "NOW"; display: block; color: var(--hot); font-size: 10px; letter-spacing: .1em; animation: blink 1.2s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.win { font: 600 16px var(--f-body); color: var(--screen-ink); background: repeating-linear-gradient(90deg, var(--screen-2) 0 18px, var(--screen-3) 18px 36px); border: 2px solid var(--bulb); border-radius: 8px; padding: 12px 14px; }
+.win b { color: var(--bulb); font: 800 22px var(--f-display); text-transform: uppercase; margin-right: 6px; }
+
+@media (max-width: 900px) { .wall { grid-template-columns: repeat(4, minmax(0, 1fr)); } .cal { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 720px) {
+  .wall { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; }
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero-poster { max-width: 180px; }
+  .row4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guide, .svcgrid { grid-template-columns: minmax(0, 1fr); }
+  .card { grid-template-columns: 72px minmax(0, 1fr); }
+  .card .rank { grid-column: 1; grid-row: 1; text-align: left; font-size: 24px; position: relative; z-index: 1; margin: 4px 0 0 6px; text-shadow: 0 1px 4px #000; }
+  .card .poster { grid-column: 1; grid-row: 1; width: 72px; }
+  .card .body { grid-column: 2; grid-row: 1; }
+  .screen { border-width: 6px; }
+  .screen-in { padding: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .tile img, .bar i { transition: none; } .blk.now .when::after { animation: none; } }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+nav.navl { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; padding-block: 10px; background: var(--wall); border-bottom: 1px solid var(--wall-line); }
+nav.navl a { color: var(--wall-ink); text-decoration: none; font: 600 14px var(--f-body); padding: 6px 14px; border: 1.5px solid var(--wall-line); border-radius: 999px; }
+nav.navl a:hover { border-color: var(--marquee); color: var(--marquee); }
+.step { scroll-margin-top: 70px; padding-top: 18px; }
+.sub-foot { color: var(--wall-muted); font-size: 13px; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">The <span>Yes</span> Pile</h1>
+    <div class="progress">13 films · 11 shows · 1 weekend</div>
+  </header>
+  <nav class="navl" aria-label="Sections"><a href="#pile">The whole pile</a><a href="#yesathon">Weekend calendar</a><a href="#films">Films</a><a href="#shows">Shows</a></nav>
+  <section class="step" id="pile">
+  <h2>Everything you said yes to, best reviewed first</h2>
+  <p class="line">13 films and 11 shows, ranked by Rotten Tomatoes and IMDb together.</p>
+  <div class="screen"><div class="screen-bar"><span></span><span></span><span></span><em>The whole pile</em></div><div class="screen-in pile"><div class="wall"><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#1</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/20749.jpg" alt="Kingdom poster" loading="lazy">
+  <span class="t-name">Kingdom</span>
+  <span class="t-sc">100% RT · 8.5 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#2</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/55668.jpg" alt="Dark poster" loading="lazy">
+  <span class="t-name">Dark</span>
+  <span class="t-sc">95% RT · 8.7 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#3</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/381980.jpg" alt="Pluto poster" loading="lazy">
+  <span class="t-name">Pluto</span>
+  <span class="t-sc">100% RT · 8.1 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#4</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/57554.jpg" alt="Saving Private Ryan poster" loading="lazy">
+  <span class="t-name">Saving Private Ryan</span>
+  <span class="t-sc">94% RT · 8.6 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#5</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/11174.jpg" alt="Brooklyn Nine-Nine poster" loading="lazy">
+  <span class="t-name">Brooklyn Nine-Nine</span>
+  <span class="t-sc">95% RT · 8.4 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#6</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/1515031.jpg" alt="I&#x27;m Still Here poster" loading="lazy">
+  <span class="t-name">I&#x27;m Still Here</span>
+  <span class="t-sc">97% RT · 8.1 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#7</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/1448833.jpg" alt="How to Make Millions Before Grandma Dies poster" loading="lazy">
+  <span class="t-name">How to Make Millions Before Grandma Dies</span>
+  <span class="t-sc">98% RT · 7.9 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#8</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/153755.jpg" alt="Boyhood poster" loading="lazy">
+  <span class="t-name">Boyhood</span>
+  <span class="t-sc">97% RT · 7.9 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#9</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/287975.jpg" alt="Ghosts poster" loading="lazy">
+  <span class="t-name">Ghosts</span>
+  <span class="t-sc">97% RT · 7.9 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#10</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/20536.jpg" alt="Fringe poster" loading="lazy">
+  <span class="t-name">Fringe</span>
+  <span class="t-sc">91% RT · 8.4 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#11</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/255077.jpg" alt="Dopesick poster" loading="lazy">
+  <span class="t-name">Dopesick</span>
+  <span class="t-sc">89% RT · 8.6 IMDb</span>
+  <span class="svc hu">Hulu</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#12</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/827107.jpg" alt="Sound of Metal poster" loading="lazy">
+  <span class="t-name">Sound of Metal</span>
+  <span class="t-sc">97% RT · 7.7 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#13</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/82169.jpg" alt="Rocky poster" loading="lazy">
+  <span class="t-name">Rocky</span>
+  <span class="t-sc">93% RT · 8.1 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#14</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/84441.jpg" alt="Million Dollar Baby poster" loading="lazy">
+  <span class="t-name">Million Dollar Baby</span>
+  <span class="t-sc">90% RT · 8.1 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#15</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/42173.jpg" alt="Letterkenny poster" loading="lazy">
+  <span class="t-name">Letterkenny</span>
+  <span class="t-sc">8.5 IMDb</span>
+  <span class="svc hu">Hulu</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#16</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/191110.jpg" alt="Titanic poster" loading="lazy">
+  <span class="t-name">Titanic</span>
+  <span class="t-sc">88% RT · 8.0 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#17</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/76869.jpg" alt="Violet Evergarden poster" loading="lazy">
+  <span class="t-name">Violet Evergarden</span>
+  <span class="t-sc">8.4 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#18</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/155112.jpg" alt="Dances with Wolves poster" loading="lazy">
+  <span class="t-name">Dances with Wolves</span>
+  <span class="t-sc">87% RT · 8.0 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#19</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/21408.jpg" alt="Twin Peaks poster" loading="lazy">
+  <span class="t-name">Twin Peaks</span>
+  <span class="t-sc">77% RT · 8.7 IMDb</span>
+  <span class="svc pp">Paramount+</span>
+</a><a class="tile" href="#shows" data-go="shows">
+  <span class="t-rank">#20</span><span class="t-kind show">Show</span>
+  <img src="/fornow/posters/20388.jpg" alt="Psycho-Pass poster" loading="lazy">
+  <span class="t-name">Psycho-Pass</span>
+  <span class="t-sc">8.1 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#21</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/1144853.jpg" alt="Spoiler Alert poster" loading="lazy">
+  <span class="t-name">Spoiler Alert</span>
+  <span class="t-sc">87% RT · 7.4 IMDb</span>
+  <span class="svc nf">Netflix</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#22</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/965195.jpg" alt="Tetris poster" loading="lazy">
+  <span class="t-name">Tetris</span>
+  <span class="t-sc">81% RT · 7.4 IMDb</span>
+  <span class="svc at">Apple TV</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#23</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/373034.jpg" alt="Beautiful Boy poster" loading="lazy">
+  <span class="t-name">Beautiful Boy</span>
+  <span class="t-sc">67% RT · 7.4 IMDb</span>
+  <span class="svc pv">Prime Video</span>
+</a><a class="tile" href="#films" data-go="films">
+  <span class="t-rank">#24</span><span class="t-kind film">Film</span>
+  <img src="/fornow/posters/72065.jpg" alt="The Odd Life of Timothy Green poster" loading="lazy">
+  <span class="t-name">The Odd Life of Timothy Green</span>
+  <span class="t-sc">36% RT · 6.6 IMDb</span>
+  <span class="svc dp">Disney+</span>
+</a></div></div></div>
+</section><section class="step" id="yesathon">
+  <h2>The Yes-a-thon: all 24 in one weekend</h2>
+  <p class="line">Every film and every first episode. Check them off as you go.</p>
+  <div class="screen"><div class="screen-bar"><span></span><span></span><span></span><em>Weekend calendar</em></div><div class="screen-in yesathon"><div class="stats">
+  <div><b>38h 24m</b><span>of screen time</span></div>
+  <div><b>13</b><span>films</span></div>
+  <div><b>11</b><span>first episodes</span></div>
+  <div><b>2</b><span>nights of sleep</span></div>
+  <div class="meter"><span>Marathon meter</span><div class="bar"><i id="mbar"></i></div><span id="mtext">0h of 38h watched</span></div>
+</div><div class="cal"><section class="day d0"><header class="dayhead"><b>Fri</b><span>Oct 17</span><em>Opening Night</em></header><ol><li class="blk nf" data-start="2026-10-17T16:00:00" data-end="2026-10-17T16:22:00" data-min="22">
+  <span class="when">4p</span>
+  <img src="/fornow/posters/11174.jpg" alt="">
+  <div class="what"><b>Brooklyn Nine-Nine</b><span class="sub">Episode 1 · 22 min · <span class="svc nf">Netflix</span></span><span class="quip">Warm-up lap. Title of your sex tape.</span></div>
+  <input type="checkbox" id="m-brooklyn-nine-nine" data-k="brooklyn-nine-nine" aria-label="Watched Brooklyn Nine-Nine">
+</li><li class="blk at" data-start="2026-10-17T16:27:00" data-end="2026-10-17T18:25:00" data-min="118">
+  <span class="when">4:27p</span>
+  <img src="/fornow/posters/965195.jpg" alt="">
+  <div class="what"><b>Tetris</b><span class="sub">Film · 118 min · <span class="svc at">Apple TV</span></span><span class="quip">Snack: anything you can stack.</span></div>
+  <input type="checkbox" id="m-tetris" data-k="tetris" aria-label="Watched Tetris">
+</li><li class="blk brk"><span class="when">6:30p</span><div class="what"><b>Pizza</b><span class="quip">Fuel for the long night.</span></div></li><li class="blk pv" data-start="2026-10-17T19:05:00" data-end="2026-10-17T19:55:00" data-min="50">
+  <span class="when">7:05p</span>
+  <img src="/fornow/posters/20749.jpg" alt="">
+  <div class="what"><b>Kingdom</b><span class="sub">Episode 1 · 50 min · <span class="svc pv">Prime Video</span></span><span class="quip">Snack: a protein shake, for solidarity.</span></div>
+  <input type="checkbox" id="m-kingdom" data-k="kingdom" aria-label="Watched Kingdom">
+</li><li class="blk pp" data-start="2026-10-17T20:00:00" data-end="2026-10-17T21:55:00" data-min="115">
+  <span class="when">8p</span>
+  <img src="/fornow/posters/82169.jpg" alt="">
+  <div class="what"><b>Rocky</b><span class="sub">Film · 115 min · <span class="svc pp">Paramount+</span></span><span class="quip">Snack: raw eggs. Please don’t.</span></div>
+  <input type="checkbox" id="m-rocky" data-k="rocky" aria-label="Watched Rocky">
+</li><li class="blk hu" data-start="2026-10-17T22:00:00" data-end="2026-10-17T22:22:00" data-min="22">
+  <span class="when">10p</span>
+  <img src="/fornow/posters/42173.jpg" alt="">
+  <div class="what"><b>Letterkenny</b><span class="sub">Episode 1 · 22 min · <span class="svc hu">Hulu</span></span><span class="quip">Crack a Puppers. Pitter patter.</span></div>
+  <input type="checkbox" id="m-letterkenny" data-k="letterkenny" aria-label="Watched Letterkenny">
+</li><li class="blk nf" data-start="2026-10-17T22:27:00" data-end="2026-10-17T23:18:00" data-min="51">
+  <span class="when">10:27p</span>
+  <img src="/fornow/posters/55668.jpg" alt="">
+  <div class="what"><b>Dark</b><span class="sub">Episode 1 · 51 min · <span class="svc nf">Netflix</span></span><span class="quip">Lights off. Keep a notebook handy.</span></div>
+  <input type="checkbox" id="m-dark" data-k="dark" aria-label="Watched Dark">
+</li><li class="blk nf" data-start="2026-10-17T23:23:00" data-end="2026-10-18T01:13:00" data-min="110">
+  <span class="when">11:23p</span>
+  <img src="/fornow/posters/1144853.jpg" alt="">
+  <div class="what"><b>Spoiler Alert</b><span class="sub">Film · 110 min · <span class="svc nf">Netflix</span></span><span class="quip">Bring the first box of tissues.</span></div>
+  <input type="checkbox" id="m-spoiler-alert" data-k="spoiler-alert" aria-label="Watched Spoiler Alert">
+</li><li class="blk pv" data-start="2026-10-18T01:18:00" data-end="2026-10-18T02:39:00" data-min="81">
+  <span class="when">1:18a</span>
+  <img src="/fornow/posters/20536.jpg" alt="">
+  <div class="what"><b>Fringe</b><span class="sub">Episode 1 · 81 min · <span class="svc pv">Prime Video</span></span><span class="quip">Snack: Red Vines, Walter’s favorite.</span></div>
+  <input type="checkbox" id="m-fringe" data-k="fringe" aria-label="Watched Fringe">
+</li><li class="blk sleep"><span class="when">2:39a</span><div class="what"><b>Sleep</b><span class="quip">Dream about stacking blocks.</span></div></li></ol></section><section class="day d1"><header class="dayhead"><b>Sat</b><span>Oct 18</span><em>The Long Haul</em></header><ol><li class="blk pp" data-start="2026-10-18T09:00:00" data-end="2026-10-18T09:22:00" data-min="22">
+  <span class="when">9a</span>
+  <img src="/fornow/posters/287975.jpg" alt="">
+  <div class="what"><b>Ghosts</b><span class="sub">Episode 1 · 22 min · <span class="svc pp">Paramount+</span></span><span class="quip">With pancakes.</span></div>
+  <input type="checkbox" id="m-ghosts" data-k="ghosts" aria-label="Watched Ghosts">
+</li><li class="blk pv" data-start="2026-10-18T09:27:00" data-end="2026-10-18T12:28:00" data-min="181">
+  <span class="when">9:27a</span>
+  <img src="/fornow/posters/155112.jpg" alt="">
+  <div class="what"><b>Dances with Wolves</b><span class="sub">Film · 181 min · <span class="svc pv">Prime Video</span></span><span class="quip">Three hours on the prairie. Stretch at intermission.</span></div>
+  <input type="checkbox" id="m-dances-with-wolves" data-k="dances-with-wolves" aria-label="Watched Dances with Wolves">
+</li><li class="blk brk"><span class="when">12:33p</span><div class="what"><b>Lunch</b><span class="quip">Get some actual sunlight.</span></div></li><li class="blk pp" data-start="2026-10-18T13:08:00" data-end="2026-10-18T15:57:00" data-min="169">
+  <span class="when">1:08p</span>
+  <img src="/fornow/posters/57554.jpg" alt="">
+  <div class="what"><b>Saving Private Ryan</b><span class="sub">Film · 169 min · <span class="svc pp">Paramount+</span></span><span class="quip">Snack: nothing. You won’t want to eat.</span></div>
+  <input type="checkbox" id="m-saving-private-ryan" data-k="saving-private-ryan" aria-label="Watched Saving Private Ryan">
+</li><li class="blk nf" data-start="2026-10-18T16:02:00" data-end="2026-10-18T16:26:00" data-min="24">
+  <span class="when">4:02p</span>
+  <img src="/fornow/posters/76869.jpg" alt="">
+  <div class="what"><b>Violet Evergarden</b><span class="sub">Episode 1 · 24 min · <span class="svc nf">Netflix</span></span><span class="quip">Write someone a letter after.</span></div>
+  <input type="checkbox" id="m-violet-evergarden" data-k="violet-evergarden" aria-label="Watched Violet Evergarden">
+</li><li class="blk pp" data-start="2026-10-18T16:31:00" data-end="2026-10-18T18:43:00" data-min="132">
+  <span class="when">4:31p</span>
+  <img src="/fornow/posters/84441.jpg" alt="">
+  <div class="what"><b>Million Dollar Baby</b><span class="sub">Film · 132 min · <span class="svc pp">Paramount+</span></span><span class="quip">Snack: lemon meringue pie, like the diner in the film.</span></div>
+  <input type="checkbox" id="m-million-dollar-baby" data-k="million-dollar-baby" aria-label="Watched Million Dollar Baby">
+</li><li class="blk brk"><span class="when">6:48p</span><div class="what"><b>Dinner</b><span class="quip">Halfway point. Order in.</span></div></li><li class="blk nf" data-start="2026-10-18T19:23:00" data-end="2026-10-18T22:08:00" data-min="165">
+  <span class="when">7:23p</span>
+  <img src="/fornow/posters/153755.jpg" alt="">
+  <div class="what"><b>Boyhood</b><span class="sub">Film · 165 min · <span class="svc nf">Netflix</span></span><span class="quip">Its last night on Netflix. Twelve years in one sitting.</span></div>
+  <input type="checkbox" id="m-boyhood" data-k="boyhood" aria-label="Watched Boyhood">
+</li><li class="blk pv" data-start="2026-10-18T22:13:00" data-end="2026-10-19T00:14:00" data-min="121">
+  <span class="when">10:13p</span>
+  <img src="/fornow/posters/827107.jpg" alt="">
+  <div class="what"><b>Sound of Metal</b><span class="sub">Film · 121 min · <span class="svc pv">Prime Video</span></span><span class="quip">Headphones on.</span></div>
+  <input type="checkbox" id="m-sound-of-metal" data-k="sound-of-metal" aria-label="Watched Sound of Metal">
+</li><li class="blk pp" data-start="2026-10-19T00:19:00" data-end="2026-10-19T01:53:00" data-min="94">
+  <span class="when">12:19a</span>
+  <img src="/fornow/posters/21408.jpg" alt="">
+  <div class="what"><b>Twin Peaks</b><span class="sub">Episode 1 · 94 min · <span class="svc pp">Paramount+</span></span><span class="quip">Cherry pie and a damn fine cup of coffee.</span></div>
+  <input type="checkbox" id="m-twin-peaks" data-k="twin-peaks" aria-label="Watched Twin Peaks">
+</li><li class="blk cr" data-start="2026-10-19T01:58:00" data-end="2026-10-19T02:21:00" data-min="23">
+  <span class="when">1:58a</span>
+  <img src="/fornow/posters/20388.jpg" alt="">
+  <div class="what"><b>Psycho-Pass</b><span class="sub">Episode 1 · 23 min · <span class="svc cr">Crunchyroll</span></span><span class="quip">Episode 1 is on Crunchyroll; Prime only has Season 3.</span></div>
+  <input type="checkbox" id="m-psycho-pass" data-k="psycho-pass" aria-label="Watched Psycho-Pass">
+</li><li class="blk sleep"><span class="when">2:21a</span><div class="what"><b>Sleep</b><span class="quip">Dream of Laura Palmer. Or don’t.</span></div></li></ol></section><section class="day d2"><header class="dayhead"><b>Sun</b><span>Oct 19</span><em>Tissues Required</em></header><ol><li class="blk nf" data-start="2026-10-19T09:00:00" data-end="2026-10-19T10:00:00" data-min="60">
+  <span class="when">9a</span>
+  <img src="/fornow/posters/381980.jpg" alt="">
+  <div class="what"><b>Pluto</b><span class="sub">Episode 1 · 60 min · <span class="svc nf">Netflix</span></span><span class="quip">Morning cry, to get it out of the way.</span></div>
+  <input type="checkbox" id="m-pluto" data-k="pluto" aria-label="Watched Pluto">
+</li><li class="blk nf" data-start="2026-10-19T10:05:00" data-end="2026-10-19T12:23:00" data-min="138">
+  <span class="when">10:05a</span>
+  <img src="/fornow/posters/1515031.jpg" alt="">
+  <div class="what"><b>I&#x27;m Still Here</b><span class="sub">Film · 138 min · <span class="svc nf">Netflix</span></span><span class="quip">Brazilian coffee, strong.</span></div>
+  <input type="checkbox" id="m-im-still-here" data-k="im-still-here" aria-label="Watched I&#x27;m Still Here">
+</li><li class="blk brk"><span class="when">12:28p</span><div class="what"><b>Lunch</b><span class="quip">Call your mom.</span></div></li><li class="blk hu" data-start="2026-10-19T13:03:00" data-end="2026-10-19T14:04:00" data-min="61">
+  <span class="when">1:03p</span>
+  <img src="/fornow/posters/255077.jpg" alt="">
+  <div class="what"><b>Dopesick</b><span class="sub">Episode 1 · 61 min · <span class="svc hu">Hulu</span></span><span class="quip">Just water.</span></div>
+  <input type="checkbox" id="m-dopesick" data-k="dopesick" aria-label="Watched Dopesick">
+</li><li class="blk pv" data-start="2026-10-19T14:09:00" data-end="2026-10-19T16:09:00" data-min="120">
+  <span class="when">2:09p</span>
+  <img src="/fornow/posters/373034.jpg" alt="">
+  <div class="what"><b>Beautiful Boy</b><span class="sub">Film · 120 min · <span class="svc pv">Prime Video</span></span><span class="quip">Hug someone after.</span></div>
+  <input type="checkbox" id="m-beautiful-boy" data-k="beautiful-boy" aria-label="Watched Beautiful Boy">
+</li><li class="blk nf" data-start="2026-10-19T16:14:00" data-end="2026-10-19T18:20:00" data-min="126">
+  <span class="when">4:14p</span>
+  <img src="/fornow/posters/1448833.jpg" alt="">
+  <div class="what"><b>How to Make Millions Before Grandma Dies</b><span class="sub">Film · 126 min · <span class="svc nf">Netflix</span></span><span class="quip">Call your grandma.</span></div>
+  <input type="checkbox" id="m-how-to-make-millions-before-grandma-dies" data-k="how-to-make-millions-before-grandma-dies" aria-label="Watched How to Make Millions Before Grandma Dies">
+</li><li class="blk brk"><span class="when">6:25p</span><div class="what"><b>Dinner</b><span class="quip">Last real meal of the Yes-a-thon.</span></div></li><li class="blk dp" data-start="2026-10-19T19:00:00" data-end="2026-10-19T20:45:00" data-min="105">
+  <span class="when">7p</span>
+  <img src="/fornow/posters/72065.jpg" alt="">
+  <div class="what"><b>The Odd Life of Timothy Green</b><span class="sub">Film · 105 min · <span class="svc dp">Disney+</span></span><span class="quip">Gentle one before the finale.</span></div>
+  <input type="checkbox" id="m-the-odd-life-of-timothy-green" data-k="the-odd-life-of-timothy-green" aria-label="Watched The Odd Life of Timothy Green">
+</li><li class="blk pp" data-start="2026-10-19T20:50:00" data-end="2026-10-20T00:04:00" data-min="194">
+  <span class="when">8:50p</span>
+  <img src="/fornow/posters/191110.jpg" alt="">
+  <div class="what"><b>Titanic</b><span class="sub">Film · 194 min · <span class="svc pp">Paramount+</span></span><span class="quip">The grand finale. Door discourse optional.</span></div>
+  <input type="checkbox" id="m-titanic" data-k="titanic" aria-label="Watched Titanic">
+</li><li class="blk done"><span class="when">12:04a</span><div class="what"><b>Credits roll on the Yes-a-thon</b><span class="quip">You watched everything. Go to bed.</span></div></li></ol></section></div><div class="win" id="win" hidden><b>You finished the Yes-a-thon.</b> Every film and every first episode. Legend.</div></div></div>
+</section><section class="step" id="films">
+  <h2>All 13 films, best reviewed first</h2>
+  <p class="line">Every one is streaming on a service you have.</p>
+  <div class="screen"><div class="screen-bar"><span></span><span></span><span></span><em>Films</em></div><div class="screen-in films"><article class="card" id="t-saving-private-ryan">
+  <div class="rank">1</div>
+  <img class="poster" src="/fornow/posters/57554.jpg" alt="Saving Private Ryan poster" loading="lazy">
+  <div class="body">
+    <h3>Saving Private Ryan <span class="yr">1998</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">2h 49m</span></div>
+    <p class="hook">The opening on Omaha Beach is the most famous battle sequence ever filmed.</p>
+    <p class="sell">Then Tom Hanks leads eight men to find one soldier, and the mission&#x27;s cost becomes the whole point.</p>
+    <div class="scores"><span class="sc"><b>94%</b> Rotten Tomatoes</span><span class="sc"><b>8.6</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-im-still-here">
+  <div class="rank">2</div>
+  <img class="poster" src="/fornow/posters/1515031.jpg" alt="I&#x27;m Still Here poster" loading="lazy">
+  <div class="body">
+    <h3>I&#x27;m Still Here <span class="yr">2024</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">2h 18m</span></div>
+    <p class="hook">Rio, 1971. Eunice Paiva&#x27;s husband is taken by the dictatorship and never comes home, and she holds five kids together without letting them see her break.</p>
+    <p class="sell">Won Brazil its first Oscar. Fernanda Torres is extraordinary.</p>
+    <div class="scores"><span class="sc"><b>97%</b> Rotten Tomatoes</span><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-how-to-make-millions-before-grandma-dies">
+  <div class="rank">3</div>
+  <img class="poster" src="/fornow/posters/1448833.jpg" alt="How to Make Millions Before Grandma Dies poster" loading="lazy">
+  <div class="body">
+    <h3>How to Make Millions Before Grandma Dies <span class="yr">2024</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">2h 06m</span></div>
+    <p class="hook">A slacker moves in with his dying grandma to win the inheritance, and slowly stops scheming.</p>
+    <p class="sell">The rare tearjerker that earns every tear. Everyone who sees it brings up their own grandmother after.</p>
+    <div class="scores"><span class="sc"><b>98%</b> Rotten Tomatoes</span><span class="sc"><b>7.9</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-boyhood">
+  <div class="rank">4</div>
+  <img class="poster" src="/fornow/posters/153755.jpg" alt="Boyhood poster" loading="lazy">
+  <div class="body">
+    <h3>Boyhood <span class="yr">2014</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">2h 45m</span><span class="flag hot">Leaves Netflix Oct 19</span></div>
+    <p class="hook">Shot over twelve years with the same cast, so you watch one kid grow from six to eighteen in real time.</p>
+    <p class="sell">Patricia Arquette won the Oscar. Last chance: leaves Netflix Oct 19.</p>
+    <div class="scores"><span class="sc"><b>97%</b> Rotten Tomatoes</span><span class="sc"><b>7.9</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-sound-of-metal">
+  <div class="rank">5</div>
+  <img class="poster" src="/fornow/posters/827107.jpg" alt="Sound of Metal poster" loading="lazy">
+  <div class="body">
+    <h3>Sound of Metal <span class="yr">2020</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="len">2h 01m</span></div>
+    <p class="hook">A heavy-metal drummer loses his hearing in a matter of days and has to decide who he is without it.</p>
+    <p class="sell">Won Oscars for sound and editing; the mix puts you inside his head. Use headphones.</p>
+    <div class="scores"><span class="sc"><b>97%</b> Rotten Tomatoes</span><span class="sc"><b>7.7</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-rocky">
+  <div class="rank">6</div>
+  <img class="poster" src="/fornow/posters/82169.jpg" alt="Rocky poster" loading="lazy">
+  <div class="body">
+    <h3>Rocky <span class="yr">1976</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="svc pv">Prime Video</span><span class="len">1h 55m</span></div>
+    <p class="hook">Before the sequels, it was a small, lonely film about a club fighter who only wants to go the distance.</p>
+    <p class="sell">Won Best Picture. The love story with Adrian is the real heart of it.</p>
+    <div class="scores"><span class="sc"><b>93%</b> Rotten Tomatoes</span><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-million-dollar-baby">
+  <div class="rank">7</div>
+  <img class="poster" src="/fornow/posters/84441.jpg" alt="Million Dollar Baby poster" loading="lazy">
+  <div class="body">
+    <h3>Million Dollar Baby <span class="yr">2004</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">2h 12m</span></div>
+    <p class="hook">Clint Eastwood reluctantly trains Hilary Swank, a 31-year-old waitress who won&#x27;t take no for an answer.</p>
+    <p class="sell">Four Oscars including Best Picture. It is not the movie it looks like for the first hour.</p>
+    <div class="scores"><span class="sc"><b>90%</b> Rotten Tomatoes</span><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-titanic">
+  <div class="rank">8</div>
+  <img class="poster" src="/fornow/posters/191110.jpg" alt="Titanic poster" loading="lazy">
+  <div class="body">
+    <h3>Titanic <span class="yr">1997</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">3h 14m</span></div>
+    <p class="hook">Three hours and fourteen minutes that move like ninety.</p>
+    <p class="sell">The last hour is still the best disaster filmmaking ever put on screen.</p>
+    <div class="scores"><span class="sc"><b>88%</b> Rotten Tomatoes</span><span class="sc"><b>8.0</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-dances-with-wolves">
+  <div class="rank">9</div>
+  <img class="poster" src="/fornow/posters/155112.jpg" alt="Dances with Wolves poster" loading="lazy">
+  <div class="body">
+    <h3>Dances with Wolves <span class="yr">1990</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="len">3h 01m</span><span class="flag warn">Leaves Prime Dec 1</span></div>
+    <p class="hook">A Union officer posted alone on the frontier slowly becomes part of a Lakota community.</p>
+    <p class="sell">Seven Oscars and huge prairie skies. Leaves Prime Dec 1.</p>
+    <div class="scores"><span class="sc"><b>87%</b> Rotten Tomatoes</span><span class="sc"><b>8.0</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-spoiler-alert">
+  <div class="rank">10</div>
+  <img class="poster" src="/fornow/posters/1144853.jpg" alt="Spoiler Alert poster" loading="lazy">
+  <div class="body">
+    <h3>Spoiler Alert <span class="yr">2022</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">1h 50m</span></div>
+    <p class="hook">Jim Parsons and Ben Aldridge in TV journalist Michael Ausiello&#x27;s true story of his marriage and his husband&#x27;s cancer.</p>
+    <p class="sell">Funny and warm right up until it isn&#x27;t.</p>
+    <div class="scores"><span class="sc"><b>87%</b> Rotten Tomatoes</span><span class="sc"><b>7.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-tetris">
+  <div class="rank">11</div>
+  <img class="poster" src="/fornow/posters/965195.jpg" alt="Tetris poster" loading="lazy">
+  <div class="body">
+    <h3>Tetris <span class="yr">2023</span></h3>
+    <div class="meta"><span class="svc at">Apple TV</span><span class="len">1h 58m</span></div>
+    <p class="hook">A Dutch game salesman flies into Soviet Moscow to get the rights to Tetris before the Brits and Nintendo do.</p>
+    <p class="sell">Plays like a Cold War spy thriller about a puzzle game.</p>
+    <div class="scores"><span class="sc"><b>81%</b> Rotten Tomatoes</span><span class="sc"><b>7.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-beautiful-boy">
+  <div class="rank">12</div>
+  <img class="poster" src="/fornow/posters/373034.jpg" alt="Beautiful Boy poster" loading="lazy">
+  <div class="body">
+    <h3>Beautiful Boy <span class="yr">2018</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="len">2h 00m</span></div>
+    <p class="hook">Steve Carell as a father who tries everything to pull his son (Timothée Chalamet) out of meth addiction.</p>
+    <p class="sell">Built from two real memoirs, one by the dad and one by the son.</p>
+    <div class="scores"><span class="sc"><b>67%</b> Rotten Tomatoes</span><span class="sc"><b>7.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-the-odd-life-of-timothy-green">
+  <div class="rank">13</div>
+  <img class="poster" src="/fornow/posters/72065.jpg" alt="The Odd Life of Timothy Green poster" loading="lazy">
+  <div class="body">
+    <h3>The Odd Life of Timothy Green <span class="yr">2012</span></h3>
+    <div class="meta"><span class="svc dp">Disney+</span><span class="len">1h 45m</span></div>
+    <p class="hook">A couple who can&#x27;t have children bury their wishes in the garden, and a boy shows up muddy at the door that night.</p>
+    <p class="sell">Critics shrugged. It&#x27;s an open-hearted family tearjerker anyway.</p>
+    <div class="scores"><span class="sc"><b>36%</b> Rotten Tomatoes</span><span class="sc"><b>6.6</b> IMDb</span></div>
+  </div>
+</article></div></div>
+</section><section class="step" id="shows">
+  <h2>All 11 shows, best reviewed first</h2>
+  <p class="line">Your show to keep going with after the weekend.</p>
+  <div class="screen"><div class="screen-bar"><span></span><span></span><span></span><em>Shows</em></div><div class="screen-in shows"><article class="card" id="t-kingdom">
+  <div class="rank">1</div>
+  <img class="poster" src="/fornow/posters/20749.jpg" alt="Kingdom poster" loading="lazy">
+  <div class="body">
+    <h3>Kingdom <span class="yr">2014</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="len">3 seasons · 49m eps</span></div>
+    <p class="hook">Frank Grillo runs a Venice Beach MMA gym held together by tape and grudges, with his two fighter sons and his ex-fighter ex-con best friend.</p>
+    <p class="sell">Nick Jonas is genuinely great. Three seasons, gritty and tender.</p>
+    <div class="scores"><span class="sc"><b>100%</b> Rotten Tomatoes</span><span class="sc"><b>8.5</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-dark">
+  <div class="rank">2</div>
+  <img class="poster" src="/fornow/posters/55668.jpg" alt="Dark poster" loading="lazy">
+  <div class="body">
+    <h3>Dark <span class="yr">2017</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">3 seasons · 56m eps</span></div>
+    <p class="hook">A boy vanishes in a German forest town, and the answer is spread across three generations and 33-year cycles.</p>
+    <p class="sell">Keep notes. It pays everything off and ends exactly when it should.</p>
+    <div class="scores"><span class="sc"><b>95%</b> Rotten Tomatoes</span><span class="sc"><b>8.7</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-pluto">
+  <div class="rank">3</div>
+  <img class="poster" src="/fornow/posters/381980.jpg" alt="Pluto poster" loading="lazy">
+  <div class="body">
+    <h3>Pluto <span class="yr">2023</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">1 season · 62m eps</span></div>
+    <p class="hook">Naoki Urasawa turns an Astro Boy story into a robot murder mystery about grief.</p>
+    <p class="sell">Eight hour-long episodes. The blind composer and his robot butler in episode one will wreck you.</p>
+    <div class="scores"><span class="sc"><b>100%</b> Rotten Tomatoes</span><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-brooklyn-nine-nine">
+  <div class="rank">4</div>
+  <img class="poster" src="/fornow/posters/11174.jpg" alt="Brooklyn Nine-Nine poster" loading="lazy">
+  <div class="body">
+    <h3>Brooklyn Nine-Nine <span class="yr">2013</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">8 seasons · 22m eps</span></div>
+    <p class="hook">The Office&#x27;s warmth inside a Brooklyn police precinct.</p>
+    <p class="sell">Andre Braugher&#x27;s deadpan Captain Holt is one of the great sitcom characters ever. Eight seasons of comfort.</p>
+    <div class="scores"><span class="sc"><b>95%</b> Rotten Tomatoes</span><span class="sc"><b>8.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-ghosts">
+  <div class="rank">5</div>
+  <img class="poster" src="/fornow/posters/287975.jpg" alt="Ghosts poster" loading="lazy">
+  <div class="body">
+    <h3>Ghosts <span class="yr">2021</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">5 seasons · 21m eps</span></div>
+    <p class="hook">A couple inherits a crumbling mansion full of ghosts from every century, and only she can see them.</p>
+    <p class="sell">Cozy, fast and very funny. Twenty-minute episodes.</p>
+    <div class="scores"><span class="sc"><b>97%</b> Rotten Tomatoes</span><span class="sc"><b>7.9</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-fringe">
+  <div class="rank">6</div>
+  <img class="poster" src="/fornow/posters/20536.jpg" alt="Fringe poster" loading="lazy">
+  <div class="body">
+    <h3>Fringe <span class="yr">2008</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="svc hu">Hulu</span><span class="len">5 seasons · 46m eps</span></div>
+    <p class="hook">An FBI agent, a brilliant institutionalized scientist and his estranged son investigate the impossible.</p>
+    <p class="sell">It grows into parallel universes and a father&#x27;s guilt, and it&#x27;s great from season two on.</p>
+    <div class="scores"><span class="sc"><b>91%</b> Rotten Tomatoes</span><span class="sc"><b>8.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-dopesick">
+  <div class="rank">7</div>
+  <img class="poster" src="/fornow/posters/255077.jpg" alt="Dopesick poster" loading="lazy">
+  <div class="body">
+    <h3>Dopesick <span class="yr">2021</span></h3>
+    <div class="meta"><span class="svc hu">Hulu</span><span class="len">1 season · 62m eps</span><span class="flag info">Hulu, or Disney+ bundle</span></div>
+    <p class="hook">How OxyContin was sold to America, from the Sackler boardroom to a Virginia mining town.</p>
+    <p class="sell">Michael Keaton won the Emmy as a small-town doctor who believed the pitch.</p>
+    <div class="scores"><span class="sc"><b>89%</b> Rotten Tomatoes</span><span class="sc"><b>8.6</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-letterkenny">
+  <div class="rank">8</div>
+  <img class="poster" src="/fornow/posters/42173.jpg" alt="Letterkenny poster" loading="lazy">
+  <div class="body">
+    <h3>Letterkenny <span class="yr">2016</span></h3>
+    <div class="meta"><span class="svc hu">Hulu</span><span class="len">12 seasons · 23m eps</span><span class="flag info">Hulu, or Disney+ bundle</span></div>
+    <p class="hook">Hicks, skids and hockey players, and the fastest chirps on television.</p>
+    <p class="sell">On your darts wall at five stars. Rewatch it.</p>
+    <div class="scores"><span class="sc"><b>8.5</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-violet-evergarden">
+  <div class="rank">9</div>
+  <img class="poster" src="/fornow/posters/76869.jpg" alt="Violet Evergarden poster" loading="lazy">
+  <div class="body">
+    <h3>Violet Evergarden <span class="yr">2018</span></h3>
+    <div class="meta"><span class="svc nf">Netflix</span><span class="len">1 season · 25m eps</span></div>
+    <p class="hook">A former child soldier becomes a professional letter-writer to understand the last thing her commander said to her.</p>
+    <p class="sell">Kyoto Animation at its most beautiful. Episode 10 is famous for a reason.</p>
+    <div class="scores"><span class="sc"><b>8.4</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-twin-peaks">
+  <div class="rank">10</div>
+  <img class="poster" src="/fornow/posters/21408.jpg" alt="Twin Peaks poster" loading="lazy">
+  <div class="body">
+    <h3>Twin Peaks <span class="yr">1990</span></h3>
+    <div class="meta"><span class="svc pp">Paramount+</span><span class="len">2 seasons · 50m eps</span><span class="flag info">Your 5★ rewatch</span></div>
+    <p class="hook">Who killed Laura Palmer? Damn fine coffee, cherry pie and David Lynch&#x27;s dream logic.</p>
+    <p class="sell">On your darts wall at five stars. Rewatch it.</p>
+    <div class="scores"><span class="sc"><b>77%</b> Rotten Tomatoes</span><span class="sc"><b>8.7</b> IMDb</span></div>
+  </div>
+</article><article class="card" id="t-psycho-pass">
+  <div class="rank">11</div>
+  <img class="poster" src="/fornow/posters/20388.jpg" alt="Psycho-Pass poster" loading="lazy">
+  <div class="body">
+    <h3>Psycho-Pass <span class="yr">2012</span></h3>
+    <div class="meta"><span class="svc pv">Prime Video</span><span class="len">3 seasons · 27m eps</span><span class="flag warn">Prime has S3 only</span></div>
+    <p class="hook">A future Tokyo where scanners measure your criminal potential before you act, and a rookie cop starts doubting the system.</p>
+    <p class="sell">Death Note&#x27;s moral games in a cyberpunk cop show. Prime has Season 3 only; Seasons 1-2 are on Crunchyroll.</p>
+    <div class="scores"><span class="sc"><b>8.1</b> IMDb</span></div>
+  </div>
+</article></div></div>
+</section>
+  <p class="sub-foot">Scores and streaming from JustWatch, checked Oct 17, 2026. Checkmarks save in this browser.</p>
+</div>
+<script>
+(() => {
+  const KEY = 'yes-pile-watched';
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  const TOTAL = 2304;
+  const boxes = [...document.querySelectorAll('.blk input')];
+  const count = () => {
+    let mins = 0;
+    boxes.forEach(b => { const li = b.closest('.blk'); li.classList.toggle('seen', b.checked); if (b.checked) mins += +li.dataset.min; });
+    document.getElementById('mbar').style.width = (100 * mins / TOTAL) + '%';
+    document.getElementById('mtext').textContent = `${Math.floor(mins / 60)}h ${mins % 60}m of ${Math.floor(TOTAL / 60)}h ${TOTAL % 60}m watched`;
+    document.getElementById('win').hidden = !boxes.every(b => b.checked);
+  };
+  boxes.forEach(b => {
+    b.checked = !!done[b.dataset.k];
+    b.addEventListener('change', () => {
+      done[b.dataset.k] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {}
+      count();
+    });
+  });
+  count();
+
+  // Light up whatever should be on screen right now.
+  const tick = () => {
+    const now = new Date();
+    document.querySelectorAll('.blk[data-start]').forEach(li => {
+      li.classList.toggle('now', now >= new Date(li.dataset.start) && now < new Date(li.dataset.end));
+    });
+  };
+  tick(); setInterval(tick, 60000);
+})();
+</script>
+</body>
+</html>
