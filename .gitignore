@@ -24,3 +24,9 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# candidate-source caches (MusicBrainz, ListenBrainz, Spotify), rebuilt on demand
+scripts/data/cache/
+scripts/data/master-ii.json
+scripts/data/taste-until-*.json
+scripts/data/track-albums.json

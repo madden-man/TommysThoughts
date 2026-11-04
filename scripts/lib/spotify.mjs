@@ -48,6 +48,9 @@ export const accessToken = () => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** The longest 429 wait worth sitting through (SPOTIFY_MAX_429_WAIT seconds, default 600). */
+const MAX_429_WAIT_MS = (Number(process.env.SPOTIFY_MAX_429_WAIT) || 600) * 1000;
+
 /**
  * GET a Web API path (or full URL) as JSON. Honours Retry-After on 429 and
  * waits it out: a script has all the time it needs, and hammering a throttled
@@ -60,6 +63,16 @@ export const get = async (path, { retries = 5 } = {}) => {
         const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
         if (response.status === 429 && attempt < retries) {
             const wait = (Number(response.headers.get('retry-after')) || 1) * 1000;
+            // A Retry-After of hours is a daily quota spent, not a burst: Spotify
+            // answered 85,000 seconds on 2026-11-05 for /albums/{id} and
+            // /tracks/{id}. Waiting that out inside a script just hangs it, so
+            // past MAX_429_WAIT_MS the caller gets an error it can route around.
+            if (wait > MAX_429_WAIT_MS) {
+                const err = new Error(`Spotify 429 ${url}: Retry-After ${wait / 1000}s, over the ${MAX_429_WAIT_MS / 1000}s this script will wait`);
+                err.status = 429;
+                err.retryAfter = wait / 1000;
+                throw err;
+            }
             process.stderr.write(`  429, waiting ${wait / 1000}s\n`);
             await sleep(wait);
             continue;
@@ -149,9 +162,13 @@ export const artists = async (ids) => {
     return out;
 };
 
-/** An artist's own albums (album_group=album only; no singles, no appears-on). */
+/**
+ * An artist's own albums (album_group=album only; no singles, no appears-on).
+ * Ten a page: since the 2026 development-mode limits Spotify answers 400
+ * "Invalid limit" to anything higher here.
+ */
 export const artistAlbums = (artistId) =>
-    getAll(`/artists/${artistId}/albums?include_groups=album&limit=50`);
+    getAll(`/artists/${artistId}/albums?include_groups=album&limit=10`);
 
 /** Album search; returns the simplified album objects. */
 export const searchAlbums = async (artist, album, limit = 5) => {
