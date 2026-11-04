@@ -12,6 +12,7 @@ import { Header } from '../../components/Header';
 import { PreApprovedTab } from './PreApprovedTab';
 import { PlaylistTab } from './PlaylistTab';
 import { InOrderTab } from './InOrderTab';
+import { NextRecordsTab } from './NextRecordsTab';
 import { listPlaylists, partsFor } from './server';
 
 import './spotify.css';
@@ -130,6 +131,9 @@ export const SpotifyPage = () => {
                 },
             ]
             : [{ key: 'master', label: 'master (ii)', kind: 'master' }]),
+        // Always present, master found or not: it reads a static file of
+        // recommendations rather than the playlist.
+        { key: 'next-records', label: 'next records', kind: 'nextrecords' },
         ...added.flatMap((a) => tabsFor(a.id, a.name, 'pl', true)),
         // tabsFor closes over `options`, which is the dependency that matters
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,6 +176,7 @@ export const SpotifyPage = () => {
                 />
             );
         }
+        if (active.kind === 'nextrecords') return <NextRecordsTab />;
         if (active.kind === 'master') {
             if (options === null) return <p className="spotify__muted">Finding master (ii)…</p>;
             return (

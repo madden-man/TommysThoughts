@@ -192,3 +192,30 @@ Needs `MONGODB_URI`. Mongo client pattern as in `server/get_playlist`.
 `src/views/spotify/server.js` gains `recordFeedback(payload)` and
 `listFeedback()` wrapping the function through the existing `post` helper
 (so the rate-limit breaker is shared), nothing else changes there.
+
+## 6. `src/views/spotify/fit.js`: the one fit score
+
+Pure, import-free beyond names.js, loadable from Node and the browser.
+`profileIndex(profile)`, `scoreAlbum(album, index, weights)` returning
+`{ score, tier, parts, reasons, key }`, `rankAlbums(albums, profile, weights)`
+(unheard and sampled by score, then liked and loved, then dropped),
+`albumOfBlock(block)` for shuffle.js album blocks, `DEFAULT_WEIGHTS`. The
+ranker script and the ranked tab both call these and never score on their
+own. Weights live in `docs/spotify-recommendations-weights.json` once the
+backtest has chosen them; the tab fetches `/spotify-recommendations.json`
+and uses its `weights` block, falling back to DEFAULT_WEIGHTS.
+
+## 7. The ranked tab (Tommy, 2026-11-05: "sort git add goodMusic by which albums I'm most likely to enjoy")
+
+The queue playlist is named `git add ./goodMusic` (id 2hD9q4WrdC1h56j6EXXFVZ,
+9,864 tracks, 999 albums, 817 of them whole). A built-in tab `RankedTab`
+(kind `ranked`), found by name the way master (ii) is, labelled
+`<name> ranked`, sitting after `next records`. It mirrors InOrderTab: reads
+every part, groups with `albumBlocksOf`, fetches `/spotify-taste.json` once,
+ranks the blocks with `rankAlbums` (via `albumOfBlock`), previews the top 40
+with score, tier and the first reason, shows tier counts (unheard / already
+kept / dropped), and writes the flattened order to `<name> ranked` through
+ensurePlaylist, clearPlaylist and writeOrder with append, exactly as
+InOrderTab writes `in order`. ` ranked` joins OUTPUT_SUFFIXES. Profile load
+failure: the tab says so and refuses to write (there is no fallback order
+worth writing).

@@ -1,0 +1,93 @@
+{
+  "generated": "2026-11-05",
+  "profile": {
+    "generated": "2026-11-05",
+    "exportTo": "2026-08-25",
+    "masterTrackCount": 6095
+  },
+  "weights": {
+    "known-artist": 0.3,
+    "listenbrainz": 0.4,
+    "lastfm": 0,
+    "claude": 0.3,
+    "artistAffinity": 0.2,
+    "genreAffinity": 0.2,
+    "shape": 0.1,
+    "droppedPenalty": 0.3
+  },
+  "albums": [
+    {
+      "albumId": "dFfeGoRVoblEhNFrBi1ldL",
+      "uri": "spotify:album:dFfeGoRVoblEhNFrBi1ldL",
+      "artist": "The Head and the Heart",
+      "album": "Living Mirage",
+      "artistIds": [
+        "hgHlNvRKbJGAhaVrb1F5w2"
+      ],
+      "year": 2019,
+      "totalTracks": 12,
+      "minutes": 43,
+      "image": "https://i.scdn.co/image/ab67616d0000b273ef2b5836f12c03a386f27b1d",
+      "score": 0.84,
+      "why": "You kept all of Strange Trails and Vide Noir and played them across six years; ListenBrainz puts this record's artist beside Lord Huron.",
+      "sources": [
+        "listenbrainz",
+        "claude"
+      ],
+      "trackUris": [
+        "spotify:track:Nkaur6TtrUn5TDPq7KqTxn",
+        "spotify:track:zfAC77T510AcuRZOiyVxjB",
+        "spotify:track:ThQ5bVmzuRtIttmG9u0894",
+        "spotify:track:wjCAaA4V1hUZEBNoic8DuT"
+      ]
+    },
+    {
+      "albumId": "Ns8gRcttCy6zh7kbUREwAT",
+      "uri": "spotify:album:Ns8gRcttCy6zh7kbUREwAT",
+      "artist": "Bon Iver",
+      "album": "22, A Million",
+      "artistIds": [
+        "cJIWHtQpx6NTIjAa0K6pRC"
+      ],
+      "year": 2016,
+      "totalTracks": 10,
+      "minutes": 34,
+      "image": "https://i.scdn.co/image/ab67616d0000b273883736acd9c4a179d44d3de0",
+      "score": 0.79,
+      "why": "You played For Emma, Forever Ago in eight different years and kept every track of it; this is the one Bon Iver album you have never started.",
+      "sources": [
+        "known-artist"
+      ],
+      "trackUris": [
+        "spotify:track:ZcGqeMKLLU0jFPo89mHykl",
+        "spotify:track:uZs6HWML8u1jHBwkvwiQu3",
+        "spotify:track:07zcxtfdK2GQXwKG6SfF1U"
+      ]
+    },
+    {
+      "albumId": "Dcn8RH6wC2cSizrOeBh2Gb",
+      "uri": "spotify:album:Dcn8RH6wC2cSizrOeBh2Gb",
+      "artist": "Gregory Alan Isakov",
+      "album": "Evening Machines",
+      "artistIds": [
+        "iT5u0DVx3WRNQuxxJWzf0b"
+      ],
+      "year": 2018,
+      "totalTracks": 12,
+      "minutes": 49,
+      "image": "https://i.scdn.co/image/ab67616d0000b273497ff9e31134603fb09a9329",
+      "score": 0.74,
+      "why": "Three of your loved records lean on quiet banjo and fingerpicked guitar, and Claude and ListenBrainz both point here from The Lumineers.",
+      "sources": [
+        "listenbrainz",
+        "claude"
+      ],
+      "trackUris": [
+        "spotify:track:HLSHH3FuZbIiZhyf6ug8r1",
+        "spotify:track:KjVt74072R0D7TTJvkdULZ",
+        "spotify:track:KgypnPMnnLQtPhsjI0aPuy",
+        "spotify:track:n2CH8sqjNmPaDrz3ErMhkd"
+      ]
+    }
+  ]
+}
