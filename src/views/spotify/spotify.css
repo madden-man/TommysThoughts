@@ -391,3 +391,44 @@
         height: 88px;
     }
 }
+
+/* ranked: a queue reordered by fit. It sits inside the white .spotify box like
+   the in order tab, so it reuses the spotify__ classes and only adds the list
+   line layout and a quiet tier label. */
+.ranked {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ranked__summary span {
+    white-space: nowrap;
+}
+
+.ranked__item {
+    overflow-wrap: anywhere;
+}
+
+.ranked__name,
+.ranked__meta {
+    display: block;
+}
+
+.ranked__tier {
+    font-weight: 600;
+}
+
+.ranked__tier--unheard {
+    color: #0b5238;
+}
+
+.ranked__tier--dropped {
+    color: #a3195b;
+}
+
+@media (min-width: 600px) {
+    .ranked__name,
+    .ranked__meta {
+        display: inline;
+    }
+}

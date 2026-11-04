@@ -83,12 +83,20 @@ export const profileIndex = (profile) => {
     };
 };
 
+// The primary artist is the first id, or the display name; a featured artist
+// further down the list counts, but at half strength, so a guest verse by
+// someone Tommy loves does not make a stranger's record look like theirs.
 const artistFor = (index, album) => {
-    for (const id of album.artistIds ?? []) {
+    const ids = album.artistIds ?? [];
+    const primary = (ids[0] && index.artistById.get(ids[0]))
+        || index.artistByName.get(normalizeName(album.artist))
+        || null;
+    if (primary) return { artist: primary, strength: 1 };
+    for (const id of ids.slice(1)) {
         const hit = index.artistById.get(id);
-        if (hit) return hit;
+        if (hit) return { artist: hit, strength: 0.5 };
     }
-    return index.artistByName.get(normalizeName(album.artist)) ?? null;
+    return { artist: null, strength: 0 };
 };
 
 const heardAlbumFor = (index, album, key) =>
@@ -123,8 +131,8 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
     const key = albumKeyOf(album.artist, album.album);
     const reasons = [];
 
-    const artist = artistFor(index, album);
-    const artistAffinity = clamp01(artist?.score ?? 0);
+    const { artist, strength } = artistFor(index, album);
+    const artistAffinity = clamp01((artist?.score ?? 0) * strength);
     if (artist && artistAffinity > 0.3) {
         reasons.push(artist.lovedAlbums > 0
             ? `you kept ${artist.lovedAlbums} ${artist.lovedAlbums === 1 ? 'record' : 'records'} by ${artist.name}`
@@ -139,7 +147,10 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
 
     const shape = shapeScore(album, index.shape);
 
-    const sourceScore = clamp01(album.sourceScore ?? 0);
+    // A queue playlist has no candidate sources vouching for it, so the source
+    // weight leaves the scale entirely rather than capping every album at 70%.
+    const hasSource = album.sourceScore !== undefined && album.sourceScore !== null;
+    const sourceScore = hasSource ? clamp01(album.sourceScore) : 0;
 
     const heard = heardAlbumFor(index, album, key);
     const heardAnywhere = Boolean(heard)
@@ -169,7 +180,7 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
         source: w.source * sourceScore,
         penalty: -penalty,
     };
-    const positive = w.artistAffinity + w.genreAffinity + w.shape + w.source;
+    const positive = w.artistAffinity + w.genreAffinity + w.shape + (hasSource ? w.source : 0);
     const score = clamp01(
         (parts.artist + parts.genre + parts.shape + parts.source) / positive - penalty,
     );
