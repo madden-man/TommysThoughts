@@ -171,9 +171,11 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
     const { artist, strength } = artistFor(index, album);
     const artistAffinity = clamp01((artist?.score ?? 0) * strength);
     if (artist && artistAffinity > 0.3) {
+        // A guest credit says so, or a NIGO record reads as Tyler's.
+        const who = strength < 1 ? `${artist.name} (featured)` : artist.name;
         reasons.push(artist.lovedAlbums > 0
-            ? `you kept ${artist.lovedAlbums} ${artist.lovedAlbums === 1 ? 'record' : 'records'} by ${artist.name}`
-            : `you have played ${artist.name} for ${Math.round(artist.hours ?? 0)} hours`);
+            ? `you kept ${artist.lovedAlbums} ${artist.lovedAlbums === 1 ? 'record' : 'records'} by ${who}`
+            : `you have played ${who} for ${Math.round(artist.hours ?? 0)} hours`);
     }
 
     // The album's best-weighted genre counts: a record tagged "indie folk,

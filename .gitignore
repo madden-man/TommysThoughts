@@ -31,3 +31,6 @@ scripts/data/master-ii.json
 scripts/data/taste-until-*.json
 scripts/data/track-albums.json
 scripts/data/taste-full.json
+
+# queue playlist reads for seed-artist-genres.mjs
+scripts/data/queue-*.json
