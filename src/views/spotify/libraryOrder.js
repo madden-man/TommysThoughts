@@ -21,43 +21,11 @@
 
 import { albumBlocksOf, flatten } from './shuffle';
 
-// Curly apostrophes are the usual trap — Spotify writes "Don't" both ways and the
-// two are different strings. NFKC folds the width and accent variants.
-const CURLY = /[‘’ʼ]/g;
+// The name rules live in names.js, which has no imports so the offline
+// scripts can load it too. Re-exported here so callers and tests are unchanged.
+import { normalizeName, baseAlbumName } from './names';
 
-/** One spelling of a name, so the two sides can be compared at all. */
-export const normalizeName = (value) => (value ?? '')
-    .normalize('NFKC')
-    .replace(CURLY, "'")
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-
-// A trailing edition or remaster qualifier, which the catalogue spells a dozen
-// ways: "(Deluxe Edition)", "[Explicit]", "- 2011 Remaster". Stripping it lets a
-// deluxe copy sitting in a playlist find the standard copy that was streamed.
-const QUALIFIER = new RegExp(
-    '\\s*(?:[([][^)\\]]*'
-    + '(?:deluxe|edition|remaster|version|expanded|anniversary|explicit|bonus|reissue|mono|stereo)'
-    + '[^)\\]]*[)\\]]'
-    // The dash form carries the qualifier anywhere in the tail — "- 2011
-    // Remaster", "- Deluxe" — so the keyword is looked for across it rather than
-    // straight after the dash. It still has to BE there: "Live - Paris" stays.
-    + '|-\\s*[^-]*(?:deluxe|remaster|expanded|anniversary|bonus|reissue)[^-]*)$',
-    'i',
-);
-
-/** An album name with its edition qualifiers taken off, however many it carries. */
-export const baseAlbumName = (album) => {
-    let out = (album ?? '').trim();
-    for (let prev = null; prev !== out;) {
-        prev = out;
-        out = out.replace(QUALIFIER, '').trim();
-    }
-    // Never strip a name down to nothing — an album really called "(Remastered)"
-    // keeps its name rather than becoming a key that matches everything.
-    return out || (album ?? '').trim();
-};
+export { normalizeName, baseAlbumName };
 
 const keyFor = (artist, album) => `${normalizeName(artist)}\t${normalizeName(album)}`;
 

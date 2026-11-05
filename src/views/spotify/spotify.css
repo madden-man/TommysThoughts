@@ -274,3 +274,161 @@
     font-size: 0.85rem;
     color: #0b5238;
 }
+
+/* next records: recommended albums as cards. The tab already sits inside the
+   white .spotify box, so the cards are light panels within it. One column on a
+   phone, two side by side once there is room. */
+.next-records {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.next-records__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (min-width: 600px) {
+    .next-records__grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+.next-records__card {
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px;
+    background-color: white;
+    border: 2px ridge var(--blue-70);
+    border-radius: 8px;
+}
+
+.next-records__card--saved {
+    background-color: #f3faf6;
+}
+
+.next-records__cover {
+    flex: 0 0 120px;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.next-records__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.next-records__body p {
+    margin: 0;
+}
+
+.next-records__artist {
+    font-size: 0.85rem;
+    color: #444;
+}
+
+.next-records__album {
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.next-records__meta,
+.next-records__sources {
+    color: #666;
+    font-size: 0.78rem;
+}
+
+.next-records__why {
+    margin-top: 4px !important;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.next-records__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.next-records__saved {
+    color: #0b5238;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.next-records__saved a {
+    font-weight: 400;
+}
+
+.next-records__undo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.next-records__footer {
+    margin: 4px 0 0;
+}
+
+@media (max-width: 420px) {
+    .next-records__cover {
+        flex-basis: 88px;
+        width: 88px;
+        height: 88px;
+    }
+}
+
+/* ranked: a queue reordered by fit. It sits inside the white .spotify box like
+   the in order tab, so it reuses the spotify__ classes and only adds the list
+   line layout and a quiet tier label. */
+.ranked {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ranked__summary span {
+    white-space: nowrap;
+}
+
+.ranked__item {
+    overflow-wrap: anywhere;
+}
+
+.ranked__name,
+.ranked__meta {
+    display: block;
+}
+
+.ranked__tier {
+    font-weight: 600;
+}
+
+.ranked__tier--unheard {
+    color: #0b5238;
+}
+
+.ranked__tier--dropped {
+    color: #a3195b;
+}
+
+@media (min-width: 600px) {
+    .ranked__name,
+    .ranked__meta {
+        display: inline;
+    }
+}

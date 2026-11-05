@@ -1,0 +1,131 @@
+{
+  "fit": {
+    "artistAffinity": 0.1,
+    "genreAffinity": 0.1,
+    "genreKeep": 0.6,
+    "shape": 0.1,
+    "source": 0.3,
+    "droppedPenalty": 0.4,
+    "artistMissPenalty": 0.05
+  },
+  "sources": {
+    "known-artist": 1,
+    "listenbrainz": 0.35,
+    "lastfm": 0,
+    "claude": 0
+  },
+  "chosenOn": "2026-11-05",
+  "metric": {
+    "objective": "AUC, precision at 25 the tiebreak, chosen on the tune half; picked over the other objective by two-fold out-of-sample P@25",
+    "twoFold": {
+      "p25": {
+        "auc": 0.558,
+        "p25": 0.39,
+        "p10": 0.5,
+        "p50": 0.405
+      },
+      "auc": {
+        "auc": 0.544,
+        "p25": 0.4,
+        "p10": 0.35,
+        "p50": 0.397
+      }
+    },
+    "targets": 238,
+    "hits": 84,
+    "cutoff": "2023-12-31",
+    "all": {
+      "n": 238,
+      "hits": 84,
+      "auc": 0.569,
+      "p10": 0.433,
+      "p25": 0.32,
+      "p50": 0.44
+    },
+    "tune": {
+      "n": 112,
+      "hits": 45,
+      "auc": 0.591,
+      "p10": 0.7,
+      "p25": 0.52,
+      "p50": 0.5
+    },
+    "holdout": {
+      "n": 126,
+      "hits": 39,
+      "auc": 0.559,
+      "p10": 0.3,
+      "p25": 0.36,
+      "p50": 0.36
+    },
+    "baselines": {
+      "artist hours only": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.498,
+        "p10": 0.1,
+        "p25": 0.32,
+        "p50": 0.312
+      },
+      "artist score only": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.511,
+        "p10": 0.3,
+        "p25": 0.36,
+        "p50": 0.317
+      },
+      "genre weight only": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.542,
+        "p10": 0.333,
+        "p25": 0.3,
+        "p50": 0.36
+      },
+      "genre keep rate only": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.539,
+        "p10": 0.6,
+        "p25": 0.32,
+        "p50": 0.34
+      },
+      "has any genre": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.504,
+        "p10": 0.311,
+        "p25": 0.311,
+        "p50": 0.311
+      },
+      "random": {
+        "n": 126,
+        "hits": 39,
+        "auc": 0.5,
+        "p10": 0.31,
+        "p25": 0.31,
+        "p50": 0.31
+      }
+    },
+    "recall": {
+      "known-artist": {
+        "recall": 0.024,
+        "precision": 0.024,
+        "hits": 2
+      },
+      "listenbrainz": {
+        "recall": 0.083,
+        "precision": 0.008,
+        "hits": 7
+      },
+      "claude (from the frozen profile)": {
+        "recall": 0,
+        "precision": 0,
+        "hits": 0
+      }
+    },
+    "recallNote": "measured on a partial candidate set (frozen-profile build with --limit-artists 40 on a throttled day)"
+  },
+  "note": "Hand-set on 2026-11-05 from the backtest's --try rows: within noise of the AUC-search optimum (holdout AUC 0.564 vs 0.559, P@25 0.36 both) while keeping a small artist term, so the order a person reads in the ranked preview agrees with the reasons printed beside it. Rerun `node scripts/backtest.mjs --offline --try '<json>'` to compare before changing."
+}

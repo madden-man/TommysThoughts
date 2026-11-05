@@ -191,3 +191,14 @@ export const writeOrder = async (uris, onProgress, playlistId, { append = false 
         onProgress?.(Math.min((i + 1) * CHUNK, uris.length), uris.length);
     }
 };
+
+/**
+ * Record a verdict on a recommended album: `{ albumId, artist, album, verdict }`
+ * with verdict saved, heard or not-for-me, or `{ albumId, verdict: 'undo' }` to
+ * take it back. Resolves to `{ ok: true }`.
+ */
+export const recordFeedback = (payload) => post('rec_feedback', payload);
+
+/** Every recorded verdict, `{ albumId, artist, album, verdict, at }` each. */
+export const listFeedback = () =>
+    post('rec_feedback', { list: true }).then((data) => data.feedback ?? []);

@@ -12,6 +12,8 @@ import { Header } from '../../components/Header';
 import { PreApprovedTab } from './PreApprovedTab';
 import { PlaylistTab } from './PlaylistTab';
 import { InOrderTab } from './InOrderTab';
+import { NextRecordsTab } from './NextRecordsTab';
+import { RankedTab } from './RankedTab';
 import { listPlaylists, partsFor } from './server';
 
 import './spotify.css';
@@ -22,10 +24,11 @@ import './spotify.css';
 // playlists, so the tab appears on its own without anything to paste in.
 const norm = (value) => (value ?? '').trim().toLowerCase();
 
-// A tab writes into a "<name> shuffled" or "<name> in order" playlist, so those
+// A tab writes into a "<name> shuffled", "<name> in order" or "<name> ranked"
+// playlist, so those
 // outputs also live in the account. They are destinations, not sources — never a
 // tab of their own, and never an option in the add picker.
-const OUTPUT_SUFFIXES = [' shuffled', ' in order'];
+const OUTPUT_SUFFIXES = [' shuffled', ' in order', ' ranked'];
 const isOutput = (playlist) =>
     OUTPUT_SUFFIXES.some((suffix) => norm(playlist?.name).endsWith(suffix));
 
@@ -49,6 +52,12 @@ const masterIn = (playlists) => {
             .sort((a, b) => a.name.length - b.name.length)[0]
         ?? null;
 };
+
+// The queue the ranked tab reorders. Exact name only: "git add ./goodMusic
+// ranked" is its output and must never be read back in as the queue.
+const QUEUE_NAME = 'git add ./goodmusic';
+const queueIn = (playlists) =>
+    playlists.find((p) => norm(p?.name) === QUEUE_NAME && !isOutput(p)) ?? null;
 
 // Every other tab is one the user added from the picker, kept here so they
 // survive a reload.
@@ -87,6 +96,7 @@ export const SpotifyPage = () => {
 
     // The account's own "… (ii)" master playlist, once the list has loaded.
     const master = useMemo(() => masterIn(options ?? []), [options]);
+    const queue = useMemo(() => queueIn(options ?? []), [options]);
 
     // A playlist longer than one part becomes several tabs, one per slice, so
     // nothing goes unread. The length comes from the playlist list, so the tabs
@@ -130,10 +140,24 @@ export const SpotifyPage = () => {
                 },
             ]
             : [{ key: 'master', label: 'master (ii)', kind: 'master' }]),
+        // Always present, master found or not: it reads a static file of
+        // recommendations rather than the playlist.
+        { key: 'next-records', label: 'next records', kind: 'nextrecords' },
+        // Only once the queue is found: it reads the whole playlist, every part.
+        ...(queue
+            ? [{
+                key: 'queue-ranked',
+                label: `${queue.name} ranked`,
+                kind: 'ranked',
+                playlistId: queue.id,
+                name: queue.name,
+                parts: partsFor(countOf(queue.id)),
+            }]
+            : []),
         ...added.flatMap((a) => tabsFor(a.id, a.name, 'pl', true)),
         // tabsFor closes over `options`, which is the dependency that matters
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ], [added, master, options]);
+    ], [added, master, queue, options]);
 
     const active = tabs.find((t) => t.key === activeKey) ?? tabs[0];
 
@@ -166,6 +190,16 @@ export const SpotifyPage = () => {
         if (active.kind === 'inorder') {
             return (
                 <InOrderTab
+                    playlistId={active.playlistId}
+                    name={active.name}
+                    parts={active.parts ?? 1}
+                />
+            );
+        }
+        if (active.kind === 'nextrecords') return <NextRecordsTab />;
+        if (active.kind === 'ranked') {
+            return (
+                <RankedTab
                     playlistId={active.playlistId}
                     name={active.name}
                     parts={active.parts ?? 1}
