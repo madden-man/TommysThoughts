@@ -79,3 +79,8 @@ Claude: 33 of the 40 proposals written from the frozen profile were records Tomm
 
 Source weights are each source's precision (target hits surfaced per candidate) over the best source's, so the most precise source is worth the whole source weight. Last.fm has no key here and gets 0. The fit's own `source` weight (0.3) was not tested: too few targets carry a source score to tune it.
 
+
+
+## Weights shipped
+
+The weights file carries artistAffinity 0.1, genreAffinity 0.1, genreKeep 0.6, shape 0.1, artistMissPenalty 0.05 rather than the searched optimum (artistAffinity 0). On the holdout half the two are indistinguishable (AUC 0.564 against 0.559, P@25 0.36 for both; `--try` rows above), and the small artist term keeps the ranked preview honest: a line that says "you kept two records by this artist" now moves the record a little, instead of being decoration. The search put the real signal in genre keep rate, and that is still where most of the weight sits.

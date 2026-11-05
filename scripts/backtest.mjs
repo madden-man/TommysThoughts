@@ -142,6 +142,14 @@ addMethod('genre keep rate only', fitScore({ artistAffinity: 0, genreAffinity: 0
 addMethod('has any genre', (t) => (t.album.genres.length ? 1 : 0));
 // Random: every target tied, which the metrics read as a coin toss.
 addMethod('random', () => 0);
+// Any weight set worth a look beside the searched ones, as JSON:
+//   --try '{"artistAffinity":0.2,"genreAffinity":0.15,"genreKeep":0.45}'
+// Repeatable. Rows are named "fit, tried N". Reads only; never written.
+argv.forEach((a, i) => {
+    if (a !== '--try' || !argv[i + 1]) return;
+    const n = argv.slice(0, i).filter((x) => x === '--try').length + 1;
+    addMethod(`fit, tried ${n}`, fitScore({ ...DEFAULT_WEIGHTS, ...JSON.parse(argv[i + 1]) }));
+});
 
 // ---- weight search ----------------------------------------------------------
 

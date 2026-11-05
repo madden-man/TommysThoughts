@@ -1,12 +1,12 @@
 {
   "fit": {
-    "artistAffinity": 0,
+    "artistAffinity": 0.1,
     "genreAffinity": 0.1,
     "genreKeep": 0.6,
     "shape": 0.1,
     "source": 0.3,
     "droppedPenalty": 0.4,
-    "artistMissPenalty": 0
+    "artistMissPenalty": 0.05
   },
   "sources": {
     "known-artist": 1,
@@ -126,5 +126,6 @@
       }
     },
     "recallNote": "measured on a partial candidate set (frozen-profile build with --limit-artists 40 on a throttled day)"
-  }
+  },
+  "note": "Hand-set on 2026-11-05 from the backtest's --try rows: within noise of the AUC-search optimum (holdout AUC 0.564 vs 0.559, P@25 0.36 both) while keeping a small artist term, so the order a person reads in the ranked preview agrees with the reasons printed beside it. Rerun `node scripts/backtest.mjs --offline --try '<json>'` to compare before changing."
 }
