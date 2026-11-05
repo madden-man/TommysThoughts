@@ -230,6 +230,22 @@ export const NextRecordsTab = () => {
                                                 save
                                             </Button>
                                         )}
+                                        {/* A build made while Spotify was throttling album
+                                            reads carries no track list, so there is nothing
+                                            to write yet; the record is still a click away. */}
+                                        {!saved && !album.trackUris?.length && (
+                                            <span className="spotify__muted next-records__no-tracks">
+                                                tracks arrive on the next build
+                                                {' · '}
+                                                <a
+                                                    href={`https://open.spotify.com/album/${id}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    open in spotify
+                                                </a>
+                                            </span>
+                                        )}
                                         <Button
                                             size="small"
                                             variant="outlined"
