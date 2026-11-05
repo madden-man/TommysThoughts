@@ -72,6 +72,10 @@ const NOT_A_RECORD = new RegExp([
     '\\bconcert\\b',
     'original motion picture',
     '\\bsoundtrack\\b',
+    // A label's vault or archive set is outtakes, not a record.
+    'from the vault',
+    '\\bvault\\b',
+    '\\barchives?\\b',
     'greatest hits',
     '\\bbest of\\b',
     '\\bthe essential\\b',

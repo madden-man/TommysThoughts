@@ -5457,32 +5457,6 @@
    ]
   },
   {
-   "key": "imagine dragons\u0000reflections (from the vault of smoke + mirrors)",
-   "albumId": "5IBigZKJt8uffeMjKw5uEl",
-   "artist": "Imagine Dragons",
-   "album": "Reflections (From The Vault Of Smoke + Mirrors)",
-   "artistIds": [
-    "53XhwfbYqKCa1cC15pYq2q"
-   ],
-   "year": 2025,
-   "totalTracks": 14,
-   "minutes": null,
-   "albumType": "album",
-   "image": "https://i.scdn.co/image/ab67616d0000b27324225f56ed789d55e998a07a",
-   "popularity": null,
-   "label": null,
-   "trackUris": null,
-   "tracksComplete": false,
-   "sources": [
-    {
-     "source": "known-artist",
-     "score": 0.899,
-     "via": "Imagine Dragons",
-     "note": "unheard album by Imagine Dragons"
-    }
-   ]
-  },
-  {
    "key": "dua lipa\u0000club future nostalgia (dj mix)",
    "albumId": "3W04W2HfQ5kVeByxfjbu2C",
    "artist": "Dua Lipa",
@@ -10447,32 +10421,6 @@
    ]
   },
   {
-   "key": "strfkr\u0000vault vol. 3",
-   "albumId": "5vWhtJjw0o641Ka1ESiIR7",
-   "artist": "STRFKR",
-   "album": "Vault Vol. 3",
-   "artistIds": [
-    "2Tz1DTzVJ5Gyh8ZwVr6ekU"
-   ],
-   "year": 2017,
-   "totalTracks": 19,
-   "minutes": null,
-   "albumType": "album",
-   "image": "https://i.scdn.co/image/ab67616d0000b273b8e7dfe8a2dd903cb1f0437f",
-   "popularity": null,
-   "label": null,
-   "trackUris": null,
-   "tracksComplete": false,
-   "sources": [
-    {
-     "source": "known-artist",
-     "score": 0.829,
-     "via": "STRFKR",
-     "note": "unheard album by STRFKR"
-    }
-   ]
-  },
-  {
    "key": "wilder woods\u0000curioso",
    "albumId": "3GQfiWf3Hmkn7wW7FsQTKr",
    "artist": "Wilder Woods",
@@ -14310,32 +14258,6 @@
    ]
   },
   {
-   "key": "lucy dacus\u0000forever is a feeling: the archives",
-   "albumId": "2K91mmZiTrqVmt3ZRoosk6",
-   "artist": "Lucy Dacus",
-   "album": "Forever Is A Feeling: The Archives",
-   "artistIds": [
-    "07D1Bjaof0NFlU32KXiqUP"
-   ],
-   "year": 2025,
-   "totalTracks": 21,
-   "minutes": null,
-   "albumType": "album",
-   "image": "https://i.scdn.co/image/ab67616d0000b2735a26048fbf83390a5b0c944e",
-   "popularity": null,
-   "label": null,
-   "trackUris": null,
-   "tracksComplete": false,
-   "sources": [
-    {
-     "source": "listenbrainz",
-     "score": 0.78,
-     "via": "Haley Heynderickx",
-     "note": "similar artist Lucy Dacus, rank 2; their #3 album"
-    }
-   ]
-  },
-  {
    "key": "lucy dacus\u0000home video",
    "albumId": "2nwfSapJ3YIq7Ofad4Vuh1",
    "artist": "Lucy Dacus",
@@ -14383,7 +14305,7 @@
      "source": "listenbrainz",
      "score": 0.78,
      "via": "Haley Heynderickx",
-     "note": "similar artist Lucy Dacus, rank 2; their #4 album"
+     "note": "similar artist Lucy Dacus, rank 2; their #3 album"
     }
    ]
   },
@@ -23102,7 +23024,7 @@
      "source": "listenbrainz",
      "score": 0.506,
      "via": "The Brilliance",
-     "note": "similar artist Kings Kaleidoscope, rank 2; their #3 album"
+     "note": "similar artist Kings Kaleidoscope, rank 2; their #2 album"
     }
    ]
   },

@@ -7,13 +7,15 @@
 // The profile is public/spotify-taste.json (docs/SPOTIFY-RECS-CONTRACTS.md,
 // section 1). An album to score is a plain object:
 //
-//   { artist, album, artistIds, albumId, genre, totalTracks, minutes, year,
-//     sourceScore }
+//   { artist, album, artistIds, albumId, genre, genres, totalTracks, minutes,
+//     year, sourceScore }
 //
 // artist/album are display names; artistIds and albumId are Spotify ids when
 // known; genre is the artist's first Spotify genre as get_playlist attaches it
-// to tracks; sourceScore (0..1, optional) is how strongly the candidate sources
-// vouched for it, which a queue playlist does not have and leaves undefined.
+// to tracks, and genres (optional) the artist's whole list, as the ranker
+// script looks them up; sourceScore (0..1, optional) is how strongly the
+// candidate sources vouched for it, which a queue playlist does not have and
+// leaves undefined.
 //
 // Weights are tuned by scripts/backtest.mjs and stored in
 // docs/spotify-recommendations-weights.json; DEFAULT_WEIGHTS is the fallback
@@ -24,6 +26,8 @@ import { baseAlbumName, normalizeName } from './names.js';
 export const DEFAULT_WEIGHTS = {
     artistAffinity: 0.35,
     genreAffinity: 0.25,
+    // How often records in the album's genres were kept rather than dropped.
+    genreKeep: 0,
     shape: 0.1,
     source: 0.3,
     // Subtracted, not added: a record Tommy already gave a fair hearing and
@@ -31,6 +35,10 @@ export const DEFAULT_WEIGHTS = {
     droppedPenalty: 0.4,
     artistMissPenalty: 0.15,
 };
+
+// Judged rows a genre needs before its own keep rate outweighs the overall
+// one; below that it is shrunk toward the overall rate.
+const KEEP_PRIOR = 4;
 
 /** The album key used everywhere: artist and album, normalised, edition stripped. */
 export const albumKeyOf = (artist, album) =>
@@ -67,6 +75,33 @@ export const profileIndex = (profile) => {
         if (w > maxGenre) maxGenre = w;
     });
 
+    // Keep rate per genre, from the judged records only (loved and liked
+    // against dropped), so it reads the same from the trimmed public profile
+    // and the backtest's full one. Genres are the artist's, from the profile.
+    const genresByArtist = new Map();
+    (profile?.artists ?? []).forEach((a) => {
+        if (a.genres?.length) genresByArtist.set(normalizeName(a.name), a.genres.map(normalizeName));
+    });
+    const keepCounts = new Map();
+    let kept = 0;
+    let judged = 0;
+    (profile?.albums ?? []).forEach((a) => {
+        if (!['loved', 'liked', 'dropped'].includes(a.verdict)) return;
+        const isKept = a.verdict !== 'dropped';
+        judged += 1;
+        if (isKept) kept += 1;
+        (genresByArtist.get(normalizeName(a.artist)) ?? []).forEach((g) => {
+            const c = keepCounts.get(g) ?? { kept: 0, judged: 0 };
+            c.judged += 1;
+            if (isKept) c.kept += 1;
+            keepCounts.set(g, c);
+        });
+    });
+    const keepRate = judged ? kept / judged : 0.5;
+    const genreKeep = new Map([...keepCounts].map(([g, c]) => [
+        g, (c.kept + KEEP_PRIOR * keepRate) / (c.judged + KEEP_PRIOR),
+    ]));
+
     const heardKeys = new Set(profile?.heard?.albumKeys ?? []);
     const heardIds = new Set(profile?.heard?.albumIds ?? []);
 
@@ -77,6 +112,8 @@ export const profileIndex = (profile) => {
         albumById,
         genreWeight,
         maxGenre,
+        genreKeep,
+        keepRate,
         heardKeys,
         heardIds,
         shape: profile?.shape ?? { medianTracks: 12, medianMinutes: 44 },
@@ -139,11 +176,22 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
             : `you have played ${artist.name} for ${Math.round(artist.hours ?? 0)} hours`);
     }
 
-    const genre = normalizeName(album.genre);
-    const genreAffinity = index.maxGenre > 0 && genre
-        ? clamp01((index.genreWeight.get(genre) ?? 0) / index.maxGenre)
-        : 0;
-    if (genreAffinity > 0.5 && album.genre) reasons.push(`${album.genre} is near the top of your listening`);
+    // The album's best-weighted genre counts: a record tagged "indie folk,
+    // americana" is an indie folk record to someone who plays indie folk.
+    const genres = (album.genres?.length ? album.genres : [album.genre]).filter(Boolean);
+    let genreAffinity = 0;
+    let topGenre = null;
+    if (index.maxGenre > 0) {
+        genres.forEach((g) => {
+            const a = clamp01((index.genreWeight.get(normalizeName(g)) ?? 0) / index.maxGenre);
+            if (a > genreAffinity) { genreAffinity = a; topGenre = g; }
+        });
+    }
+    if (genreAffinity > 0.5 && topGenre) reasons.push(`${topGenre} is near the top of your listening`);
+
+    // Mean keep rate over the album's genres; no genre reads as the overall rate.
+    const rates = genres.map((g) => index.genreKeep.get(normalizeName(g))).filter((x) => x !== undefined);
+    const genreKeep = rates.length ? rates.reduce((sum, x) => sum + x, 0) / rates.length : index.keepRate;
 
     const shape = shapeScore(album, index.shape);
 
@@ -176,25 +224,33 @@ export const scoreAlbum = (album, index, weights = DEFAULT_WEIGHTS) => {
     const parts = {
         artist: w.artistAffinity * artistAffinity,
         genre: w.genreAffinity * genreAffinity,
+        genreKeep: (w.genreKeep ?? 0) * genreKeep,
         shape: w.shape * shape,
         source: w.source * sourceScore,
         penalty: -penalty,
     };
-    const positive = w.artistAffinity + w.genreAffinity + w.shape + (hasSource ? w.source : 0);
+    const positive = w.artistAffinity + w.genreAffinity + (w.genreKeep ?? 0) + w.shape
+        + (hasSource ? w.source : 0);
     const score = clamp01(
-        (parts.artist + parts.genre + parts.shape + parts.source) / positive - penalty,
+        (parts.artist + parts.genre + parts.genreKeep + parts.shape + parts.source) / (positive || 1)
+        - penalty,
     );
 
     return { score, tier, parts, reasons, key };
 };
 
 // Where each tier sits in a queue: the point of a queue is what is unheard,
-// so those lead by score; records already kept are known quantities and go
-// after; records given a fair hearing and dropped go last.
-const TIER_ORDER = { unheard: 0, sampled: 0, liked: 1, loved: 1, dropped: 2 };
+// so those lead by score. A sampled record (played briefly, never continued)
+// comes next, as its own tier rather than with a penalty: in the backtest
+// (docs/spotify-recommendations-backtest.md) records sampled before the
+// cutoff and tried again after it were kept about one time in twelve, against
+// one in three for records tried for the first time, a gap no fit score
+// closes. Records already kept are known quantities and go after; records
+// given a fair hearing and dropped go last.
+export const TIER_ORDER = { unheard: 0, sampled: 1, liked: 2, loved: 2, dropped: 3 };
 
 /**
- * Rank a list of albums: unheard and barely-sampled records by score, then
+ * Rank a list of albums: unheard records by score, then sampled ones, then
  * the ones already kept, then the dropped. Returns the same objects with
  * `fit` attached ({ score, tier, parts, reasons }), best first; stable for
  * ties so a caller's existing order is the tiebreaker.

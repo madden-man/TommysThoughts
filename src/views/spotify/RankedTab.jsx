@@ -150,7 +150,8 @@ export const RankedTab = ({ playlistId, name, parts = 1 }) => {
             <p className="spotify__muted">
                 <strong>{name}</strong> by how likely each record is to land, whole
                 albums in album order: unheard records first, then the ones you
-                already keep, then the ones you let go. writes to{' '}
+                only sampled, then the ones you already keep, then the ones you
+                let go. writes to{' '}
                 <strong>{destName}</strong>, so the source is never modified.
             </p>
 

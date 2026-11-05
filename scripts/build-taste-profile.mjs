@@ -2,7 +2,14 @@
 // export plus master (ii), into public/spotify-taste.json: step 1 of
 // docs/PLAN-SPOTIFY-RECOMMENDATIONS.md, shape in docs/SPOTIFY-RECS-CONTRACTS.md.
 //
-//   node scripts/build-taste-profile.mjs '<export dir>' [--until YYYY-MM-DD] [--out path] [--refresh] [--resolve-uris]
+//   node scripts/build-taste-profile.mjs '<export dir>' [--until YYYY-MM-DD] [--out path] [--full] [--refresh] [--resolve-uris]
+//
+// albums[] holds only the judged records (loved, liked, dropped) unless
+// `--full` is passed: the ranked tab fetches this file in the browser, and the
+// five thousand sampled rows were most of its three megabytes. Every played
+// album stays in heard{}, which is all a sampled record is ever used for (fit.js
+// reads "heard, no verdict row" as sampled). The backtest profile is built with
+// `--full`, since the backtest reads the sampled rows' hours.
 //
 // `--until` freezes the history at a date for the backtest: later plays are
 // ignored, recency and "gone quiet" are measured from the cutoff, and an album
@@ -106,12 +113,13 @@ const toggle = (name) => {
 const refresh = toggle('--refresh');
 const resolveUris = toggle('--resolve-uris');
 const noMusicBrainz = toggle('--no-musicbrainz');
+const full = toggle('--full');
 const until = flag('--until');
 const OUT = flag('--out') ?? 'public/spotify-taste.json';
 const dir = args[0];
 
 if (!dir || (until && !/^\d{4}-\d{2}-\d{2}$/.test(until))) {
-    console.error('usage: node scripts/build-taste-profile.mjs <export dir> [--until YYYY-MM-DD] [--out path] [--refresh] [--resolve-uris] [--no-musicbrainz]');
+    console.error('usage: node scripts/build-taste-profile.mjs <export dir> [--until YYYY-MM-DD] [--out path] [--full] [--refresh] [--resolve-uris] [--no-musicbrainz]');
     process.exit(1);
 }
 
@@ -348,7 +356,7 @@ const payload = {
     },
     generated: today,
     until: until ?? null,
-    albums: albums.map((a) => ({
+    albums: albums.filter((a) => full || a.verdict !== 'sampled').map((a) => ({
         key: a.key, artist: a.artist, album: a.album,
         artistIds: a.artistIds, albumIds: a.albumIds,
         firstPlayed: a.firstPlayed, lastPlayed: a.lastPlayed,
@@ -362,7 +370,7 @@ const payload = {
     // cutting them is most of what keeps the file near its size budget.
     artists: artists.filter((r) => r.hours >= 1 || r.lovedAlbums || r.droppedAlbums)
         .map((r) => ({ ...r, score: round(r.score, 3), hours: round(r.hours, 1) })),
-    genres: genres.map((g) => ({ genre: g.genre, weight: round(g.weight, 4), recentWeight: round(g.recentWeight, 4) })),
+    genres: genres.map((g) => ({ genre: g.genre, weight: round(g.weight, 3), recentWeight: round(g.recentWeight, 3) })),
     shape: {
         medianTracks: shape.medianTracks,
         medianMinutes: round(shape.medianMinutes, 0),
@@ -424,7 +432,9 @@ const lines = [
 ];
 const text = lines.join('\n');
 console.log(text);
-// The backtest run keeps its report out of docs so the real one is not overwritten.
-if (!until) writeFileSync(REPORT, text);
+// A backtest run, or a --full copy written elsewhere, keeps its report out of
+// docs so the real one is not overwritten.
+const isDefault = !until && OUT === 'public/spotify-taste.json';
+if (isDefault) writeFileSync(REPORT, text);
 const kb = (statSync(OUT).size / 1024).toFixed(1);
-console.log(`wrote ${OUT}: ${kb} KB${until ? '' : `, and ${REPORT}`}`);
+console.log(`wrote ${OUT}: ${kb} KB, ${full ? 'every album row' : 'judged album rows only (--full keeps the sampled ones)'}${isDefault ? `, and ${REPORT}` : ''}`);

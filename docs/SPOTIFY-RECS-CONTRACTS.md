@@ -198,7 +198,7 @@ Needs `MONGODB_URI`. Mongo client pattern as in `server/get_playlist`.
 Pure, import-free beyond names.js, loadable from Node and the browser.
 `profileIndex(profile)`, `scoreAlbum(album, index, weights)` returning
 `{ score, tier, parts, reasons, key }`, `rankAlbums(albums, profile, weights)`
-(unheard and sampled by score, then liked and loved, then dropped),
+(unheard by score, then sampled by score, then liked and loved, then dropped; the backtest put sampled below unheard),
 `albumOfBlock(block)` for shuffle.js album blocks, `DEFAULT_WEIGHTS`. The
 ranker script and the ranked tab both call these and never score on their
 own. Weights live in `docs/spotify-recommendations-weights.json` once the
