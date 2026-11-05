@@ -1,0 +1,47 @@
+{
+  "source": {
+    "export": "Spotify Extended Streaming History",
+    "exportFrom": "2014-01-21", "exportTo": "2026-08-25", "plays": 1200,
+    "master": { "id": "1QDPVDJSXB9bIrfRg0V36q", "name": "master (ii)", "trackCount": 120, "readAt": "2026-11-05" }
+  },
+  "generated": "2026-11-05",
+  "until": null,
+  "albums": [
+    { "key": "lord huron\u0000vide noir", "artist": "Lord Huron", "album": "Vide Noir", "artistIds": ["6ltzsmQQbmdoHHbLZ4ZN25"], "albumIds": [], "firstPlayed": "2018-04-20", "lastPlayed": "2026-08-20", "plays": 902, "hours": 54.0, "distinctTracks": 12, "totalTracks": 12, "years": [2018, 2019, 2021, 2024, 2025, 2026], "skipRate": 0.04, "inMaster": true, "masterTracks": 12, "masterShare": 1.0, "score": 0.97, "verdict": "loved" },
+    { "key": "lord huron\u0000strange trails", "artist": "Lord Huron", "album": "Strange Trails", "artistIds": ["6ltzsmQQbmdoHHbLZ4ZN25"], "albumIds": [], "firstPlayed": "2016-02-01", "lastPlayed": "2026-07-02", "plays": 760, "hours": 48.2, "distinctTracks": 14, "totalTracks": 14, "years": [2016, 2017, 2019, 2022, 2025], "skipRate": 0.05, "inMaster": true, "masterTracks": 14, "masterShare": 1.0, "score": 0.95, "verdict": "loved" },
+    { "key": "of monsters and men\u0000my head is an animal", "artist": "Of Monsters and Men", "album": "My Head Is An Animal", "artistIds": ["4dwdTW1Lfiq0cM8nBAqIIz"], "albumIds": [], "firstPlayed": "2014-03-11", "lastPlayed": "2026-05-01", "plays": 640, "hours": 38.0, "distinctTracks": 12, "totalTracks": 12, "years": [2014, 2015, 2018, 2023, 2026], "skipRate": 0.06, "inMaster": true, "masterTracks": 11, "masterShare": 0.92, "score": 0.93, "verdict": "loved" },
+    { "key": "the national\u0000boxer", "artist": "The National", "album": "Boxer", "artistIds": ["2cCUtGK9sDU2EoElnk0GNB"], "albumIds": [], "firstPlayed": "2015-09-01", "lastPlayed": "2026-03-14", "plays": 420, "hours": 30.1, "distinctTracks": 12, "totalTracks": 12, "years": [2015, 2017, 2020, 2026], "skipRate": 0.03, "inMaster": true, "masterTracks": 12, "masterShare": 1.0, "score": 0.9, "verdict": "loved" },
+    { "key": "bon iver\u0000for emma, forever ago", "artist": "Bon Iver", "album": "For Emma, Forever Ago", "artistIds": ["4LEiUm1SRbFMgfqnQTwUbQ"], "albumIds": [], "firstPlayed": "2014-06-01", "lastPlayed": "2025-12-01", "plays": 300, "hours": 18.5, "distinctTracks": 9, "totalTracks": 9, "years": [2014, 2016, 2021, 2025], "skipRate": 0.05, "inMaster": true, "masterTracks": 6, "masterShare": 0.67, "score": 0.78, "verdict": "liked" },
+    { "key": "of monsters and men\u0000beneath the skin", "artist": "Of Monsters and Men", "album": "Beneath The Skin", "artistIds": ["4dwdTW1Lfiq0cM8nBAqIIz"], "albumIds": [], "firstPlayed": "2015-06-08", "lastPlayed": "2025-10-10", "plays": 210, "hours": 12.0, "distinctTracks": 11, "totalTracks": 11, "years": [2015, 2016, 2025], "skipRate": 0.08, "inMaster": true, "masterTracks": 5, "masterShare": 0.45, "score": 0.7, "verdict": "liked" },
+    { "key": "the national\u0000trouble will find me", "artist": "The National", "album": "Trouble Will Find Me", "artistIds": ["2cCUtGK9sDU2EoElnk0GNB"], "albumIds": [], "firstPlayed": "2016-01-01", "lastPlayed": "2025-04-01", "plays": 180, "hours": 11.0, "distinctTracks": 13, "totalTracks": 13, "years": [2016, 2019, 2025], "skipRate": 0.1, "inMaster": true, "masterTracks": 4, "masterShare": 0.31, "score": 0.62, "verdict": "liked" },
+    { "key": "imagine dragons\u0000evolve", "artist": "Imagine Dragons", "album": "Evolve", "artistIds": ["53XhwfbYqKCa1cC15pYq2q"], "albumIds": [], "firstPlayed": "2017-07-01", "lastPlayed": "2018-02-01", "plays": 60, "hours": 2.6, "distinctTracks": 9, "totalTracks": 11, "years": [2017, 2018], "skipRate": 0.3, "inMaster": false, "masterTracks": 0, "masterShare": 0, "score": 0.31, "verdict": "dropped" },
+    { "key": "mumford & sons\u0000delta", "artist": "Mumford & Sons", "album": "Delta", "artistIds": ["3gd8FJtBJtkRxdfbTu19U2"], "albumIds": [], "firstPlayed": "2018-11-20", "lastPlayed": "2019-01-10", "plays": 40, "hours": 1.9, "distinctTracks": 8, "totalTracks": 14, "years": [2018, 2019], "skipRate": 0.25, "inMaster": false, "masterTracks": 0, "masterShare": 0, "score": 0.28, "verdict": "dropped" },
+    { "key": "coldplay\u0000everyday life", "artist": "Coldplay", "album": "Everyday Life", "artistIds": ["4gzpq5DPGxSnKTe4SA8HAU"], "albumIds": [], "firstPlayed": "2019-11-22", "lastPlayed": "2020-01-15", "plays": 30, "hours": 1.4, "distinctTracks": 6, "totalTracks": 16, "years": [2019, 2020], "skipRate": 0.35, "inMaster": false, "masterTracks": 0, "masterShare": 0, "score": 0.22, "verdict": "dropped" },
+    { "key": "bon iver\u0000i,i", "artist": "Bon Iver", "album": "i,i", "artistIds": ["4LEiUm1SRbFMgfqnQTwUbQ"], "albumIds": [], "firstPlayed": "2019-08-30", "lastPlayed": "2019-09-02", "plays": 5, "hours": 0.3, "distinctTracks": 3, "totalTracks": 13, "years": [2019], "skipRate": 0.4, "inMaster": false, "masterTracks": 0, "masterShare": 0, "score": 0.08, "verdict": "sampled" },
+    { "key": "lord huron\u0000long lost", "artist": "Lord Huron", "album": "Long Lost", "artistIds": ["6ltzsmQQbmdoHHbLZ4ZN25"], "albumIds": [], "firstPlayed": "2021-05-21", "lastPlayed": "2021-05-22", "plays": 4, "hours": 0.2, "distinctTracks": 2, "totalTracks": 16, "years": [2021], "skipRate": 0.5, "inMaster": false, "masterTracks": 0, "masterShare": 0, "score": 0.06, "verdict": "sampled" }
+  ],
+  "artists": [
+    { "name": "Lord Huron", "artistIds": ["6ltzsmQQbmdoHHbLZ4ZN25"], "score": 0.92, "hours": 102.4, "lovedAlbums": 2, "droppedAlbums": 0, "genres": ["indie folk"] },
+    { "name": "Of Monsters and Men", "artistIds": ["4dwdTW1Lfiq0cM8nBAqIIz"], "score": 0.85, "hours": 50.0, "lovedAlbums": 1, "droppedAlbums": 0, "genres": ["icelandic indie", "indie folk"] },
+    { "name": "The National", "artistIds": ["2cCUtGK9sDU2EoElnk0GNB"], "score": 0.82, "hours": 41.1, "lovedAlbums": 1, "droppedAlbums": 0, "genres": ["indie rock", "chamber pop"] },
+    { "name": "Bon Iver", "artistIds": ["4LEiUm1SRbFMgfqnQTwUbQ"], "score": 0.6, "hours": 18.8, "lovedAlbums": 0, "droppedAlbums": 0, "genres": ["indie folk", "chamber pop"] },
+    { "name": "Imagine Dragons", "artistIds": ["53XhwfbYqKCa1cC15pYq2q"], "score": 0.2, "hours": 2.6, "lovedAlbums": 0, "droppedAlbums": 1, "genres": ["pop rock"] },
+    { "name": "Mumford & Sons", "artistIds": [], "score": 0.18, "hours": 1.9, "lovedAlbums": 0, "droppedAlbums": 1, "genres": ["folk rock"] }
+  ],
+  "genres": [
+    { "genre": "indie folk", "weight": 0.45, "recentWeight": 0.5 },
+    { "genre": "indie rock", "weight": 0.25, "recentWeight": 0.25 },
+    { "genre": "chamber pop", "weight": 0.2, "recentWeight": 0.2 },
+    { "genre": "pop rock", "weight": 0.1, "recentWeight": 0.05 }
+  ],
+  "shape": { "medianTracks": 12, "medianMinutes": 44, "fullAlbumShare": 0.61 },
+  "heard": {
+    "albumKeys": [
+      "lord huron\u0000vide noir", "lord huron\u0000strange trails", "of monsters and men\u0000my head is an animal",
+      "the national\u0000boxer", "bon iver\u0000for emma, forever ago", "of monsters and men\u0000beneath the skin",
+      "the national\u0000trouble will find me", "imagine dragons\u0000evolve", "mumford & sons\u0000delta",
+      "coldplay\u0000everyday life", "bon iver\u0000i,i", "lord huron\u0000long lost"
+    ],
+    "albumIds": []
+  }
+}
